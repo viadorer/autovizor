@@ -5,8 +5,9 @@ import {
   Calendar, Gauge, Zap, Fuel, Settings, Palette,
   Shield, Star, ChevronLeft, ChevronRight, Camera,
   Check, Info, Car, Globe, BookOpen, DoorOpen, Users,
-  Wind, Leaf, Key,
+  Wind, Leaf, Key, Search, Loader2,
 } from 'lucide-react';
+import { decodeVin, type VinDecodeResult } from '../lib/vin-decoder';
 import type { Vehicle } from '../types';
 import { getMockVehicle } from '../lib/mock-data';
 import { EQUIPMENT } from '../lib/codebooks';
@@ -31,6 +32,8 @@ export default function VehicleDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [currentImage, setCurrentImage] = useState(0);
+  const [vinResult, setVinResult] = useState<VinDecodeResult | null>(null);
+  const [vinLoading, setVinLoading] = useState(false);
   const { toggleFavorite, isFavorite } = useFavoritesStore();
 
   useEffect(() => {
@@ -175,6 +178,110 @@ export default function VehicleDetailPage() {
               ))}
             </div>
           </div>
+
+          {/* VIN dekódování */}
+          {vehicle.vin && (
+            <div className="mt-6 bg-surface-900 rounded-xl border border-surface-800 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                  <Key className="w-5 h-5 text-primary-500" />
+                  VIN: <span className="font-mono tracking-wider">{vehicle.vin}</span>
+                </h2>
+                {!vinResult && (
+                  <button
+                    onClick={async () => {
+                      setVinLoading(true);
+                      const result = await decodeVin(vehicle.vin!);
+                      setVinResult(result);
+                      setVinLoading(false);
+                    }}
+                    disabled={vinLoading}
+                    className="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-surface-700 rounded-lg text-sm font-medium text-white transition-colors flex items-center gap-2"
+                  >
+                    {vinLoading ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Dekóduji...</>
+                    ) : (
+                      <><Search className="w-4 h-4" /> Ověřit VIN</>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              {vinResult && vinResult.valid && (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {[
+                      { label: 'Výrobce', value: vinResult.manufacturer },
+                      { label: 'Model', value: vinResult.model },
+                      { label: 'Varianta', value: vinResult.model_variant },
+                      { label: 'Rok výroby', value: vinResult.year },
+                      { label: 'Karoserie', value: vinResult.body_type },
+                      { label: 'Palivo', value: vinResult.fuel_type },
+                      { label: 'Objem motoru', value: vinResult.engine_volume ? `${vinResult.engine_volume} ccm` : undefined },
+                      { label: 'Výkon', value: vinResult.engine_power ? `${vinResult.engine_power} kW` : undefined },
+                      { label: 'Pohon', value: vinResult.drive_type },
+                      { label: 'Převodovka', value: vinResult.gearbox },
+                      { label: 'Barva', value: vinResult.color },
+                      { label: 'Počet míst', value: vinResult.capacity },
+                      { label: 'Hmotnost', value: vinResult.weight },
+                      { label: 'Max. rychlost', value: vinResult.top_speed },
+                      { label: '0-100 km/h', value: vinResult.acceleration },
+                      { label: 'CO₂', value: vinResult.co2_emissions },
+                      { label: 'Spotřeba', value: vinResult.fuel_consumption },
+                      { label: 'Země výroby', value: vinResult.country },
+                    ].filter((i) => i.value).map((item) => (
+                      <div key={item.label} className="p-3 bg-surface-800/50 rounded-lg">
+                        <p className="text-xs text-surface-500">{item.label}</p>
+                        <p className="text-sm font-medium text-white mt-0.5">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Výbava z VIN (vindecoder.eu) */}
+                  {vinResult.equipment && vinResult.equipment.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-surface-800">
+                      <h3 className="text-sm font-semibold text-white mb-3">
+                        Výbava dle VIN ({vinResult.equipment.length} položek)
+                      </h3>
+                      <div className="space-y-3">
+                        {Object.entries(
+                          vinResult.equipment.reduce<Record<string, typeof vinResult.equipment>>((acc, eq) => {
+                            const cat = eq.category || 'Ostatní';
+                            if (!acc[cat]) acc[cat] = [];
+                            acc[cat]!.push(eq);
+                            return acc;
+                          }, {})
+                        ).map(([category, items]) => (
+                          <div key={category}>
+                            <h4 className="text-xs font-semibold text-surface-400 mb-1.5 uppercase tracking-wider">{category}</h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                              {items!.map((eq, i) => (
+                                <span key={i} className="flex items-center gap-2 text-sm text-surface-300">
+                                  <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                  {eq.name}
+                                  {eq.code && <span className="text-xs text-surface-600">({eq.code})</span>}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {vinResult.source && (
+                    <p className="text-xs text-surface-600 mt-3">
+                      Zdroj: {vinResult.source === 'vindecoder' ? 'vindecoder.eu' : vinResult.source === 'nhtsa' ? 'NHTSA vPIC' : 'offline WMI'}
+                    </p>
+                  )}
+                </>
+              )}
+
+              {vinResult && !vinResult.valid && (
+                <p className="text-sm text-red-400">{vinResult.error}</p>
+              )}
+            </div>
+          )}
 
           {/* Výbava */}
           {Object.keys(equipmentByCategory).length > 0 && (

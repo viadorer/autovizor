@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Car, Camera, Upload, Info, Phone, Mail, MapPin,
-  ChevronDown, ChevronUp, Check, AlertCircle,
+  ChevronDown, ChevronUp, Check, AlertCircle, Loader2, Search,
 } from 'lucide-react';
+import { decodeVin, validateVin, isVindecoderAvailable, type VinDecodeResult } from '../lib/vin-decoder';
 import {
   VEHICLE_KINDS, FUEL_TYPES, GEARBOX_TYPES, COLORS, CONDITIONS,
   DRIVE_TYPES, BODY_TYPES, AIRCONDITION_TYPES, EURO_TYPES,
@@ -116,10 +117,91 @@ export default function SellPage() {
   const [step, setStep] = useState(1);
   const [showEquipment, setShowEquipment] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [vinLoading, setVinLoading] = useState(false);
+  const [vinResult, setVinResult] = useState<VinDecodeResult | null>(null);
+  const [vinError, setVinError] = useState<string | null>(null);
 
   const set = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
+
+  // VIN dekódování - najde odpovídající ID z číselníku podle názvu
+  const findCodebookId = (items: { id: number; name: string }[], search?: string): string => {
+    if (!search) return '';
+    const lower = search.toLowerCase();
+    const found = items.find((i) => i.name.toLowerCase().includes(lower) || lower.includes(i.name.toLowerCase()));
+    return found ? String(found.id) : '';
+  };
+
+  const findManufacturerId = (name?: string): string => {
+    if (!name) return '';
+    const lower = name.toLowerCase();
+    const found = MOCK_MANUFACTURERS_LIST.find(
+      (m) => m.name.toLowerCase() === lower || lower.includes(m.name.toLowerCase())
+    );
+    return found ? String(found.id) : '';
+  };
+
+  const findModelId = (mfrId: string, modelName?: string): string => {
+    if (!mfrId || !modelName) return '';
+    const mfr = MOCK_MANUFACTURERS_LIST.find((m) => m.id === Number(mfrId));
+    if (!mfr) return '';
+    const lower = modelName.toLowerCase();
+    const found = mfr.models.find(
+      (m) => m.name.toLowerCase() === lower || lower.includes(m.name.toLowerCase())
+    );
+    return found ? String(found.id) : '';
+  };
+
+  const handleVinDecode = useCallback(async () => {
+    const validation = validateVin(form.vin);
+    if (!validation.valid) {
+      setVinError(validation.error ?? 'Neplatný VIN');
+      setVinResult(null);
+      return;
+    }
+
+    setVinLoading(true);
+    setVinError(null);
+    setVinResult(null);
+
+    try {
+      const result = await decodeVin(form.vin);
+      setVinResult(result);
+
+      if (!result.valid) {
+        setVinError(result.error ?? 'Nepodařilo se dekódovat VIN');
+        return;
+      }
+
+      // Automatické vyplnění formuláře z dekódovaného VIN
+      setForm((prev) => {
+        const mfrId = findManufacturerId(result.manufacturer);
+        const mdlId = findModelId(mfrId, result.model);
+
+        return {
+          ...prev,
+          manufacturer_id: mfrId || prev.manufacturer_id,
+          model_id: mdlId || prev.model_id,
+          made_year: result.year ? String(result.year) : prev.made_year,
+          fuel_type_id: findCodebookId(FUEL_TYPES, result.fuel_type) || prev.fuel_type_id,
+          gearbox_id: findCodebookId(GEARBOX_TYPES, result.gearbox) || prev.gearbox_id,
+          drive_id: findCodebookId(DRIVE_TYPES, result.drive_type) || prev.drive_id,
+          body_type_id: findCodebookId(BODY_TYPES, result.body_type) || prev.body_type_id,
+          door_count_id: findCodebookId(DOOR_COUNTS, result.door_count) || prev.door_count_id,
+          engine_volume: result.engine_volume || prev.engine_volume,
+          engine_power: result.engine_power || prev.engine_power,
+          title: result.manufacturer && result.model
+            ? `${result.manufacturer} ${result.model}${result.year ? ` ${result.year}` : ''}`
+            : prev.title,
+        };
+      });
+    } catch {
+      setVinError('Nepodařilo se dekódovat VIN');
+    } finally {
+      setVinLoading(false);
+    }
+  }, [form.vin]);
 
   const toggleEquip = (id: number) => {
     set('equipment_ids',
@@ -314,7 +396,167 @@ export default function SellPage() {
               <FormSelect label="Potahy sedadel" value={form.upholstery_id} onChange={(v) => set('upholstery_id', v)} options={UPHOLSTERY_TYPES} />
               <FormSelect label="Počet vlastníků" value={form.owner_count_id} onChange={(v) => set('owner_count_id', v)} options={OWNER_COUNTS} />
               <FormSelect label="Typ obchodu" value={form.deal_type_id} onChange={(v) => set('deal_type_id', v)} options={DEAL_TYPES} />
-              <FormInput label="VIN" value={form.vin} onChange={(v) => set('vin', v)} placeholder="Nepovinné" />
+
+              {/* VIN s dekódováním */}
+              <div className="sm:col-span-2 lg:col-span-3">
+                <label className="block text-sm font-medium text-surface-300 mb-1.5">
+                  VIN – automatické vyplnění údajů
+                </label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type="text"
+                      value={form.vin}
+                      onChange={(e) => set('vin', e.target.value.toUpperCase())}
+                      placeholder="např. TMBAG7NE1L0123456"
+                      maxLength={17}
+                      className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600 font-mono tracking-wider"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-surface-500">
+                      {form.vin.length}/17
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleVinDecode}
+                    disabled={vinLoading || form.vin.length !== 17}
+                    className="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-surface-700 disabled:text-surface-500 rounded-lg text-sm font-medium text-white transition-colors flex items-center gap-2 shrink-0"
+                  >
+                    {vinLoading ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Dekóduji...</>
+                    ) : (
+                      <><Search className="w-4 h-4" /> Dekódovat VIN</>
+                    )}
+                  </button>
+                </div>
+
+                {/* Chyba */}
+                {vinError && (
+                  <div className="flex items-center gap-2 mt-2 text-xs text-red-400">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    {vinError}
+                  </div>
+                )}
+
+                {/* Úspěšné dekódování */}
+                {vinResult && vinResult.valid && !vinError && (
+                  <div className="mt-3 p-3 bg-emerald-600/10 border border-emerald-600/30 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm font-medium text-emerald-400 mb-2">
+                      <Check className="w-4 h-4" />
+                      VIN úspěšně dekódován
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 text-xs">
+                      {vinResult.manufacturer && (
+                        <div><span className="text-surface-500">Výrobce:</span> <span className="text-white">{vinResult.manufacturer}</span></div>
+                      )}
+                      {vinResult.model && (
+                        <div><span className="text-surface-500">Model:</span> <span className="text-white">{vinResult.model}</span></div>
+                      )}
+                      {vinResult.year && (
+                        <div><span className="text-surface-500">Rok:</span> <span className="text-white">{vinResult.year}</span></div>
+                      )}
+                      {vinResult.body_type && (
+                        <div><span className="text-surface-500">Karoserie:</span> <span className="text-white">{vinResult.body_type}</span></div>
+                      )}
+                      {vinResult.fuel_type && (
+                        <div><span className="text-surface-500">Palivo:</span> <span className="text-white">{vinResult.fuel_type}</span></div>
+                      )}
+                      {vinResult.engine_volume && (
+                        <div><span className="text-surface-500">Objem:</span> <span className="text-white">{vinResult.engine_volume} ccm</span></div>
+                      )}
+                      {vinResult.engine_power && (
+                        <div><span className="text-surface-500">Výkon:</span> <span className="text-white">{vinResult.engine_power} kW</span></div>
+                      )}
+                      {vinResult.drive_type && (
+                        <div><span className="text-surface-500">Pohon:</span> <span className="text-white">{vinResult.drive_type}</span></div>
+                      )}
+                      {vinResult.gearbox && (
+                        <div><span className="text-surface-500">Převodovka:</span> <span className="text-white">{vinResult.gearbox}</span></div>
+                      )}
+                      {vinResult.country && (
+                        <div><span className="text-surface-500">Země výroby:</span> <span className="text-white">{vinResult.country}</span></div>
+                      )}
+                    </div>
+                    <p className="text-xs text-surface-500 mt-2">
+                      Údaje byly automaticky vyplněny do formuláře. Zkontrolujte a případně opravte.
+                    </p>
+
+                    {/* Rozšířené údaje z vindecoder.eu */}
+                    {vinResult.source === 'vindecoder' && (
+                      <div className="mt-3 pt-3 border-t border-emerald-600/20">
+                        <h4 className="text-xs font-semibold text-emerald-400 mb-2">Rozšířené údaje (vindecoder.eu)</h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 text-xs">
+                          {vinResult.model_variant && (
+                            <div><span className="text-surface-500">Varianta:</span> <span className="text-white">{vinResult.model_variant}</span></div>
+                          )}
+                          {vinResult.color && (
+                            <div><span className="text-surface-500">Barva:</span> <span className="text-white">{vinResult.color}</span></div>
+                          )}
+                          {vinResult.capacity && (
+                            <div><span className="text-surface-500">Počet míst:</span> <span className="text-white">{vinResult.capacity}</span></div>
+                          )}
+                          {vinResult.weight && (
+                            <div><span className="text-surface-500">Hmotnost:</span> <span className="text-white">{vinResult.weight}</span></div>
+                          )}
+                          {vinResult.top_speed && (
+                            <div><span className="text-surface-500">Max. rychlost:</span> <span className="text-white">{vinResult.top_speed}</span></div>
+                          )}
+                          {vinResult.acceleration && (
+                            <div><span className="text-surface-500">0-100 km/h:</span> <span className="text-white">{vinResult.acceleration}</span></div>
+                          )}
+                          {vinResult.co2_emissions && (
+                            <div><span className="text-surface-500">CO₂:</span> <span className="text-white">{vinResult.co2_emissions}</span></div>
+                          )}
+                          {vinResult.fuel_consumption && (
+                            <div><span className="text-surface-500">Spotřeba:</span> <span className="text-white">{vinResult.fuel_consumption}</span></div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Výbava z VIN */}
+                    {vinResult.equipment && vinResult.equipment.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-emerald-600/20">
+                        <h4 className="text-xs font-semibold text-emerald-400 mb-2">
+                          Výbava z VIN ({vinResult.equipment.length} položek)
+                        </h4>
+                        <div className="max-h-48 overflow-y-auto space-y-2">
+                          {Object.entries(
+                            vinResult.equipment.reduce<Record<string, typeof vinResult.equipment>>((acc, eq) => {
+                              const cat = eq.category || 'Ostatní';
+                              if (!acc[cat]) acc[cat] = [];
+                              acc[cat]!.push(eq);
+                              return acc;
+                            }, {})
+                          ).map(([category, items]) => (
+                            <div key={category}>
+                              <h5 className="text-xs font-medium text-surface-400 uppercase tracking-wider">{category}</h5>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-0.5 mt-1">
+                                {items!.map((eq, i) => (
+                                  <span key={i} className="flex items-center gap-1.5 text-xs text-surface-300">
+                                    <Check className="w-3 h-3 text-emerald-500 shrink-0" />
+                                    {eq.name}
+                                    {eq.code && <span className="text-surface-600">({eq.code})</span>}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <p className="text-xs text-surface-500 mt-2">
+                          Výbavové položky budou automaticky zaškrtnuty v kroku 3.
+                        </p>
+                      </div>
+                    )}
+
+                    {!isVindecoderAvailable() && (
+                      <p className="text-xs text-amber-500/70 mt-2">
+                        Pro kompletní výbavu z VIN nastavte vindecoder.eu API klíč v .env
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex justify-between">
               <button type="button" onClick={() => setStep(1)} className="px-6 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-white hover:bg-surface-700 transition-colors">
