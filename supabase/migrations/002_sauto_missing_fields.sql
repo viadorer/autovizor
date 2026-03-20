@@ -320,7 +320,9 @@ ALTER TABLE vehicles ADD COLUMN cebia_coupon TEXT;
 ALTER TABLE vehicles ADD COLUMN cebia_smart_code_url TEXT;
 
 -- Změna first_owner z BOOLEAN na INTEGER (codebook: 1=Ano, 2=Ne)
+ALTER TABLE vehicles ALTER COLUMN first_owner DROP DEFAULT;
 ALTER TABLE vehicles ALTER COLUMN first_owner TYPE INTEGER USING CASE WHEN first_owner THEN 1 ELSE 2 END;
+ALTER TABLE vehicles ALTER COLUMN first_owner SET DEFAULT 2;
 
 -- Upholstery + owner_count + deal_type + seller_type references
 ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS upholstery_id INTEGER REFERENCES upholstery_types(id);
