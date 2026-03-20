@@ -363,3 +363,54 @@ CREATE INDEX idx_vehicles_stk ON vehicles(stk_date) WHERE is_active = TRUE AND s
 CREATE INDEX idx_vehicles_certified ON vehicles(certified_id) WHERE is_active = TRUE AND certified_id IS NOT NULL;
 CREATE INDEX idx_vehicles_color_type ON vehicles(color_type_id) WHERE is_active = TRUE;
 CREATE INDEX idx_vehicles_gearbox_level ON vehicles(gearbox_level_id) WHERE is_active = TRUE;
+
+-- ============================================================
+-- FIX #8: Chybějící Sauto API sloupce
+-- ============================================================
+
+-- sign_note: poznámka na štítek za sklem (max 100 znaků)
+ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS sign_note TEXT;
+
+-- deactivation_reason: důvod deaktivace inzerátu
+ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS deactivation_reason TEXT;
+
+-- car_status: status inzerátu ze Sauto (1=aktivní, jiná=neaktivní)
+ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS car_status INTEGER;
+
+-- priority_ordering: priorita řazení (promoted listing ze Sauto)
+ALTER TABLE vehicles ADD COLUMN IF NOT EXISTS priority_ordering INTEGER DEFAULT 0;
+
+-- ============================================================
+-- FIX #9: Odstranění duplicitních textových sloupců
+-- (nahrazeny FK referencemi v této migraci)
+-- ============================================================
+
+-- deal_type TEXT → deal_type_id INTEGER (již přidáno výše)
+ALTER TABLE vehicles DROP COLUMN IF EXISTS deal_type;
+
+-- seller_type TEXT → seller_type_id INTEGER (již přidáno výše)
+ALTER TABLE vehicles DROP COLUMN IF EXISTS seller_type;
+
+-- ============================================================
+-- FIX #10: Odstranění duplicitní tabulky vehicle_leasing
+-- (nahrazena tabulkou operating_leases v této migraci)
+-- ============================================================
+DROP TABLE IF EXISTS vehicle_leasing CASCADE;
+
+-- ============================================================
+-- FIX #11: Přidání pg_trgm pro fulltextové vyhledávání
+-- ============================================================
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- ============================================================
+-- FIX #12: Chybějící indexy na nových FK sloupcích
+-- ============================================================
+CREATE INDEX IF NOT EXISTS idx_vehicles_deal_type ON vehicles(deal_type_id) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_vehicles_seller_type ON vehicles(seller_type_id) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_vehicles_motorcycle ON vehicles(motorcycle_type_id) WHERE is_active = TRUE AND motorcycle_type_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_vehicles_truck ON vehicles(truck_type_id) WHERE is_active = TRUE AND truck_type_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_vehicles_bus ON vehicles(bus_type_id) WHERE is_active = TRUE AND bus_type_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_vehicles_trailer ON vehicles(trailer_type_id) WHERE is_active = TRUE AND trailer_type_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_vehicles_seatplace ON vehicles(seatplace_id) WHERE is_active = TRUE AND seatplace_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_vehicles_weight ON vehicles(weight) WHERE is_active = TRUE AND weight IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_vehicles_priority ON vehicles(priority_ordering DESC) WHERE is_active = TRUE AND priority_ordering > 0;

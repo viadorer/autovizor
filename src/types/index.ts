@@ -118,6 +118,12 @@ export interface Vehicle {
   cebia_coupon?: string; // Cebia kupón (10 znaků)
   cebia_smart_code_url?: string; // Cebia Smart Code URL
 
+  // Sauto specifické
+  sign_note?: string; // poznámka na štítek za sklem (max 100 znaků)
+  deactivation_reason?: string; // důvod deaktivace
+  car_status?: number; // status ze Sauto (1=aktivní)
+  priority_ordering?: number; // priorita řazení
+
   // VIN
   vin?: string;
   owners_count?: number;
