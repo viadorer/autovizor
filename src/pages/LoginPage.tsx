@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Car, Mail, Lock, User, Eye, EyeOff, Chrome } from 'lucide-react';
+import { Car, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 
 type Mode = 'login' | 'register' | 'forgot';
 

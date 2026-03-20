@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import {
-  Car, Camera, Upload, Info, Phone, Mail, MapPin,
+  Car, Camera, Upload, Info,
   ChevronDown, ChevronUp, Check, AlertCircle, Loader2, Search,
 } from 'lucide-react';
 import { decodeVin, validateVin, isVindecoderAvailable, type VinDecodeResult } from '../lib/vin-decoder';
@@ -10,7 +10,6 @@ import {
   DOOR_COUNTS, CAPACITY_TYPES, COUNTRIES, REGIONS, YEAR_OPTIONS,
   COLOR_TONES, EQUIPMENT, EQUIPMENT_CATEGORIES,
   UPHOLSTERY_TYPES, OWNER_COUNTS, DEAL_TYPES,
-  MOTORCYCLE_TYPES, TRUCK_TYPES, BUS_TYPES, TRAILER_TYPES,
   COLOR_TYPES, GEARBOX_LEVELS, CERTIFIED_PROGRAMS, SEATPLACE_TYPES,
 } from '../lib/codebooks';
 import { MANUFACTURERS } from '../lib/manufacturers';

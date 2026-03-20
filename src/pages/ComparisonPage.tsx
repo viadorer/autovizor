@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   X, Plus, Search, ArrowLeftRight, Check, Minus,
-  Car, Gauge, Zap, Fuel, Settings, Calendar, Palette,
 } from 'lucide-react';
 import type { Vehicle } from '../types';
 import { searchVehicles } from '../lib/api';
@@ -73,9 +72,6 @@ export default function ComparisonPage() {
     { label: 'Země původu', getValue: (v) => getCodebookName(COUNTRIES, v.country_id) },
     { label: 'DPH', getValue: (v) => v.vat_deductible ? 'Odpočet DPH' : 'Ne' },
   ];
-
-  // Společná výbava a rozdílná
-  const allEquipIds = filled.map((v) => new Set((v.equipment ?? []).map((e) => e.id)));
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

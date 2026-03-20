@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Grid3X3, List, Search, Star, Bookmark } from 'lucide-react';
+import { Grid3X3, List, Search, Star } from 'lucide-react';
 import SearchFilters from '../components/SearchFilters';
 import VehicleCard from '../components/VehicleCard';
 import SearchBar from '../components/SearchBar';

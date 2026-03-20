@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  BookOpen, ShieldCheck, AlertTriangle, FileCheck, Calculator,
+  BookOpen, ShieldCheck, FileCheck, Calculator,
   Car, ChevronDown, ChevronUp, Search, HelpCircle, CheckCircle,
-  XCircle, Clock, Banknote, Wrench, FileText, Scale,
+  Wrench, FileText, Scale,
 } from 'lucide-react';
 
 const GUIDES = [
