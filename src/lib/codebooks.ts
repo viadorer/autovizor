@@ -29,12 +29,61 @@ export const BODY_TYPES: Codebook[] = [
 ];
 
 // Odstín laku
+// Odstín barvy (Sauto: color_tone)
 export const COLOR_TONES: Codebook[] = [
-  { id: 1, name: 'Metalíza' },
-  { id: 2, name: 'Pastelová' },
-  { id: 3, name: 'Perlový efekt' },
-  { id: 4, name: 'Matná' },
-  { id: 5, name: 'Chromová' },
+  { id: 1, name: 'Světlá' },
+  { id: 2, name: 'Tmavá' },
+];
+
+// Typ laku (Sauto: color_type) — dříve chybně v COLOR_TONES
+export const COLOR_TYPES: Codebook[] = [
+  { id: 1, name: 'Základní' },
+  { id: 2, name: 'Metalíza' },
+  { id: 3, name: 'Fólie' },
+  { id: 4, name: 'Pastelová' },
+  { id: 5, name: 'Perleťová' },
+];
+
+// Počet stupňů převodovky (Sauto: gearbox_level)
+export const GEARBOX_LEVELS: Codebook[] = [
+  { id: 3, name: '3stupňová a méně' },
+  { id: 4, name: '4stupňová' },
+  { id: 5, name: '5stupňová' },
+  { id: 6, name: '6stupňová' },
+  { id: 7, name: '7stupňová' },
+  { id: 8, name: '8stupňová a více' },
+];
+
+// Kategorie sedadel autobusu (Sauto: seatplace)
+export const SEATPLACE_TYPES: Codebook[] = [
+  { id: 1, name: 'Do 16 sedadel' },
+  { id: 2, name: '17–29 sedadel' },
+  { id: 3, name: '30–39 sedadel' },
+  { id: 4, name: '40–49 sedadel' },
+  { id: 5, name: '50 a více sedadel' },
+];
+
+// Operativní leasing – určeno pro (Sauto: operating_lease_intended_for)
+export const LEASE_INTENDED_FOR: Codebook[] = [
+  { id: 1, name: 'Firma' },
+  { id: 2, name: 'OSVČ' },
+  { id: 3, name: 'Fyzická osoba' },
+];
+
+// Ověřené programy výrobců (Sauto: certified_id)
+export const CERTIFIED_PROGRAMS: Codebook[] = [
+  { id: 1, name: 'Škoda Plus' },
+  { id: 2, name: 'Das WeltAuto' },
+  { id: 3, name: 'BMW Premium Selection' },
+  { id: 4, name: 'Mercedes-Benz Junge Sterne' },
+  { id: 5, name: 'Audi Approved Plus' },
+  { id: 6, name: 'Toyota Garantovaná ojetina' },
+  { id: 7, name: 'Hyundai Promise' },
+  { id: 8, name: 'Volvo Selekt' },
+  { id: 9, name: 'Ford Approved' },
+  { id: 10, name: 'Peugeot Příslib' },
+  { id: 11, name: 'Kia Approved' },
+  { id: 12, name: 'Renault Selection' },
 ];
 
 export const FUEL_TYPES: Codebook[] = [
@@ -289,13 +338,11 @@ export const REGIONS: Region[] = [
 ];
 
 // Služby operativního leasingu
+// Sauto API: operating_lease_services (aktuální hodnoty)
 export const OPERATING_LEASE_SERVICES: Codebook[] = [
-  { id: 1, name: 'Pojištění' },
-  { id: 2, name: 'Servis' },
-  { id: 3, name: 'Pneumatiky' },
-  { id: 4, name: 'Dálniční známka' },
-  { id: 5, name: 'Asistenční služba' },
-  { id: 6, name: 'Náhradní vozidlo' },
+  { id: 1, name: 'Servis' },
+  { id: 2, name: 'Zimní pneumatiky' },
+  { id: 3, name: 'GAP' },
 ];
 
 // Typ motocyklu
@@ -381,14 +428,20 @@ export const SELLER_TYPES: Codebook[] = [
 ];
 
 // Typ obchodu
+// Sauto API: deal_type (string hodnoty: "sale", "operating_lease", "sale_or_lease")
+// Rozšířeno o další běžné typy obchodu v ČR
 export const DEAL_TYPES: Codebook[] = [
   { id: 1, name: 'Prodej' },
-  { id: 2, name: 'Leasing' },
-  { id: 3, name: 'Operativní leasing' },
-  { id: 4, name: 'Úvěr' },
-  { id: 5, name: 'Na splátky' },
-  { id: 6, name: 'Na protiúčet' },
+  { id: 2, name: 'Operativní leasing' },
+  { id: 3, name: 'Prodej nebo leasing' },
 ];
+
+// Mapování Sauto deal_type string → naše ID
+export const DEAL_TYPE_MAP: Record<string, number> = {
+  sale: 1,
+  operating_lease: 2,
+  sale_or_lease: 3,
+};
 
 // Materiál sedadel / čalounění
 export const UPHOLSTERY_TYPES: Codebook[] = [

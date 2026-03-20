@@ -62,9 +62,9 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
 
         {/* Info */}
         <div className="p-4">
-          <h3 className="text-sm font-semibold text-white truncate">{vehicle.title}</h3>
+          <h3 className="text-sm font-semibold text-surface-100 truncate">{vehicle.title}</h3>
           <div className="flex items-center gap-2 mt-2">
-            <span className="text-lg font-bold text-white">{formatPrice(vehicle.price)}</span>
+            <span className="text-lg font-bold text-surface-100">{formatPrice(vehicle.price)}</span>
             {rating && (
               <span className={`px-2 py-0.5 text-[10px] font-medium text-white rounded ${rating.className}`}>
                 {rating.label}
@@ -141,7 +141,7 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
       <div className="flex-1 p-4 sm:p-5 flex flex-col">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-base font-semibold text-white group-hover:text-primary-400 transition-colors">
+            <h3 className="text-base font-semibold text-surface-100 group-hover:text-primary-400 transition-colors">
               {vehicle.title}
             </h3>
             {vehicle.model_variant && (
@@ -149,7 +149,7 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
             )}
           </div>
           <div className="text-right shrink-0">
-            <p className="text-xl font-bold text-white">{formatPrice(vehicle.price)}</p>
+            <p className="text-xl font-bold text-surface-100">{formatPrice(vehicle.price)}</p>
             {rating && (
               <span className={`inline-block mt-1 px-2 py-0.5 text-[10px] font-medium text-white rounded ${rating.className}`}>
                 {rating.label}

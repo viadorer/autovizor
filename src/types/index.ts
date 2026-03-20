@@ -44,18 +44,27 @@ export interface Vehicle {
   // Cena
   price: number;
   price_note?: string;
+  price_leasing?: number;
+  payment?: number;
+  payment_count?: number;
   vat_deductible?: boolean;
-  deal_type?: string;
+  dph?: boolean; // cena s/bez DPH
+  deal_type?: string; // "sale" | "operating_lease" | "sale_or_lease"
 
   // Technické údaje
   fuel_type_id?: number;
   gearbox_id?: number;
+  gearbox_level_id?: number; // počet stupňů převodovky (3-8+)
   drive_id?: number;
   engine_volume?: number;
   engine_power?: number;
   engine_power_ps?: number;
   tachometer: number;
   tachometer_unit_id?: number;
+  gas_mileage?: number; // spotřeba l/100km
+  weight?: number; // hmotnost kg
+  load_capacity?: number; // nosnost kg
+  motohodiny?: number; // motohodiny (stroje)
 
   // Elektro
   battery_capacity?: number;
@@ -67,10 +76,16 @@ export interface Vehicle {
   first_registration?: string;
   made_year?: number;
   made_month?: number;
+  run_date?: string; // v provozu od
+  disused_date?: string; // mimo provoz od
+  stk_date?: string; // STK platné do
+  guarantee_date?: string; // záruka do
+  delivery_date?: string; // dodání (u availability=1)
 
   // Vzhled
   color_id?: number;
-  color_tone?: string;
+  color_tone_id?: number; // 1=světlá, 2=tmavá
+  color_type_id?: number; // 1=základní, 2=metalíza, 3=fólie, 4=pastelová, 5=perleťová
 
   // Další
   door_count_id?: number;
@@ -90,12 +105,27 @@ export interface Vehicle {
   truck_type_id?: number;
   bus_type_id?: number;
   trailer_type_id?: number;
+  seatplace_id?: number; // kategorie sedadel autobusů
+  certified_id?: number; // ověřené vozidlo (Škoda Plus, DWA...)
+  type_info?: string; // doplňková info o modelu (max 30 znaků)
+
+  // Speciální příznaky
+  tunning?: boolean; // tuningové úpravy
+  handicapped?: boolean; // úpravy pro hendikepované
+  environmental_tax?: boolean; // ekologická daň zaplacena
+
+  // Cebia
+  cebia_coupon?: string; // Cebia kupón (10 znaků)
+  cebia_smart_code_url?: string; // Cebia Smart Code URL
 
   // VIN
   vin?: string;
   owners_count?: number;
   crashed?: boolean;
-  first_owner?: boolean;
+  first_owner?: number; // codebook: 1=Ano, 2=Ne
+
+  // Operativní leasing
+  operating_lease?: OperatingLeaseData;
 
   // Lokace
   region_id?: number;
@@ -163,6 +193,17 @@ export interface VehicleImage {
   order?: number;
 }
 
+// Operativní leasing
+export interface OperatingLeaseData {
+  operating_lease_id?: number;
+  annual_distance?: number; // roční nájezd km
+  price_without_vat?: number;
+  period?: number; // doba pronájmu v měsících
+  services?: number[]; // ID služeb z číselníku
+  additional_info?: string;
+  intended_for_id?: number; // 1=Firma, 2=OSVČ, 3=FO
+}
+
 // Vyhledávání
 export interface SearchFilters {
   manufacturer_id?: number;
@@ -198,6 +239,9 @@ export interface SearchFilters {
 
   vat_deductible?: boolean;
   first_owner?: boolean;
+  crashed?: boolean;
+  tunning?: boolean;
+  handicapped?: boolean;
   servicebook_id?: number;
   country_id?: number;
   upholstery_id?: number;
@@ -208,6 +252,10 @@ export interface SearchFilters {
   truck_type_id?: number;
   bus_type_id?: number;
   trailer_type_id?: number;
+  seatplace_id?: number;
+  gearbox_level_id?: number;
+  color_type_id?: number;
+  certified_id?: number;
 
   equipment_ids?: number[];
 

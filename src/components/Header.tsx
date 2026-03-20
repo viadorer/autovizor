@@ -1,12 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Heart, ArrowLeftRight, User, Car, Menu, X } from 'lucide-react';
+import { Search, Heart, ArrowLeftRight, User, Car, Menu, X, Sun, Moon } from 'lucide-react';
 import { useState } from 'react';
 import { useFavoritesStore } from '../stores/favoritesStore';
+import { useThemeStore } from '../stores/themeStore';
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const favoriteCount = useFavoritesStore((s) => s.favoriteIds.length);
+  const { mode, toggleMode } = useThemeStore();
 
   const navItems = [
     { to: '/hledat', label: 'Hledat', icon: Search },
@@ -25,7 +27,7 @@ export default function Header() {
               <Car className="w-5 h-5 text-white" />
             </div>
             <div className="flex flex-col leading-none">
-              <span className="text-lg font-bold text-white tracking-tight">Autovizor</span>
+              <span className="text-lg font-bold text-surface-100 tracking-tight">Autovizor</span>
               <span className="text-[10px] text-surface-400 -mt-0.5">.cz</span>
             </div>
           </Link>
@@ -40,8 +42,8 @@ export default function Header() {
                   to={item.to}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-surface-800 text-white'
-                      : 'text-surface-300 hover:text-white hover:bg-surface-900'
+                      ? 'bg-surface-800 text-surface-100'
+                      : 'text-surface-300 hover:text-surface-100 hover:bg-surface-900'
                   }`}
                 >
                   <item.icon className="w-4 h-4" />
@@ -53,9 +55,17 @@ export default function Header() {
 
           {/* Pravé ikony */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={toggleMode}
+              className="flex items-center justify-center w-10 h-10 rounded-lg text-surface-300 hover:text-surface-100 hover:bg-surface-800 transition-colors"
+              aria-label="Přepnout motiv"
+            >
+              {mode === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
             <Link
               to="/oblibene"
-              className="relative flex items-center justify-center w-10 h-10 rounded-lg text-surface-300 hover:text-white hover:bg-surface-800 transition-colors"
+              className="relative flex items-center justify-center w-10 h-10 rounded-lg text-surface-300 hover:text-surface-100 hover:bg-surface-800 transition-colors"
             >
               <Heart className="w-5 h-5" />
               {favoriteCount > 0 && (
@@ -75,7 +85,7 @@ export default function Header() {
 
             {/* Hamburger */}
             <button
-              className="md:hidden flex items-center justify-center w-10 h-10 text-surface-300 hover:text-white"
+              className="md:hidden flex items-center justify-center w-10 h-10 text-surface-300 hover:text-surface-100"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -93,7 +103,7 @@ export default function Header() {
                 key={item.to}
                 to={item.to}
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-surface-300 hover:text-white hover:bg-surface-800 transition-colors"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-surface-300 hover:text-surface-100 hover:bg-surface-800 transition-colors"
               >
                 <item.icon className="w-5 h-5" />
                 {item.label}

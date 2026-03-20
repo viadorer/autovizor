@@ -36,7 +36,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
           <input
             type="text"
             placeholder="Popiš, jaké auto hledáš..."
-            className="w-full pl-10 pr-4 py-2.5 bg-surface-800 rounded-lg text-sm text-white placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
+            className="w-full pl-10 pr-4 py-2.5 bg-surface-800 rounded-lg text-sm text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 setFilter('query', (e.target as HTMLInputElement).value);
@@ -57,7 +57,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
 
   return (
     <div className="bg-surface-900/80 backdrop-blur-sm rounded-2xl p-6 border border-surface-800">
-      <h2 className="text-xl font-bold text-white mb-5">
+      <h2 className="text-xl font-bold text-surface-100 mb-5">
         Miliony aut. Jedno hledání.
       </h2>
 
@@ -67,7 +67,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <input
           type="text"
           placeholder="Popiš, jaké auto hledáš..."
-          className="w-full pl-12 pr-14 py-4 bg-surface-800 rounded-xl text-white placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600 text-base"
+          className="w-full pl-12 pr-14 py-4 bg-surface-800 rounded-xl text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600 text-base"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               setFilter('query', (e.target as HTMLInputElement).value);
@@ -89,7 +89,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <select
           value={selectedMfr ?? ''}
           onChange={(e) => handleManufacturer(e.target.value ? Number(e.target.value) : undefined)}
-          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
         >
           <option value="">Značka</option>
           {MOCK_MANUFACTURERS_LIST.map((m) => (
@@ -101,7 +101,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <select
           value={filters.model_id ?? ''}
           onChange={(e) => setFilter('model_id', e.target.value ? Number(e.target.value) : undefined)}
-          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
           disabled={!selectedMfr}
         >
           <option value="">Model</option>
@@ -114,7 +114,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <select
           value={filters.year_from ?? ''}
           onChange={(e) => setFilter('year_from', e.target.value ? Number(e.target.value) : undefined)}
-          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
         >
           <option value="">Rok od</option>
           {YEAR_OPTIONS.map((y) => (
@@ -126,7 +126,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <select
           value={filters.km_to ?? ''}
           onChange={(e) => setFilter('km_to', e.target.value ? Number(e.target.value) : undefined)}
-          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
         >
           <option value="">Km do</option>
           {[10000, 30000, 50000, 75000, 100000, 150000, 200000].map((km) => (
@@ -138,7 +138,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <select
           value={filters.price_to ?? ''}
           onChange={(e) => setFilter('price_to', e.target.value ? Number(e.target.value) : undefined)}
-          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
         >
           <option value="">Cena do</option>
           {[100000, 200000, 300000, 500000, 750000, 1000000, 1500000, 2000000].map((p) => (

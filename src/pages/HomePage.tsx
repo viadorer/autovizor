@@ -39,7 +39,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-primary-950/30 via-surface-950 to-surface-950" />
         <div className="relative max-w-7xl mx-auto px-4 pt-12 pb-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-surface-100 leading-tight">
               Najdi své
               <span className="text-primary-500"> vysněné auto</span>
             </h1>
@@ -62,7 +62,7 @@ export default function HomePage() {
               >
                 <cat.icon className="w-6 h-6 text-surface-400 group-hover:text-primary-400 transition-colors" />
                 <div className="text-left">
-                  <p className="text-sm font-medium text-white">{cat.name}</p>
+                  <p className="text-sm font-medium text-surface-100">{cat.name}</p>
                   <p className="text-xs text-surface-500">{cat.count} nabídek</p>
                 </div>
               </Link>
@@ -75,7 +75,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 py-12">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-surface-100">
               Top <span className="px-2 py-0.5 bg-primary-600 rounded text-sm">NABÍDKY</span> pro vás
             </h2>
             <p className="text-sm text-surface-400 mt-1">Nejzajímavější inzeráty vybrané pro vás</p>
@@ -97,7 +97,7 @@ export default function HomePage() {
 
       {/* Populární značky */}
       <section className="max-w-7xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold text-white mb-6">Populární značky</h2>
+        <h2 className="text-2xl font-bold text-surface-100 mb-6">Populární značky</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {POPULAR_BRANDS.map((brand) => (
             <Link
@@ -105,7 +105,7 @@ export default function HomePage() {
               to={`/hledat?brand=${encodeURIComponent(brand.name)}`}
               className="flex items-center justify-between p-4 bg-surface-900 rounded-xl border border-surface-800 hover:border-surface-600 transition-all group"
             >
-              <span className="text-sm font-medium text-white group-hover:text-primary-400 transition-colors">
+              <span className="text-sm font-medium text-surface-100 group-hover:text-primary-400 transition-colors">
                 {brand.name}
               </span>
               <span className="text-xs text-surface-500">{brand.count}</span>
@@ -119,7 +119,7 @@ export default function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="p-6 bg-surface-900 rounded-xl border border-surface-800">
             <TrendingUp className="w-8 h-8 text-primary-500 mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">Hodnocení ceny</h3>
+            <h3 className="text-lg font-semibold text-surface-100 mb-2">Hodnocení ceny</h3>
             <p className="text-sm text-surface-400">
               U každého vozidla vidíte, zda je cena výhodná, férová, nebo vysoká.
               Nakupujte chytře.
@@ -127,14 +127,14 @@ export default function HomePage() {
           </div>
           <div className="p-6 bg-surface-900 rounded-xl border border-surface-800">
             <Shield className="w-8 h-8 text-primary-500 mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">Ověření prodejci</h3>
+            <h3 className="text-lg font-semibold text-surface-100 mb-2">Ověření prodejci</h3>
             <p className="text-sm text-surface-400">
               Spolupracujeme pouze s ověřenými prodejci. Hodnocení a recenze od skutečných zákazníků.
             </p>
           </div>
           <div className="p-6 bg-surface-900 rounded-xl border border-surface-800">
             <Zap className="w-8 h-8 text-primary-500 mb-4" />
-            <h3 className="text-lg font-semibold text-white mb-2">Okamžitá upozornění</h3>
+            <h3 className="text-lg font-semibold text-surface-100 mb-2">Okamžitá upozornění</h3>
             <p className="text-sm text-surface-400">
               Uložte si hledání a dostávejte upozornění, když se objeví nový inzerát odpovídající vašim kritériím.
             </p>

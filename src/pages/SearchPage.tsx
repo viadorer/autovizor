@@ -31,7 +31,7 @@ export default function SearchPage() {
           {/* Horní lišta */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h1 className="text-xl font-bold text-white">
+              <h1 className="text-xl font-bold text-surface-100">
                 {new Intl.NumberFormat('cs-CZ').format(totalCount)} nabídek
               </h1>
             </div>
@@ -43,7 +43,7 @@ export default function SearchPage() {
                 <select
                   value={filters.sort_by ?? 'created_at'}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                  className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
                 >
                   {SORT_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
@@ -55,20 +55,20 @@ export default function SearchPage() {
               <div className="flex items-center border border-surface-700 rounded-lg overflow-hidden">
                 <button
                   onClick={() => setLayout('list')}
-                  className={`p-2 transition-colors ${layout === 'list' ? 'bg-surface-700 text-white' : 'text-surface-400 hover:text-white'}`}
+                  className={`p-2 transition-colors ${layout === 'list' ? 'bg-surface-700 text-surface-100' : 'text-surface-400 hover:text-surface-100'}`}
                 >
                   <List className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setLayout('grid')}
-                  className={`p-2 transition-colors ${layout === 'grid' ? 'bg-surface-700 text-white' : 'text-surface-400 hover:text-white'}`}
+                  className={`p-2 transition-colors ${layout === 'grid' ? 'bg-surface-700 text-surface-100' : 'text-surface-400 hover:text-surface-100'}`}
                 >
                   <Grid3X3 className="w-4 h-4" />
                 </button>
               </div>
 
               {/* Uložit hledání */}
-              <button className="flex items-center gap-2 px-3 py-2 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-300 hover:text-white hover:border-primary-600 transition-colors">
+              <button className="flex items-center gap-2 px-3 py-2 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-300 hover:text-surface-100 hover:border-primary-600 transition-colors">
                 <Star className="w-4 h-4" />
                 <span className="hidden sm:inline">Uložit hledání</span>
               </button>
@@ -97,7 +97,7 @@ export default function SearchPage() {
           ) : results.length === 0 ? (
             <div className="text-center py-20">
               <Search className="w-12 h-12 text-surface-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-white mb-2">Žádné výsledky</h3>
+              <h3 className="text-lg font-semibold text-surface-100 mb-2">Žádné výsledky</h3>
               <p className="text-sm text-surface-400">
                 Zkuste upravit filtry nebo vyhledávací dotaz.
               </p>
@@ -120,7 +120,7 @@ export default function SearchPage() {
               <button
                 disabled={page <= 1}
                 onClick={() => setPage(page - 1)}
-                className="px-4 py-2 bg-surface-800 border border-surface-700 rounded-lg text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-700 transition-colors"
+                className="px-4 py-2 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-100 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-700 transition-colors"
               >
                 Předchozí
               </button>
@@ -143,7 +143,7 @@ export default function SearchPage() {
                     className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
                       page === pageNum
                         ? 'bg-primary-600 text-white'
-                        : 'bg-surface-800 border border-surface-700 text-surface-300 hover:text-white hover:bg-surface-700'
+                        : 'bg-surface-800 border border-surface-700 text-surface-300 hover:text-surface-100 hover:bg-surface-700'
                     }`}
                   >
                     {pageNum}
@@ -154,7 +154,7 @@ export default function SearchPage() {
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage(page + 1)}
-                className="px-4 py-2 bg-surface-800 border border-surface-700 rounded-lg text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-700 transition-colors"
+                className="px-4 py-2 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-100 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-700 transition-colors"
               >
                 Další
               </button>

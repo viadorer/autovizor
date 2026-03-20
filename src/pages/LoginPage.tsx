@@ -26,9 +26,9 @@ export default function LoginPage() {
     return (
       <div className="max-w-md mx-auto px-4 py-20 text-center">
         <Mail className="w-12 h-12 text-primary-500 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white mb-2">E-mail odeslán</h2>
+        <h2 className="text-xl font-bold text-surface-100 mb-2">E-mail odeslán</h2>
         <p className="text-sm text-surface-400 mb-6">
-          Na adresu <strong className="text-white">{email}</strong> jsme zaslali odkaz pro obnovení hesla.
+          Na adresu <strong className="text-surface-100">{email}</strong> jsme zaslali odkaz pro obnovení hesla.
         </p>
         <button
           onClick={() => { setMode('login'); setSubmitted(false); }}
@@ -48,7 +48,7 @@ export default function LoginPage() {
           <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center">
             <Car className="w-6 h-6 text-white" />
           </div>
-          <span className="text-2xl font-bold text-white">Autovizor.cz</span>
+          <span className="text-2xl font-bold text-surface-100">Autovizor.cz</span>
         </Link>
       </div>
 
@@ -59,7 +59,7 @@ export default function LoginPage() {
             <button
               onClick={() => setMode('login')}
               className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
-                mode === 'login' ? 'bg-surface-700 text-white' : 'text-surface-400 hover:text-white'
+                mode === 'login' ? 'bg-surface-700 text-surface-100' : 'text-surface-400 hover:text-surface-100'
               }`}
             >
               Přihlásit se
@@ -67,7 +67,7 @@ export default function LoginPage() {
             <button
               onClick={() => setMode('register')}
               className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
-                mode === 'register' ? 'bg-surface-700 text-white' : 'text-surface-400 hover:text-white'
+                mode === 'register' ? 'bg-surface-700 text-surface-100' : 'text-surface-400 hover:text-surface-100'
               }`}
             >
               Registrace
@@ -77,7 +77,7 @@ export default function LoginPage() {
 
         {mode === 'forgot' && (
           <div className="mb-6">
-            <h2 className="text-lg font-bold text-white mb-1">Zapomenuté heslo</h2>
+            <h2 className="text-lg font-bold text-surface-100 mb-1">Zapomenuté heslo</h2>
             <p className="text-sm text-surface-400">Zadejte e-mail a zašleme vám odkaz pro obnovení.</p>
           </div>
         )}
@@ -94,7 +94,7 @@ export default function LoginPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Jan Novák"
                   required
-                  className="w-full pl-10 pr-4 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-white placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
+                  className="w-full pl-10 pr-4 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
                 />
               </div>
             </div>
@@ -110,7 +110,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="jan@email.cz"
                 required
-                className="w-full pl-10 pr-4 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-white placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
+                className="w-full pl-10 pr-4 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
               />
             </div>
           </div>
@@ -127,7 +127,7 @@ export default function LoginPage() {
                   placeholder="Zadejte heslo"
                   required
                   minLength={6}
-                  className="w-full pl-10 pr-10 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-white placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
+                  className="w-full pl-10 pr-10 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
                 />
                 <button
                   type="button"
@@ -163,7 +163,7 @@ export default function LoginPage() {
         {mode === 'forgot' && (
           <button
             onClick={() => setMode('login')}
-            className="w-full mt-3 text-sm text-surface-400 hover:text-white text-center"
+            className="w-full mt-3 text-sm text-surface-400 hover:text-surface-100 text-center"
           >
             Zpět na přihlášení
           </button>
@@ -180,7 +180,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <button className="w-full flex items-center justify-center gap-3 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-white hover:bg-surface-700 transition-colors">
+            <button className="w-full flex items-center justify-center gap-3 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-100 hover:bg-surface-700 transition-colors">
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />

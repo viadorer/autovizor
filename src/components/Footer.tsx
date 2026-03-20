@@ -12,7 +12,7 @@ export default function Footer() {
               <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <Car className="w-5 h-5 text-white" />
               </div>
-              <span className="text-lg font-bold text-white">Autovizor.cz</span>
+              <span className="text-lg font-bold text-surface-100">Autovizor.cz</span>
             </Link>
             <p className="text-sm text-surface-400 leading-relaxed">
               Největší výběr aut v České republice. Najděte své vysněné vozidlo mezi tisíci nabídkami.
@@ -21,11 +21,11 @@ export default function Footer() {
 
           {/* Hledání */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-4">Hledání</h3>
+            <h3 className="text-sm font-semibold text-surface-100 mb-4">Hledání</h3>
             <ul className="space-y-2">
               {['Osobní auta', 'Užitková vozidla', 'Motocykly', 'Nákladní vozy', 'Obytné vozy'].map((item) => (
                 <li key={item}>
-                  <Link to="/hledat" className="text-sm text-surface-400 hover:text-white transition-colors">
+                  <Link to="/hledat" className="text-sm text-surface-400 hover:text-surface-100 transition-colors">
                     {item}
                   </Link>
                 </li>
@@ -35,7 +35,7 @@ export default function Footer() {
 
           {/* Služby */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-4">Služby</h3>
+            <h3 className="text-sm font-semibold text-surface-100 mb-4">Služby</h3>
             <ul className="space-y-2">
               {[
                 { label: 'Prodat auto', to: '/prodat' },
@@ -44,7 +44,7 @@ export default function Footer() {
                 { label: 'Oblíbené', to: '/oblibene' },
               ].map((item) => (
                 <li key={item.label}>
-                  <Link to={item.to} className="text-sm text-surface-400 hover:text-white transition-colors">
+                  <Link to={item.to} className="text-sm text-surface-400 hover:text-surface-100 transition-colors">
                     {item.label}
                   </Link>
                 </li>
@@ -54,7 +54,7 @@ export default function Footer() {
 
           {/* O nás */}
           <div>
-            <h3 className="text-sm font-semibold text-white mb-4">O nás</h3>
+            <h3 className="text-sm font-semibold text-surface-100 mb-4">O nás</h3>
             <ul className="space-y-2">
               {[
                 { label: 'O Autovizor.cz', to: '#' },
@@ -64,7 +64,7 @@ export default function Footer() {
                 { label: 'Přihlášení', to: '/prihlaseni' },
               ].map((item) => (
                 <li key={item.label}>
-                  <Link to={item.to} className="text-sm text-surface-400 hover:text-white transition-colors">
+                  <Link to={item.to} className="text-sm text-surface-400 hover:text-surface-100 transition-colors">
                     {item.label}
                   </Link>
                 </li>

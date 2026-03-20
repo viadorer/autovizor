@@ -19,7 +19,7 @@ export default function FavoritesPage() {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Oblíbené inzeráty</h1>
+          <h1 className="text-2xl font-bold text-surface-100">Oblíbené inzeráty</h1>
           <p className="text-sm text-surface-400 mt-1">
             {favoriteIds.length === 0
               ? 'Zatím nemáte žádné oblíbené inzeráty.'
@@ -32,7 +32,7 @@ export default function FavoritesPage() {
       {vehicles.length === 0 ? (
         <div className="text-center py-20">
           <Heart className="w-12 h-12 text-surface-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-white mb-2">
+          <h3 className="text-lg font-semibold text-surface-100 mb-2">
             Žádné oblíbené inzeráty
           </h3>
           <p className="text-sm text-surface-400 mb-6">

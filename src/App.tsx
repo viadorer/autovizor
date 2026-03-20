@@ -9,11 +9,15 @@ import SellPage from './pages/SellPage';
 import AdvisoryPage from './pages/AdvisoryPage';
 import ComparisonPage from './pages/ComparisonPage';
 import LoginPage from './pages/LoginPage';
+import { useThemeStore } from './stores/themeStore';
 
 export default function App() {
+  // Initialize theme on mount (triggers rehydration side-effect)
+  useThemeStore();
+
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-surface-950 text-white flex flex-col">
+      <div className="min-h-screen bg-surface-950 text-surface-100 flex flex-col">
         <Header />
         <main className="flex-1">
           <Routes>

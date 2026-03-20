@@ -75,7 +75,7 @@ function FormSelect({ label, value, onChange, options, required }: {
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+        className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
       >
         <option value="">Vyberte...</option>
         {options.map((o) => (
@@ -102,7 +102,7 @@ function FormInput({ label, value, onChange, type = 'text', placeholder, require
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           required={required}
-          className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
+          className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
         />
         {suffix && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-surface-500">{suffix}</span>
@@ -222,7 +222,7 @@ export default function SellPage() {
         <div className="w-16 h-16 bg-emerald-600/20 rounded-full flex items-center justify-center mx-auto mb-6">
           <Check className="w-8 h-8 text-emerald-500" />
         </div>
-        <h1 className="text-2xl font-bold text-white mb-3">Inzerát byl odeslán</h1>
+        <h1 className="text-2xl font-bold text-surface-100 mb-3">Inzerát byl odeslán</h1>
         <p className="text-surface-400 mb-8">
           Váš inzerát bude zkontrolován a zveřejněn do 24 hodin.
           O zveřejnění vás budeme informovat e-mailem.
@@ -247,7 +247,7 @@ export default function SellPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">Prodat vozidlo</h1>
+        <h1 className="text-3xl font-bold text-surface-100">Prodat vozidlo</h1>
         <p className="text-surface-400 mt-2">Vytvořte inzerát a oslovte tisíce zájemců</p>
       </div>
 
@@ -279,7 +279,7 @@ export default function SellPage() {
         {/* Krok 1: Základní údaje */}
         {step === 1 && (
           <div className="bg-surface-900 rounded-xl border border-surface-800 p-6 space-y-5">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <h2 className="text-lg font-bold text-surface-100 flex items-center gap-2">
               <Car className="w-5 h-5 text-primary-500" />
               Základní údaje o vozidle
             </h2>
@@ -294,7 +294,7 @@ export default function SellPage() {
                   value={form.manufacturer_id}
                   onChange={(e) => { set('manufacturer_id', e.target.value); set('model_id', ''); }}
                   required
-                  className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                  className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
                 >
                   <option value="">Vyberte značku...</option>
                   {MOCK_MANUFACTURERS_LIST.map((m) => (
@@ -311,7 +311,7 @@ export default function SellPage() {
                   onChange={(e) => set('model_id', e.target.value)}
                   required
                   disabled={!form.manufacturer_id}
-                  className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer disabled:opacity-50"
+                  className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer disabled:opacity-50"
                 >
                   <option value="">Vyberte model...</option>
                   {form.manufacturer_id && MOCK_MANUFACTURERS_LIST.find((m) => m.id === Number(form.manufacturer_id))?.models.map((mod) => (
@@ -347,7 +347,7 @@ export default function SellPage() {
         {/* Krok 2: Technické parametry */}
         {step === 2 && (
           <div className="bg-surface-900 rounded-xl border border-surface-800 p-6 space-y-5">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <h2 className="text-lg font-bold text-surface-100 flex items-center gap-2">
               <Info className="w-5 h-5 text-primary-500" />
               Technické parametry
             </h2>
@@ -366,7 +366,7 @@ export default function SellPage() {
                   <select
                     value={form.made_month}
                     onChange={(e) => set('made_month', e.target.value)}
-                    className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                    className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
                   >
                     <option value="">Měsíc</option>
                     {Array.from({ length: 12 }, (_, i) => (
@@ -377,7 +377,7 @@ export default function SellPage() {
                     value={form.made_year}
                     onChange={(e) => set('made_year', e.target.value)}
                     required
-                    className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                    className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
                   >
                     <option value="">Rok</option>
                     {YEAR_OPTIONS.map((y) => (
@@ -410,7 +410,7 @@ export default function SellPage() {
                       onChange={(e) => set('vin', e.target.value.toUpperCase())}
                       placeholder="např. TMBAG7NE1L0123456"
                       maxLength={17}
-                      className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600 font-mono tracking-wider"
+                      className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600 font-mono tracking-wider"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-surface-500">
                       {form.vin.length}/17
@@ -447,34 +447,34 @@ export default function SellPage() {
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 text-xs">
                       {vinResult.manufacturer && (
-                        <div><span className="text-surface-500">Výrobce:</span> <span className="text-white">{vinResult.manufacturer}</span></div>
+                        <div><span className="text-surface-500">Výrobce:</span> <span className="text-surface-100">{vinResult.manufacturer}</span></div>
                       )}
                       {vinResult.model && (
-                        <div><span className="text-surface-500">Model:</span> <span className="text-white">{vinResult.model}</span></div>
+                        <div><span className="text-surface-500">Model:</span> <span className="text-surface-100">{vinResult.model}</span></div>
                       )}
                       {vinResult.year && (
-                        <div><span className="text-surface-500">Rok:</span> <span className="text-white">{vinResult.year}</span></div>
+                        <div><span className="text-surface-500">Rok:</span> <span className="text-surface-100">{vinResult.year}</span></div>
                       )}
                       {vinResult.body_type && (
-                        <div><span className="text-surface-500">Karoserie:</span> <span className="text-white">{vinResult.body_type}</span></div>
+                        <div><span className="text-surface-500">Karoserie:</span> <span className="text-surface-100">{vinResult.body_type}</span></div>
                       )}
                       {vinResult.fuel_type && (
-                        <div><span className="text-surface-500">Palivo:</span> <span className="text-white">{vinResult.fuel_type}</span></div>
+                        <div><span className="text-surface-500">Palivo:</span> <span className="text-surface-100">{vinResult.fuel_type}</span></div>
                       )}
                       {vinResult.engine_volume && (
-                        <div><span className="text-surface-500">Objem:</span> <span className="text-white">{vinResult.engine_volume} ccm</span></div>
+                        <div><span className="text-surface-500">Objem:</span> <span className="text-surface-100">{vinResult.engine_volume} ccm</span></div>
                       )}
                       {vinResult.engine_power && (
-                        <div><span className="text-surface-500">Výkon:</span> <span className="text-white">{vinResult.engine_power} kW</span></div>
+                        <div><span className="text-surface-500">Výkon:</span> <span className="text-surface-100">{vinResult.engine_power} kW</span></div>
                       )}
                       {vinResult.drive_type && (
-                        <div><span className="text-surface-500">Pohon:</span> <span className="text-white">{vinResult.drive_type}</span></div>
+                        <div><span className="text-surface-500">Pohon:</span> <span className="text-surface-100">{vinResult.drive_type}</span></div>
                       )}
                       {vinResult.gearbox && (
-                        <div><span className="text-surface-500">Převodovka:</span> <span className="text-white">{vinResult.gearbox}</span></div>
+                        <div><span className="text-surface-500">Převodovka:</span> <span className="text-surface-100">{vinResult.gearbox}</span></div>
                       )}
                       {vinResult.country && (
-                        <div><span className="text-surface-500">Země výroby:</span> <span className="text-white">{vinResult.country}</span></div>
+                        <div><span className="text-surface-500">Země výroby:</span> <span className="text-surface-100">{vinResult.country}</span></div>
                       )}
                     </div>
                     <p className="text-xs text-surface-500 mt-2">
@@ -487,28 +487,28 @@ export default function SellPage() {
                         <h4 className="text-xs font-semibold text-emerald-400 mb-2">Rozšířené údaje (vindecoder.eu)</h4>
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 text-xs">
                           {vinResult.model_variant && (
-                            <div><span className="text-surface-500">Varianta:</span> <span className="text-white">{vinResult.model_variant}</span></div>
+                            <div><span className="text-surface-500">Varianta:</span> <span className="text-surface-100">{vinResult.model_variant}</span></div>
                           )}
                           {vinResult.color && (
-                            <div><span className="text-surface-500">Barva:</span> <span className="text-white">{vinResult.color}</span></div>
+                            <div><span className="text-surface-500">Barva:</span> <span className="text-surface-100">{vinResult.color}</span></div>
                           )}
                           {vinResult.capacity && (
-                            <div><span className="text-surface-500">Počet míst:</span> <span className="text-white">{vinResult.capacity}</span></div>
+                            <div><span className="text-surface-500">Počet míst:</span> <span className="text-surface-100">{vinResult.capacity}</span></div>
                           )}
                           {vinResult.weight && (
-                            <div><span className="text-surface-500">Hmotnost:</span> <span className="text-white">{vinResult.weight}</span></div>
+                            <div><span className="text-surface-500">Hmotnost:</span> <span className="text-surface-100">{vinResult.weight}</span></div>
                           )}
                           {vinResult.top_speed && (
-                            <div><span className="text-surface-500">Max. rychlost:</span> <span className="text-white">{vinResult.top_speed}</span></div>
+                            <div><span className="text-surface-500">Max. rychlost:</span> <span className="text-surface-100">{vinResult.top_speed}</span></div>
                           )}
                           {vinResult.acceleration && (
-                            <div><span className="text-surface-500">0-100 km/h:</span> <span className="text-white">{vinResult.acceleration}</span></div>
+                            <div><span className="text-surface-500">0-100 km/h:</span> <span className="text-surface-100">{vinResult.acceleration}</span></div>
                           )}
                           {vinResult.co2_emissions && (
-                            <div><span className="text-surface-500">CO₂:</span> <span className="text-white">{vinResult.co2_emissions}</span></div>
+                            <div><span className="text-surface-500">CO₂:</span> <span className="text-surface-100">{vinResult.co2_emissions}</span></div>
                           )}
                           {vinResult.fuel_consumption && (
-                            <div><span className="text-surface-500">Spotřeba:</span> <span className="text-white">{vinResult.fuel_consumption}</span></div>
+                            <div><span className="text-surface-500">Spotřeba:</span> <span className="text-surface-100">{vinResult.fuel_consumption}</span></div>
                           )}
                         </div>
                       </div>
@@ -559,7 +559,7 @@ export default function SellPage() {
               </div>
             </div>
             <div className="flex justify-between">
-              <button type="button" onClick={() => setStep(1)} className="px-6 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-white hover:bg-surface-700 transition-colors">
+              <button type="button" onClick={() => setStep(1)} className="px-6 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-100 hover:bg-surface-700 transition-colors">
                 Zpět
               </button>
               <button type="button" onClick={() => setStep(3)} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 rounded-lg text-sm font-medium text-white transition-colors">
@@ -572,7 +572,7 @@ export default function SellPage() {
         {/* Krok 3: Výbava a popis */}
         {step === 3 && (
           <div className="bg-surface-900 rounded-xl border border-surface-800 p-6 space-y-5">
-            <h2 className="text-lg font-bold text-white">Výbava a popis</h2>
+            <h2 className="text-lg font-bold text-surface-100">Výbava a popis</h2>
 
             <div>
               <label className="block text-sm font-medium text-surface-300 mb-1.5">Popis vozidla</label>
@@ -581,7 +581,7 @@ export default function SellPage() {
                 onChange={(e) => set('description', e.target.value)}
                 rows={5}
                 placeholder="Popište stav, historii a vše důležité o vozidle..."
-                className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600 resize-y"
+                className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600 resize-y"
               />
             </div>
 
@@ -612,7 +612,7 @@ export default function SellPage() {
                                 onChange={() => toggleEquip(eq.id)}
                                 className="w-4 h-4 rounded border-surface-600 bg-surface-800 text-primary-600 focus:ring-primary-600"
                               />
-                              <span className="text-xs text-surface-300 group-hover:text-white transition-colors">{eq.name}</span>
+                              <span className="text-xs text-surface-300 group-hover:text-surface-100 transition-colors">{eq.name}</span>
                             </label>
                           ))}
                         </div>
@@ -624,7 +624,7 @@ export default function SellPage() {
             </div>
 
             <div className="flex justify-between">
-              <button type="button" onClick={() => setStep(2)} className="px-6 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-white hover:bg-surface-700 transition-colors">
+              <button type="button" onClick={() => setStep(2)} className="px-6 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-100 hover:bg-surface-700 transition-colors">
                 Zpět
               </button>
               <button type="button" onClick={() => setStep(4)} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 rounded-lg text-sm font-medium text-white transition-colors">
@@ -637,7 +637,7 @@ export default function SellPage() {
         {/* Krok 4: Fotografie a kontakt */}
         {step === 4 && (
           <div className="bg-surface-900 rounded-xl border border-surface-800 p-6 space-y-6">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <h2 className="text-lg font-bold text-surface-100 flex items-center gap-2">
               <Camera className="w-5 h-5 text-primary-500" />
               Fotografie a kontaktní údaje
             </h2>
@@ -658,7 +658,7 @@ export default function SellPage() {
 
             {/* Kontakt */}
             <div>
-              <h3 className="text-sm font-semibold text-white mb-3">Kontaktní údaje</h3>
+              <h3 className="text-sm font-semibold text-surface-100 mb-3">Kontaktní údaje</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormInput label="Jméno / Firma" value={form.seller_name} onChange={(v) => set('seller_name', v)} placeholder="Jan Novák" required />
                 <FormInput label="Telefon" value={form.seller_phone} onChange={(v) => set('seller_phone', v)} type="tel" placeholder="+420 123 456 789" required />
@@ -669,7 +669,7 @@ export default function SellPage() {
                     value={form.region_id}
                     onChange={(e) => set('region_id', e.target.value)}
                     required
-                    className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                    className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
                   >
                     <option value="">Vyberte okres...</option>
                     {Object.entries(regionGroups).map(([group, regions]) => (
@@ -685,7 +685,7 @@ export default function SellPage() {
             </div>
 
             <div className="flex justify-between pt-4 border-t border-surface-800">
-              <button type="button" onClick={() => setStep(3)} className="px-6 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-white hover:bg-surface-700 transition-colors">
+              <button type="button" onClick={() => setStep(3)} className="px-6 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-100 hover:bg-surface-700 transition-colors">
                 Zpět
               </button>
               <button type="submit" className="px-8 py-3 bg-primary-600 hover:bg-primary-700 rounded-lg text-sm font-bold text-white transition-colors flex items-center gap-2">

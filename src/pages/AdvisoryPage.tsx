@@ -79,7 +79,7 @@ export default function AdvisoryPage() {
         <div className="w-14 h-14 bg-primary-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <BookOpen className="w-7 h-7 text-primary-500" />
         </div>
-        <h1 className="text-3xl font-bold text-white mb-3">Poradna pro kupující</h1>
+        <h1 className="text-3xl font-bold text-surface-100 mb-3">Poradna pro kupující</h1>
         <p className="text-surface-400 max-w-2xl mx-auto">
           Kompletní průvodce nákupem ojetého vozidla. Poradíme vám, na co si dát pozor,
           jak prověřit auto i prodejce a jak zvládnout administrativu.
@@ -96,7 +96,7 @@ export default function AdvisoryPage() {
         ].map((stat) => (
           <div key={stat.label} className="p-4 bg-surface-900 rounded-xl border border-surface-800 text-center">
             <stat.icon className={`w-6 h-6 ${stat.color} mx-auto mb-2`} />
-            <p className="text-lg font-bold text-white">{stat.value}</p>
+            <p className="text-lg font-bold text-surface-100">{stat.value}</p>
             <p className="text-xs text-surface-400">{stat.label}</p>
           </div>
         ))}
@@ -104,7 +104,7 @@ export default function AdvisoryPage() {
 
       {/* Guides */}
       <div className="space-y-4 mb-12">
-        <h2 className="text-xl font-bold text-white mb-4">Průvodce nákupem</h2>
+        <h2 className="text-xl font-bold text-surface-100 mb-4">Průvodce nákupem</h2>
         {GUIDES.map((guide) => (
           <div key={guide.id} className="bg-surface-900 rounded-xl border border-surface-800 overflow-hidden">
             <button
@@ -113,7 +113,7 @@ export default function AdvisoryPage() {
             >
               <span className="flex items-center gap-3">
                 <guide.icon className={`w-5 h-5 ${guide.color}`} />
-                <span className="text-base font-semibold text-white">{guide.title}</span>
+                <span className="text-base font-semibold text-surface-100">{guide.title}</span>
                 <span className="text-xs text-surface-500">{guide.items.length} tipů</span>
               </span>
               {openGuide === guide.id ? <ChevronUp className="w-4 h-4 text-surface-400" /> : <ChevronDown className="w-4 h-4 text-surface-400" />}
@@ -126,7 +126,7 @@ export default function AdvisoryPage() {
                       <span className="text-xs font-bold text-surface-400">{i + 1}</span>
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-white mb-1">{item.title}</h4>
+                      <h4 className="text-sm font-semibold text-surface-100 mb-1">{item.title}</h4>
                       <p className="text-sm text-surface-400 leading-relaxed">{item.text}</p>
                     </div>
                   </div>
@@ -139,7 +139,7 @@ export default function AdvisoryPage() {
 
       {/* Checklist */}
       <div className="bg-surface-900 rounded-xl border border-surface-800 p-6 mb-12">
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        <h2 className="text-xl font-bold text-surface-100 mb-4 flex items-center gap-2">
           <FileText className="w-5 h-5 text-primary-500" />
           Kontrolní seznam před nákupem
         </h2>
@@ -163,7 +163,7 @@ export default function AdvisoryPage() {
                 type="checkbox"
                 className="w-4 h-4 rounded border-surface-600 bg-surface-800 text-primary-600 focus:ring-primary-600"
               />
-              <span className="text-sm text-surface-300 group-hover:text-white transition-colors">{item}</span>
+              <span className="text-sm text-surface-300 group-hover:text-surface-100 transition-colors">{item}</span>
             </label>
           ))}
         </div>
@@ -171,7 +171,7 @@ export default function AdvisoryPage() {
 
       {/* FAQ */}
       <div className="mb-12">
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+        <h2 className="text-xl font-bold text-surface-100 mb-4 flex items-center gap-2">
           <HelpCircle className="w-5 h-5 text-primary-500" />
           Často kladené dotazy
         </h2>
@@ -182,7 +182,7 @@ export default function AdvisoryPage() {
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 className="w-full flex items-center justify-between p-4 text-left hover:bg-surface-800/50 transition-colors"
               >
-                <span className="text-sm font-medium text-white">{faq.q}</span>
+                <span className="text-sm font-medium text-surface-100">{faq.q}</span>
                 {openFaq === i ? <ChevronUp className="w-4 h-4 text-surface-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-surface-400 shrink-0" />}
               </button>
               {openFaq === i && (
@@ -197,7 +197,7 @@ export default function AdvisoryPage() {
 
       {/* CTA */}
       <div className="bg-gradient-to-r from-primary-600/20 to-primary-700/10 rounded-xl border border-primary-600/30 p-8 text-center">
-        <h3 className="text-xl font-bold text-white mb-2">Připraveni na nákup?</h3>
+        <h3 className="text-xl font-bold text-surface-100 mb-2">Připraveni na nákup?</h3>
         <p className="text-surface-300 mb-6">Prozkoumejte aktuální nabídky a najděte své vysněné auto.</p>
         <Link
           to="/hledat"

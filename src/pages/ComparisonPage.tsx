@@ -85,7 +85,7 @@ export default function ComparisonPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+        <h1 className="text-3xl font-bold text-surface-100 flex items-center gap-3">
           <ArrowLeftRight className="w-7 h-7 text-primary-500" />
           Porovnání vozidel
         </h1>
@@ -108,10 +108,10 @@ export default function ComparisonPage() {
                   </button>
                 </div>
                 <div className="p-4">
-                  <Link to={`/vozidlo/${v.id}`} className="text-sm font-semibold text-white hover:text-primary-400 transition-colors">
+                  <Link to={`/vozidlo/${v.id}`} className="text-sm font-semibold text-surface-100 hover:text-primary-400 transition-colors">
                     {v.title}
                   </Link>
-                  <p className="text-lg font-bold text-white mt-1">{formatPrice(v.price)}</p>
+                  <p className="text-lg font-bold text-surface-100 mt-1">{formatPrice(v.price)}</p>
                 </div>
               </>
             ) : (
@@ -142,8 +142,8 @@ export default function ComparisonPage() {
           <div className="bg-surface-900 rounded-xl border border-surface-800 w-full max-w-lg max-h-[80vh] overflow-hidden">
             <div className="p-4 border-b border-surface-800">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-bold text-white">Vyberte vozidlo</h3>
-                <button onClick={() => setSearchOpen(null)} className="text-surface-400 hover:text-white">
+                <h3 className="text-lg font-bold text-surface-100">Vyberte vozidlo</h3>
+                <button onClick={() => setSearchOpen(null)} className="text-surface-400 hover:text-surface-100">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -155,7 +155,7 @@ export default function ComparisonPage() {
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Hledat podle značky nebo modelu..."
                   autoFocus
-                  className="w-full pl-10 pr-4 py-2.5 bg-surface-800 rounded-lg text-sm text-white placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
+                  className="w-full pl-10 pr-4 py-2.5 bg-surface-800 rounded-lg text-sm text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
                 />
               </div>
             </div>
@@ -168,12 +168,12 @@ export default function ComparisonPage() {
                 >
                   <img src={v.main_thumbnail_url} alt="" className="w-16 h-12 rounded-lg object-cover shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{v.title}</p>
+                    <p className="text-sm font-medium text-surface-100 truncate">{v.title}</p>
                     <p className="text-xs text-surface-400">
                       {formatRegistration(v.made_month, v.made_year)} • {formatKm(v.tachometer)} • {v.fuel_name}
                     </p>
                   </div>
-                  <span className="text-sm font-bold text-white shrink-0">{formatPrice(v.price)}</span>
+                  <span className="text-sm font-bold text-surface-100 shrink-0">{formatPrice(v.price)}</span>
                 </button>
               ))}
             </div>
@@ -202,7 +202,7 @@ export default function ComparisonPage() {
                   <tr key={spec.label} className={si % 2 === 0 ? 'bg-surface-900' : 'bg-surface-800/20'}>
                     <td className="py-3 px-4 text-sm text-surface-400">{spec.label}</td>
                     {values.map((val, vi) => (
-                      <td key={vi} className={`py-3 px-4 text-center text-sm ${spec.highlight ? 'font-semibold text-white' : 'text-surface-300'}`}>
+                      <td key={vi} className={`py-3 px-4 text-center text-sm ${spec.highlight ? 'font-semibold text-surface-100' : 'text-surface-300'}`}>
                         {val || '–'}
                       </td>
                     ))}
@@ -214,7 +214,7 @@ export default function ComparisonPage() {
 
           {/* Výbava porovnání */}
           <div className="border-t border-surface-800 p-4">
-            <h3 className="text-sm font-semibold text-white mb-3">Výbava</h3>
+            <h3 className="text-sm font-semibold text-surface-100 mb-3">Výbava</h3>
             <div className="space-y-1">
               {(() => {
                 const allIds = new Set<number>();
@@ -254,7 +254,7 @@ export default function ComparisonPage() {
       {filled.length < 2 && (
         <div className="text-center py-16">
           <ArrowLeftRight className="w-12 h-12 text-surface-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-white mb-2">Vyberte alespoň 2 vozidla</h3>
+          <h3 className="text-lg font-semibold text-surface-100 mb-2">Vyberte alespoň 2 vozidla</h3>
           <p className="text-sm text-surface-400">Klikněte na „Přidat vozidlo" výše pro zahájení porovnání.</p>
         </div>
       )}

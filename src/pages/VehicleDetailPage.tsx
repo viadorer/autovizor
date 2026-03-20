@@ -52,7 +52,7 @@ export default function VehicleDetailPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center">
         <Car className="w-12 h-12 text-surface-600 mx-auto mb-4" />
-        <h2 className="text-xl font-bold text-white mb-2">Vozidlo nebylo nalezeno</h2>
+        <h2 className="text-xl font-bold text-surface-100 mb-2">Vozidlo nebylo nalezeno</h2>
         <Link to="/hledat" className="text-primary-400 hover:text-primary-300 text-sm">
           Zpět na vyhledávání
         </Link>
@@ -100,7 +100,7 @@ export default function VehicleDetailPage() {
       {/* Breadcrumb */}
       <Link
         to="/hledat"
-        className="inline-flex items-center gap-2 text-sm text-surface-400 hover:text-white transition-colors mb-4"
+        className="inline-flex items-center gap-2 text-sm text-surface-400 hover:text-surface-100 transition-colors mb-4"
       >
         <ArrowLeft className="w-4 h-4" />
         Zpět na výsledky hledání
@@ -122,13 +122,13 @@ export default function VehicleDetailPage() {
                 <>
                   <button
                     onClick={() => setCurrentImage((p) => (p > 0 ? p - 1 : images.length - 1))}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 0 transition-colors"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setCurrentImage((p) => (p < images.length - 1 ? p + 1 : 0))}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 0 transition-colors"
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
@@ -160,7 +160,7 @@ export default function VehicleDetailPage() {
 
           {/* Technické údaje */}
           <div className="mt-6 bg-surface-900 rounded-xl border border-surface-800 p-6">
-            <h2 className="text-lg font-bold text-white mb-4">Technické údaje</h2>
+            <h2 className="text-lg font-bold text-surface-100 mb-4">Technické údaje</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
               {specs.map((spec, i) => (
                 <div
@@ -173,7 +173,7 @@ export default function VehicleDetailPage() {
                     <spec.icon className="w-4 h-4" />
                     {spec.label}
                   </span>
-                  <span className="text-sm font-medium text-white">{spec.value}</span>
+                  <span className="text-sm font-medium text-surface-100">{spec.value}</span>
                 </div>
               ))}
             </div>
@@ -183,7 +183,7 @@ export default function VehicleDetailPage() {
           {vehicle.vin && (
             <div className="mt-6 bg-surface-900 rounded-xl border border-surface-800 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <h2 className="text-lg font-bold text-surface-100 flex items-center gap-2">
                   <Key className="w-5 h-5 text-primary-500" />
                   VIN: <span className="font-mono tracking-wider">{vehicle.vin}</span>
                 </h2>
@@ -232,7 +232,7 @@ export default function VehicleDetailPage() {
                     ].filter((i) => i.value).map((item) => (
                       <div key={item.label} className="p-3 bg-surface-800/50 rounded-lg">
                         <p className="text-xs text-surface-500">{item.label}</p>
-                        <p className="text-sm font-medium text-white mt-0.5">{item.value}</p>
+                        <p className="text-sm font-medium text-surface-100 mt-0.5">{item.value}</p>
                       </div>
                     ))}
                   </div>
@@ -240,7 +240,7 @@ export default function VehicleDetailPage() {
                   {/* Výbava z VIN (vindecoder.eu) */}
                   {vinResult.equipment && vinResult.equipment.length > 0 && (
                     <div className="mt-4 pt-4 border-t border-surface-800">
-                      <h3 className="text-sm font-semibold text-white mb-3">
+                      <h3 className="text-sm font-semibold text-surface-100 mb-3">
                         Výbava dle VIN ({vinResult.equipment.length} položek)
                       </h3>
                       <div className="space-y-3">
@@ -286,7 +286,7 @@ export default function VehicleDetailPage() {
           {/* Výbava */}
           {Object.keys(equipmentByCategory).length > 0 && (
             <div className="mt-6 bg-surface-900 rounded-xl border border-surface-800 p-6">
-              <h2 className="text-lg font-bold text-white mb-4">Výbava</h2>
+              <h2 className="text-lg font-bold text-surface-100 mb-4">Výbava</h2>
               <div className="space-y-5">
                 {Object.entries(equipmentByCategory).map(([category, items]) => (
                   <div key={category}>
@@ -310,7 +310,7 @@ export default function VehicleDetailPage() {
           {/* Popis */}
           {vehicle.description && (
             <div className="mt-6 bg-surface-900 rounded-xl border border-surface-800 p-6">
-              <h2 className="text-lg font-bold text-white mb-3">Popis</h2>
+              <h2 className="text-lg font-bold text-surface-100 mb-3">Popis</h2>
               <p className="text-sm text-surface-300 leading-relaxed whitespace-pre-wrap">
                 {vehicle.description}
               </p>
@@ -323,13 +323,13 @@ export default function VehicleDetailPage() {
           <div className="lg:sticky lg:top-20 space-y-4">
             {/* Cena box */}
             <div className="bg-surface-900 rounded-xl border border-surface-800 p-6">
-              <h1 className="text-xl font-bold text-white">{vehicle.title}</h1>
+              <h1 className="text-xl font-bold text-surface-100">{vehicle.title}</h1>
               {vehicle.model_variant && (
                 <p className="text-sm text-surface-400 mt-1">{vehicle.model_variant}</p>
               )}
 
               <div className="flex items-center gap-3 mt-4">
-                <span className="text-3xl font-extrabold text-white">
+                <span className="text-3xl font-extrabold text-surface-100">
                   {formatPrice(vehicle.price)}
                 </span>
               </div>
@@ -361,24 +361,24 @@ export default function VehicleDetailPage() {
                 <div className="p-3 bg-surface-800 rounded-lg">
                   <Gauge className="w-5 h-5 text-surface-400 mb-1" />
                   <p className="text-xs text-surface-500">Kilometry</p>
-                  <p className="text-sm font-semibold text-white">{formatKm(vehicle.tachometer)}</p>
+                  <p className="text-sm font-semibold text-surface-100">{formatKm(vehicle.tachometer)}</p>
                 </div>
                 <div className="p-3 bg-surface-800 rounded-lg">
                   <Zap className="w-5 h-5 text-surface-400 mb-1" />
                   <p className="text-xs text-surface-500">Výkon</p>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-surface-100">
                     {vehicle.engine_power ? formatPower(vehicle.engine_power) : '–'}
                   </p>
                 </div>
                 <div className="p-3 bg-surface-800 rounded-lg">
                   <Fuel className="w-5 h-5 text-surface-400 mb-1" />
                   <p className="text-xs text-surface-500">Palivo</p>
-                  <p className="text-sm font-semibold text-white">{vehicle.fuel_name}</p>
+                  <p className="text-sm font-semibold text-surface-100">{vehicle.fuel_name}</p>
                 </div>
                 <div className="p-3 bg-surface-800 rounded-lg">
                   <Settings className="w-5 h-5 text-surface-400 mb-1" />
                   <p className="text-xs text-surface-500">Převodovka</p>
-                  <p className="text-sm font-semibold text-white">{vehicle.gearbox_name}</p>
+                  <p className="text-sm font-semibold text-surface-100">{vehicle.gearbox_name}</p>
                 </div>
               </div>
 
@@ -395,7 +395,7 @@ export default function VehicleDetailPage() {
                   <Heart className={`w-4 h-4 ${fav ? 'fill-primary-400' : ''}`} />
                   {fav ? 'Uloženo' : 'Uložit'}
                 </button>
-                <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-300 hover:text-white transition-colors">
+                <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-300 hover:text-surface-100 transition-colors">
                   <Share2 className="w-4 h-4" />
                   Sdílet
                 </button>
@@ -409,7 +409,7 @@ export default function VehicleDetailPage() {
                   {vehicle.seller_type === 'dealer' ? <Shield className="w-6 h-6" /> : <Users className="w-6 h-6" />}
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-white">{vehicle.seller_name}</h3>
+                  <h3 className="text-sm font-semibold text-surface-100">{vehicle.seller_name}</h3>
                   {vehicle.seller_rating && (
                     <div className="flex items-center gap-1 mt-0.5">
                       <div className="flex text-amber-400">
@@ -435,7 +435,7 @@ export default function VehicleDetailPage() {
                   <Mail className="w-4 h-4" />
                   Napsat e-mail
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 py-3 bg-surface-800 border border-surface-700 rounded-lg text-sm font-medium text-white hover:bg-surface-700 transition-colors">
+                <button className="w-full flex items-center justify-center gap-2 py-3 bg-surface-800 border border-surface-700 rounded-lg text-sm font-medium text-surface-100 hover:bg-surface-700 transition-colors">
                   <Phone className="w-4 h-4" />
                   Zobrazit telefon
                 </button>

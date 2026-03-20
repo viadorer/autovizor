@@ -32,7 +32,7 @@ function Select({
       <select
         value={(value as string) ?? ''}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
-        className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+        className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
       >
         <option value="">{placeholder ?? 'Libovolné'}</option>
         {options.map((o) => (
@@ -90,7 +90,7 @@ export default function SearchFilters() {
             setFilter('model_id', undefined);
             search();
           }}
-          className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+          className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
         >
           <option value="">Libovolná značka</option>
           {MOCK_MANUFACTURERS_LIST.map((m) => (
@@ -106,7 +106,7 @@ export default function SearchFilters() {
           value={filters.model_id ?? ''}
           onChange={(e) => { setFilter('model_id', e.target.value ? Number(e.target.value) : undefined); search(); }}
           disabled={!selectedMfr}
-          className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer disabled:opacity-50"
+          className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer disabled:opacity-50"
         >
           <option value="">Libovolný model</option>
           {currentModels.map((m) => (
@@ -122,7 +122,7 @@ export default function SearchFilters() {
           <select
             value={filters.price_from ?? ''}
             onChange={(e) => { setFilter('price_from', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
           >
             <option value="">od</option>
             {[0, 50000, 100000, 200000, 300000, 500000, 750000, 1000000].map((p) => (
@@ -132,7 +132,7 @@ export default function SearchFilters() {
           <select
             value={filters.price_to ?? ''}
             onChange={(e) => { setFilter('price_to', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
           >
             <option value="">do</option>
             {[100000, 200000, 300000, 500000, 750000, 1000000, 1500000, 2000000, 3000000].map((p) => (
@@ -149,7 +149,7 @@ export default function SearchFilters() {
           <select
             value={filters.year_from ?? ''}
             onChange={(e) => { setFilter('year_from', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
           >
             <option value="">od</option>
             {YEAR_OPTIONS.map((y) => (
@@ -159,7 +159,7 @@ export default function SearchFilters() {
           <select
             value={filters.year_to ?? ''}
             onChange={(e) => { setFilter('year_to', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
           >
             <option value="">do</option>
             {YEAR_OPTIONS.map((y) => (
@@ -176,7 +176,7 @@ export default function SearchFilters() {
           <select
             value={filters.km_from ?? ''}
             onChange={(e) => { setFilter('km_from', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
           >
             <option value="">od</option>
             {[0, 10000, 25000, 50000, 75000, 100000].map((k) => (
@@ -186,7 +186,7 @@ export default function SearchFilters() {
           <select
             value={filters.km_to ?? ''}
             onChange={(e) => { setFilter('km_to', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
           >
             <option value="">do</option>
             {[10000, 30000, 50000, 75000, 100000, 150000, 200000, 300000].map((k) => (
@@ -262,7 +262,7 @@ export default function SearchFilters() {
               <select
                 value={filters.volume_from ?? ''}
                 onChange={(e) => { setFilter('volume_from', e.target.value ? Number(e.target.value) : undefined); search(); }}
-                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
               >
                 <option value="">od</option>
                 {[800, 1000, 1200, 1400, 1600, 1800, 2000, 2500, 3000].map((v) => (
@@ -272,7 +272,7 @@ export default function SearchFilters() {
               <select
                 value={filters.volume_to ?? ''}
                 onChange={(e) => { setFilter('volume_to', e.target.value ? Number(e.target.value) : undefined); search(); }}
-                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
               >
                 <option value="">do</option>
                 {[1000, 1200, 1400, 1600, 1800, 2000, 2500, 3000, 4000, 5000, 6000].map((v) => (
@@ -289,7 +289,7 @@ export default function SearchFilters() {
               <select
                 value={filters.power_from ?? ''}
                 onChange={(e) => { setFilter('power_from', e.target.value ? Number(e.target.value) : undefined); search(); }}
-                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
               >
                 <option value="">od</option>
                 {[44, 55, 66, 85, 100, 120, 150, 200, 250].map((p) => (
@@ -299,7 +299,7 @@ export default function SearchFilters() {
               <select
                 value={filters.power_to ?? ''}
                 onChange={(e) => { setFilter('power_to', e.target.value ? Number(e.target.value) : undefined); search(); }}
-                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
               >
                 <option value="">do</option>
                 {[66, 85, 100, 120, 150, 200, 250, 300, 400].map((p) => (
@@ -315,7 +315,7 @@ export default function SearchFilters() {
             <select
               value={filters.region_id ?? ''}
               onChange={(e) => { setFilter('region_id', e.target.value ? Number(e.target.value) : undefined); search(); }}
-              className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+              className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
             >
               <option value="">Celá ČR</option>
               {Object.entries(regionGroups).map(([group, regions]) => (
@@ -337,7 +337,7 @@ export default function SearchFilters() {
                 onChange={(e) => { setFilter('vat_deductible', e.target.checked || undefined); search(); }}
                 className="w-4 h-4 rounded border-surface-600 bg-surface-800 text-primary-600 focus:ring-primary-600"
               />
-              <span className="text-sm text-surface-300 group-hover:text-white transition-colors">Odpočet DPH</span>
+              <span className="text-sm text-surface-300 group-hover:text-surface-100 transition-colors">Odpočet DPH</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer group">
               <input
@@ -346,7 +346,7 @@ export default function SearchFilters() {
                 onChange={(e) => { setFilter('first_owner', e.target.checked || undefined); search(); }}
                 className="w-4 h-4 rounded border-surface-600 bg-surface-800 text-primary-600 focus:ring-primary-600"
               />
-              <span className="text-sm text-surface-300 group-hover:text-white transition-colors">První majitel</span>
+              <span className="text-sm text-surface-300 group-hover:text-surface-100 transition-colors">První majitel</span>
             </label>
           </div>
 
@@ -384,7 +384,7 @@ export default function SearchFilters() {
                                 }}
                                 className="w-4 h-4 rounded border-surface-600 bg-surface-800 text-primary-600 focus:ring-primary-600"
                               />
-                              <span className="text-xs text-surface-300 group-hover:text-white transition-colors">
+                              <span className="text-xs text-surface-300 group-hover:text-surface-100 transition-colors">
                                 {eq.name}
                               </span>
                             </label>
@@ -403,7 +403,7 @@ export default function SearchFilters() {
       {/* Reset */}
       <button
         onClick={() => { resetFilters(); search(); }}
-        className="flex items-center gap-2 w-full py-2.5 text-sm text-surface-400 hover:text-white border border-surface-700 rounded-lg justify-center transition-colors"
+        className="flex items-center gap-2 w-full py-2.5 text-sm text-surface-400 hover:text-surface-100 border border-surface-700 rounded-lg justify-center transition-colors"
       >
         <RotateCcw className="w-4 h-4" />
         Resetovat filtry
@@ -416,7 +416,7 @@ export default function SearchFilters() {
       {/* Mobilní toggle */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="lg:hidden flex items-center gap-2 w-full py-3 px-4 bg-surface-900 border border-surface-800 rounded-xl text-sm font-medium text-white mb-4"
+        className="lg:hidden flex items-center gap-2 w-full py-3 px-4 bg-surface-900 border border-surface-800 rounded-xl text-sm font-medium text-surface-100 mb-4"
       >
         <SlidersHorizontal className="w-4 h-4" />
         Filtry
