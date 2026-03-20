@@ -14,10 +14,20 @@ import type { ManufacturerWithModels } from './manufacturers';
 // ============================================================
 function normalizeVehicle(v: Record<string, unknown>): Vehicle {
   const vehicle = v as unknown as Vehicle;
+
+  // Parse JSONB string → array
   if (typeof vehicle.images === 'string') {
-    try { vehicle.images = JSON.parse(vehicle.images); } catch { vehicle.images = []; }
+    try { vehicle.images = JSON.parse(vehicle.images as string); } catch { vehicle.images = []; }
   }
   if (!Array.isArray(vehicle.images)) vehicle.images = [];
+
+  // Normalize: plain string URLs → VehicleImage objects {url, order}
+  vehicle.images = vehicle.images.map((img: unknown, i: number) => {
+    if (typeof img === 'string') return { url: img, order: i };
+    if (img && typeof img === 'object' && 'url' in img) return img;
+    return null;
+  }).filter(Boolean);
+
   return vehicle;
 }
 
