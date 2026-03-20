@@ -10,6 +10,18 @@ import type { Vehicle, SearchResult, ManufacturerCount } from '../types';
 import type { ManufacturerWithModels } from './manufacturers';
 
 // ============================================================
+// Helper: normalize vehicle images (JSONB may be string)
+// ============================================================
+function normalizeVehicle(v: Record<string, unknown>): Vehicle {
+  const vehicle = v as unknown as Vehicle;
+  if (typeof vehicle.images === 'string') {
+    try { vehicle.images = JSON.parse(vehicle.images); } catch { vehicle.images = []; }
+  }
+  if (!Array.isArray(vehicle.images)) vehicle.images = [];
+  return vehicle;
+}
+
+// ============================================================
 // Helper: je Supabase nakonfigurovaný?
 // ============================================================
 const isSupabaseConfigured = (): boolean => {
@@ -138,7 +150,7 @@ export async function searchVehicles(
 
     const totalCount = count ?? 0;
     return {
-      vehicles: (data as Vehicle[]) ?? [],
+      vehicles: (data ?? []).map(v => normalizeVehicle(v as Record<string, unknown>)),
       total_count: totalCount,
       page,
       per_page: perPage,
@@ -180,7 +192,7 @@ export async function getVehicle(id: number): Promise<Vehicle | undefined> {
       .select('equipment_id, equipment:equipment(id, name, category)')
       .eq('vehicle_id', id);
 
-    const vehicle = data as Vehicle;
+    const vehicle = normalizeVehicle(data as Record<string, unknown>);
     if (equipData && equipData.length > 0) {
       vehicle.equipment = equipData.map((e: Record<string, unknown>) => {
         const eq = e.equipment as Record<string, unknown>;
@@ -218,7 +230,7 @@ export async function getTopVehicles(limit = 6): Promise<Vehicle[]> {
       .limit(limit);
 
     if (error) throw error;
-    return (data as Vehicle[]) ?? [];
+    return (data ?? []).map(v => normalizeVehicle(v as Record<string, unknown>));
   } catch (err) {
     console.error('Supabase getTopVehicles error, falling back to mock:', err);
     const vehicles = getMockVehicles(200);
@@ -244,7 +256,7 @@ export async function getVehiclesByIds(ids: number[]): Promise<Vehicle[]> {
       .in('id', ids);
 
     if (error) throw error;
-    return (data as Vehicle[]) ?? [];
+    return (data ?? []).map(v => normalizeVehicle(v as Record<string, unknown>));
   } catch (err) {
     console.error('Supabase getVehiclesByIds error, falling back to mock:', err);
     const vehicles = getMockVehicles(200);
