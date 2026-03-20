@@ -11,6 +11,7 @@ import {
   COLOR_TONES, EQUIPMENT, EQUIPMENT_CATEGORIES,
   UPHOLSTERY_TYPES, OWNER_COUNTS, DEAL_TYPES,
   MOTORCYCLE_TYPES, TRUCK_TYPES, BUS_TYPES, TRAILER_TYPES,
+  COLOR_TYPES, GEARBOX_LEVELS, CERTIFIED_PROGRAMS, SEATPLACE_TYPES,
 } from '../lib/codebooks';
 import { MOCK_MANUFACTURERS_LIST } from '../lib/mock-data';
 
@@ -42,6 +43,14 @@ interface FormData {
   upholstery_id: string;
   owner_count_id: string;
   deal_type_id: string;
+  color_type_id: string;
+  gearbox_level_id: string;
+  certified_id: string;
+  seatplace_id: string;
+  gas_mileage: string;
+  weight: string;
+  stk_date: string;
+  guarantee_date: string;
   vin: string;
   description: string;
   seller_name: string;
@@ -58,6 +67,8 @@ const INITIAL: FormData = {
   color_id: '', color_tone_id: '', door_count_id: '', capacity_id: '',
   aircondition_id: '', euro_id: '', country_id: '1', region_id: '',
   upholstery_id: '', owner_count_id: '', deal_type_id: '',
+  color_type_id: '', gearbox_level_id: '', certified_id: '', seatplace_id: '',
+  gas_mileage: '', weight: '', stk_date: '', guarantee_date: '',
   vin: '', description: '', seller_name: '', seller_phone: '',
   seller_email: '', equipment_ids: [],
 };
@@ -286,6 +297,7 @@ export default function SellPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormSelect label="Typ vozidla" value={form.kind_id} onChange={(v) => set('kind_id', v)} options={VEHICLE_KINDS} required />
               <FormSelect label="Stav" value={form.condition_id} onChange={(v) => set('condition_id', v)} options={CONDITIONS} required />
+              <FormSelect label="Ověřený program" value={form.certified_id} onChange={(v) => set('certified_id', v)} options={CERTIFIED_PROGRAMS} />
               <div>
                 <label className="block text-sm font-medium text-surface-300 mb-1.5">
                   Značka <span className="text-primary-500">*</span>
@@ -354,6 +366,7 @@ export default function SellPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <FormSelect label="Palivo" value={form.fuel_type_id} onChange={(v) => set('fuel_type_id', v)} options={FUEL_TYPES} required />
               <FormSelect label="Převodovka" value={form.gearbox_id} onChange={(v) => set('gearbox_id', v)} options={GEARBOX_TYPES} required />
+              <FormSelect label="Počet stupňů" value={form.gearbox_level_id} onChange={(v) => set('gearbox_level_id', v)} options={GEARBOX_LEVELS} />
               <FormSelect label="Pohon" value={form.drive_id} onChange={(v) => set('drive_id', v)} options={DRIVE_TYPES} />
               <FormInput label="Objem motoru" value={form.engine_volume} onChange={(v) => set('engine_volume', v)} type="number" placeholder="1968" suffix="ccm" />
               <FormInput label="Výkon" value={form.engine_power} onChange={(v) => set('engine_power', v)} type="number" placeholder="110" suffix="kW" />
@@ -387,6 +400,7 @@ export default function SellPage() {
                 </div>
               </div>
               <FormSelect label="Barva" value={form.color_id} onChange={(v) => set('color_id', v)} options={COLORS} required />
+              <FormSelect label="Typ laku" value={form.color_type_id} onChange={(v) => set('color_type_id', v)} options={COLOR_TYPES} />
               <FormSelect label="Odstín" value={form.color_tone_id} onChange={(v) => set('color_tone_id', v)} options={COLOR_TONES} />
               <FormSelect label="Počet dveří" value={form.door_count_id} onChange={(v) => set('door_count_id', v)} options={DOOR_COUNTS} />
               <FormSelect label="Počet míst" value={form.capacity_id} onChange={(v) => set('capacity_id', v)} options={CAPACITY_TYPES} />
@@ -396,6 +410,13 @@ export default function SellPage() {
               <FormSelect label="Potahy sedadel" value={form.upholstery_id} onChange={(v) => set('upholstery_id', v)} options={UPHOLSTERY_TYPES} />
               <FormSelect label="Počet vlastníků" value={form.owner_count_id} onChange={(v) => set('owner_count_id', v)} options={OWNER_COUNTS} />
               <FormSelect label="Typ obchodu" value={form.deal_type_id} onChange={(v) => set('deal_type_id', v)} options={DEAL_TYPES} />
+              {form.kind_id === '6' && (
+                <FormSelect label="Kategorie sedadel" value={form.seatplace_id} onChange={(v) => set('seatplace_id', v)} options={SEATPLACE_TYPES} />
+              )}
+              <FormInput label="Spotřeba" value={form.gas_mileage} onChange={(v) => set('gas_mileage', v)} type="number" placeholder="6.5" suffix="l/100km" />
+              <FormInput label="Hmotnost" value={form.weight} onChange={(v) => set('weight', v)} type="number" placeholder="1450" suffix="kg" />
+              <FormInput label="STK platné do" value={form.stk_date} onChange={(v) => set('stk_date', v)} type="date" />
+              <FormInput label="Záruka do" value={form.guarantee_date} onChange={(v) => set('guarantee_date', v)} type="date" />
 
               {/* VIN s dekódováním */}
               <div className="sm:col-span-2 lg:col-span-3">

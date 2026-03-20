@@ -73,17 +73,209 @@ INSERT INTO certified_programs (id, name) VALUES
   (11, 'Kia Approved'),
   (12, 'Renault Selection');
 
--- Oprava color_tones – Sauto má jen 2 hodnoty
-DELETE FROM color_tones WHERE id > 2;
-UPDATE color_tones SET name = 'Světlá' WHERE id = 1;
-UPDATE color_tones SET name = 'Tmavá' WHERE id = 2;
+-- ============================================================
+-- FIX #1: Vytvoření chybějící tabulky color_tones
+-- (migrace 001 ji nevytvořila, ale 002 na ni odkazuje)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS color_tones (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL
+);
+INSERT INTO color_tones (id, name) VALUES
+  (1, 'Světlá'),
+  (2, 'Tmavá')
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name;
 
--- Oprava operating_lease_services
-DELETE FROM operating_lease_services;
+-- ============================================================
+-- FIX #2: Vytvoření chybějící tabulky operating_lease_services
+-- (migrace 001 ji nevytvořila, ale 002 na ni odkazuje)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS operating_lease_services (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL
+);
 INSERT INTO operating_lease_services (id, name) VALUES
   (1, 'Servis'),
   (2, 'Zimní pneumatiky'),
-  (3, 'GAP');
+  (3, 'GAP')
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name;
+
+-- ============================================================
+-- FIX #3: Vytvoření chybějící tabulky engine_volume_categories
+-- ============================================================
+CREATE TABLE IF NOT EXISTS engine_volume_categories (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL
+);
+INSERT INTO engine_volume_categories (id, name) VALUES
+  (1, 'do 800 ccm'),
+  (2, '800 – 1 000 ccm'),
+  (3, '1 000 – 1 200 ccm'),
+  (4, '1 200 – 1 400 ccm'),
+  (5, '1 400 – 1 600 ccm'),
+  (6, '1 600 – 1 800 ccm'),
+  (7, '1 800 – 2 000 ccm'),
+  (8, '2 000 – 2 500 ccm'),
+  (9, '2 500 – 3 000 ccm'),
+  (10, '3 000 – 4 000 ccm'),
+  (11, '4 000 – 5 000 ccm'),
+  (12, 'nad 5 000 ccm');
+
+-- ============================================================
+-- FIX #4: Oprava deal_types – Sauto API má jen 3 hodnoty
+-- ============================================================
+TRUNCATE deal_types CASCADE;
+INSERT INTO deal_types (id, name) VALUES
+  (1, 'Prodej'),
+  (2, 'Operativní leasing'),
+  (3, 'Prodej nebo leasing');
+
+-- ============================================================
+-- FIX #5: Chybějící položky výbavy (87 items)
+-- ============================================================
+INSERT INTO equipment (id, name, category) VALUES
+  -- Bezpečnost
+  (10, 'Airbag řidiče', 'Bezpečnost'),
+  (11, 'Airbag spolujezdce', 'Bezpečnost'),
+  (12, 'Boční airbagy', 'Bezpečnost'),
+  (14, 'Hlavové airbagy', 'Bezpečnost'),
+  (19, 'Kolenní airbag', 'Bezpečnost'),
+  (20, 'Isofix přední sedadlo', 'Bezpečnost'),
+  (21, 'Upevňovací body TOP Tether', 'Bezpečnost'),
+  -- Komfort
+  (29, 'Přední hlavová opěrka', 'Komfort'),
+  (34, 'Loketní opěrka vpředu', 'Komfort'),
+  (35, 'Loketní opěrka vzadu', 'Komfort'),
+  (52, 'El. ovládání oken - přední', 'Komfort'),
+  (53, 'El. ovládání oken - zadní', 'Komfort'),
+  (69, 'Automatické stahování oken', 'Komfort'),
+  (70, 'Dešťový senzor', 'Komfort'),
+  (71, 'Senzor světla', 'Komfort'),
+  (78, 'Oddělená zadní klimatizace', 'Komfort'),
+  -- Interiér
+  (55, 'Přihrádka v palubní desce', 'Interiér'),
+  -- Sedadla
+  (73, 'Sklopná zadní sedadla', 'Sedadla'),
+  -- Motocykly
+  (100, 'Vyhřívané rukojeti', 'Motocykly'),
+  (101, 'Kombinovaný brzdový systém (CBS)', 'Motocykly'),
+  (102, 'Quickshifter', 'Motocykly'),
+  (104, 'Trakční kontrola', 'Motocykly'),
+  (107, 'Výfuk s homologací', 'Motocykly'),
+  (109, 'Ochranné rámy motocyklu', 'Motocykly'),
+  (110, 'Sedlo pro spolujezdce', 'Motocykly'),
+  (111, 'Centrální stojan', 'Motocykly'),
+  (112, 'Boční stojan', 'Motocykly'),
+  (113, 'Řetěz', 'Motocykly'),
+  (114, 'Kardanový převod', 'Motocykly'),
+  (115, 'Řemenový převod', 'Motocykly'),
+  (116, 'Regulovatelné páčky', 'Motocykly'),
+  (117, 'Nastavitelné odpružení', 'Motocykly'),
+  -- Nákladní
+  (121, 'Hydraulické čelo', 'Nákladní'),
+  (122, 'Jeřáb', 'Nákladní'),
+  (123, 'Plošina', 'Nákladní'),
+  (125, 'Chladírenská nástavba', 'Nákladní'),
+  (126, 'Mrazírenská nástavba', 'Nákladní'),
+  (129, 'Valníková nástavba', 'Nákladní'),
+  (130, 'Skříňová nástavba', 'Nákladní'),
+  (131, 'Plachtová nástavba', 'Nákladní'),
+  (132, 'Cisternová nástavba', 'Nákladní'),
+  (133, 'Kontejnerový nosič', 'Nákladní'),
+  (134, 'Odtahový podvozek', 'Nákladní'),
+  (135, 'Přeprava vozidel', 'Nákladní'),
+  (136, 'Míchačka na beton', 'Nákladní'),
+  (140, 'Pneumatické sedadlo řidiče', 'Nákladní'),
+  (141, 'Lůžko v kabině', 'Nákladní'),
+  (144, 'Třístranný sklápěč', 'Nákladní'),
+  (148, 'Posuvný podlaha', 'Nákladní'),
+  (157, 'Vzduchové sedadlo spolujezdce', 'Nákladní'),
+  (174, 'Dvojité zadní kola', 'Nákladní'),
+  (175, 'Elektronický tachograf', 'Nákladní'),
+  (176, 'Horský program', 'Nákladní'),
+  (177, 'Klanicová nástavba', 'Nákladní'),
+  (178, 'Korba', 'Nákladní'),
+  (179, 'Měchové odpružení zadní nápravy', 'Nákladní'),
+  (180, 'Mezinápravový diferenciál', 'Nákladní'),
+  (181, 'Odmontovatelné bočnice', 'Nákladní'),
+  (182, 'Přepravní box', 'Nákladní'),
+  (185, 'Spací kabina', 'Nákladní'),
+  (186, 'Denní kabina', 'Nákladní'),
+  -- Obytné vozy
+  (82, 'Vařič', 'Obytné vozy'),
+  (160, 'Sprcha', 'Obytné vozy'),
+  (162, 'Markýza', 'Obytné vozy'),
+  (163, 'Solární panel', 'Obytné vozy'),
+  (164, 'Satelitní TV', 'Obytné vozy'),
+  (165, 'Plynová láhev', 'Obytné vozy'),
+  (166, 'Zásobník na vodu', 'Obytné vozy'),
+  (167, 'Klimatizace obytné části', 'Obytné vozy'),
+  (168, 'Topení obytné části', 'Obytné vozy'),
+  (169, 'Elektrická přípojka 230V', 'Obytné vozy'),
+  (170, 'Druhá baterie', 'Obytné vozy'),
+  (171, 'Generátor', 'Obytné vozy'),
+  (172, 'Nájezdová rampa', 'Obytné vozy'),
+  (173, 'Jízdní kolo / nosič', 'Obytné vozy'),
+  -- Ostatní
+  (216, 'Přední ochranný rám', 'Ostatní'),
+  (229, 'Sada na opravu pneumatik', 'Ostatní'),
+  (230, 'Kompresory na huštění kol', 'Ostatní'),
+  (234, 'Hasicí přístroj', 'Ostatní'),
+  (235, 'Výstražný trojúhelník', 'Ostatní'),
+  (236, 'Reflexní vesta', 'Ostatní'),
+  (237, 'Lékárnička', 'Ostatní'),
+  (239, 'Druhá sada kol', 'Ostatní'),
+  (256, 'Zimní paket', 'Ostatní'),
+  (260, 'Servisní paket', 'Ostatní'),
+  (269, 'Sériová výbava', 'Ostatní'),
+  (272, 'Záruka výrobce', 'Ostatní');
+
+-- ============================================================
+-- FIX #6: Oprava kategorií výbavy (66 items s nesprávnou kategorií)
+-- Kategorie v SQL se musí shodovat s TS codebooks.ts
+-- ============================================================
+
+-- Interiér → Sedadla
+UPDATE equipment SET category = 'Sedadla' WHERE id IN (3, 42, 89, 92, 96, 97, 98, 99, 221, 227, 241, 242, 258, 274, 302, 318, 320, 321, 328, 329);
+
+-- Bezpečnost → Asistenční systémy
+UPDATE equipment SET category = 'Asistenční systémy' WHERE id IN (250, 251, 252, 255, 261, 262, 263, 299, 303, 305, 306, 311, 324, 325);
+
+-- Komfort → Asistenční systémy
+UPDATE equipment SET category = 'Asistenční systémy' WHERE id IN (213, 222, 279, 280);
+
+-- Světla → Asistenční systémy
+UPDATE equipment SET category = 'Asistenční systémy' WHERE id = 312;
+
+-- Ostatní → Podvozek a řízení
+UPDATE equipment SET category = 'Podvozek a řízení' WHERE id IN (119, 145, 153, 154, 155, 156, 158, 189, 190, 225, 310);
+
+-- Ostatní → Motor a výfuk
+UPDATE equipment SET category = 'Motor a výfuk' WHERE id IN (49, 120, 273, 322);
+
+-- Ostatní → Komfort
+UPDATE equipment SET category = 'Komfort' WHERE id IN (87, 88);
+
+-- Motocykly → Komfort
+UPDATE equipment SET category = 'Komfort' WHERE id = 139;
+
+-- Ostatní → Interiér
+UPDATE equipment SET category = 'Interiér' WHERE id IN (86, 90, 91, 215, 309);
+
+-- Ostatní → Exteriér
+UPDATE equipment SET category = 'Exteriér' WHERE id IN (74, 192);
+
+-- Ostatní → Světla
+UPDATE equipment SET category = 'Světla' WHERE id = 193;
+
+-- Multimédia → Konektivita
+UPDATE equipment SET category = 'Konektivita' WHERE id = 244;
+
+-- ============================================================
+-- FIX #7: Odstranění starého textového sloupce color_tone
+-- (nahrazen referencí color_tone_id)
+-- ============================================================
+ALTER TABLE vehicles DROP COLUMN IF EXISTS color_tone;
 
 -- ============================================================
 -- NOVÉ SLOUPCE V TABULCE VEHICLES

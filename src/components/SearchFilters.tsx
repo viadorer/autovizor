@@ -6,9 +6,10 @@ import {
   AIRCONDITION_TYPES, EURO_TYPES, DOOR_COUNTS, CAPACITY_TYPES,
   COUNTRIES, SERVICEBOOK_TYPES, VEHICLE_KINDS, REGIONS,
   EQUIPMENT, EQUIPMENT_CATEGORIES, YEAR_OPTIONS,
-  BODY_TYPES, COLOR_TONES, AIRBAG_COUNTS, BED_COUNTS, AVAILABILITY_TYPES,
+  BODY_TYPES, COLOR_TONES, COLOR_TYPES, AIRBAG_COUNTS, BED_COUNTS, AVAILABILITY_TYPES,
   UPHOLSTERY_TYPES, OWNER_COUNTS, DEAL_TYPES, SELLER_TYPES,
   MOTORCYCLE_TYPES, TRUCK_TYPES, BUS_TYPES, TRAILER_TYPES,
+  GEARBOX_LEVELS, CERTIFIED_PROGRAMS, SEATPLACE_TYPES,
   formatPrice,
 } from '../lib/codebooks';
 import { MOCK_MANUFACTURERS_LIST } from '../lib/mock-data';
@@ -212,6 +213,14 @@ export default function SearchFilters() {
         options={GEARBOX_TYPES}
       />
 
+      {/* Počet stupňů převodovky */}
+      <Select
+        label="Počet stupňů"
+        value={filters.gearbox_level_id}
+        onChange={(v) => { setFilter('gearbox_level_id', v); search(); }}
+        options={GEARBOX_LEVELS}
+      />
+
       {/* Rozšířené filtry */}
       <button
         onClick={() => setShowMore(!showMore)}
@@ -227,6 +236,7 @@ export default function SearchFilters() {
           <Select label="Pohon" value={filters.drive_id} onChange={(v) => { setFilter('drive_id', v); search(); }} options={DRIVE_TYPES} />
           <Select label="Barva" value={filters.color_id} onChange={(v) => { setFilter('color_id', v); search(); }} options={COLORS} />
           <Select label="Odstín laku" value={filters.color_tone_id} onChange={(v) => { setFilter('color_tone_id', v); search(); }} options={COLOR_TONES} />
+          <Select label="Typ laku" value={filters.color_type_id} onChange={(v) => { setFilter('color_type_id', v); search(); }} options={COLOR_TYPES} />
           <Select label="Klimatizace" value={filters.aircondition_id} onChange={(v) => { setFilter('aircondition_id', v); search(); }} options={AIRCONDITION_TYPES} />
           <Select label="Emisní norma" value={filters.euro_id} onChange={(v) => { setFilter('euro_id', v); search(); }} options={EURO_TYPES} />
           <Select label="Počet dveří" value={filters.door_count_id} onChange={(v) => { setFilter('door_count_id', v); search(); }} options={DOOR_COUNTS} />
@@ -240,18 +250,22 @@ export default function SearchFilters() {
           <Select label="Počet vlastníků" value={filters.owner_count_id} onChange={(v) => { setFilter('owner_count_id', v); search(); }} options={OWNER_COUNTS} />
           <Select label="Typ obchodu" value={filters.deal_type_id} onChange={(v) => { setFilter('deal_type_id', v); search(); }} options={DEAL_TYPES} />
           <Select label="Typ prodejce" value={filters.seller_type_id} onChange={(v) => { setFilter('seller_type_id', v); search(); }} options={SELLER_TYPES} />
+          <Select label="Ověřený program" value={filters.certified_id} onChange={(v) => { setFilter('certified_id', v); search(); }} options={CERTIFIED_PROGRAMS} />
 
           {/* Typově specifické filtry */}
-          {filters.kind_id === 4 && (
+          {filters.kind_id === 3 && (
             <Select label="Typ motocyklu" value={filters.motorcycle_type_id} onChange={(v) => { setFilter('motorcycle_type_id', v); search(); }} options={MOTORCYCLE_TYPES} />
           )}
-          {filters.kind_id === 2 && (
+          {filters.kind_id === 5 && (
             <Select label="Typ nákladního vozu" value={filters.truck_type_id} onChange={(v) => { setFilter('truck_type_id', v); search(); }} options={TRUCK_TYPES} />
           )}
-          {filters.kind_id === 3 && (
-            <Select label="Typ autobusu" value={filters.bus_type_id} onChange={(v) => { setFilter('bus_type_id', v); search(); }} options={BUS_TYPES} />
+          {filters.kind_id === 6 && (
+            <>
+              <Select label="Typ autobusu" value={filters.bus_type_id} onChange={(v) => { setFilter('bus_type_id', v); search(); }} options={BUS_TYPES} />
+              <Select label="Kategorie sedadel" value={filters.seatplace_id} onChange={(v) => { setFilter('seatplace_id', v); search(); }} options={SEATPLACE_TYPES} />
+            </>
           )}
-          {filters.kind_id === 5 && (
+          {filters.kind_id === 7 && (
             <Select label="Typ přívěsu" value={filters.trailer_type_id} onChange={(v) => { setFilter('trailer_type_id', v); search(); }} options={TRAILER_TYPES} />
           )}
 

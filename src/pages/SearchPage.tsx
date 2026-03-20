@@ -22,7 +22,7 @@ export default function SearchPage() {
         <SearchBar variant="compact" />
       </div>
 
-      <div className="flex items-start gap-6">
+      <div className="lg:flex lg:items-start lg:gap-6">
         {/* Levý panel - filtry */}
         <SearchFilters />
 

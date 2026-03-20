@@ -18,6 +18,7 @@ import {
   DRIVE_TYPES, AIRCONDITION_TYPES, EURO_TYPES,
   DOOR_COUNTS, CAPACITY_TYPES, COUNTRIES, SERVICEBOOK_TYPES,
   BODY_TYPES, UPHOLSTERY_TYPES, OWNER_COUNTS, DEAL_TYPES,
+  COLOR_TYPES, GEARBOX_LEVELS, CERTIFIED_PROGRAMS,
 } from '../lib/codebooks';
 import { useFavoritesStore } from '../stores/favoritesStore';
 
@@ -34,6 +35,7 @@ export default function VehicleDetailPage() {
   const [currentImage, setCurrentImage] = useState(0);
   const [vinResult, setVinResult] = useState<VinDecodeResult | null>(null);
   const [vinLoading, setVinLoading] = useState(false);
+  const [phoneVisible, setPhoneVisible] = useState(false);
   const { toggleFavorite, isFavorite } = useFavoritesStore();
 
   useEffect(() => {
@@ -84,6 +86,13 @@ export default function VehicleDetailPage() {
     { label: 'Potahy', value: getCodebookName(UPHOLSTERY_TYPES, vehicle.upholstery_id), icon: Settings },
     { label: 'Počet vlastníků', value: getCodebookName(OWNER_COUNTS, vehicle.owner_count_id), icon: Users },
     { label: 'Typ obchodu', value: getCodebookName(DEAL_TYPES, vehicle.deal_type_id), icon: Info },
+    { label: 'Typ laku', value: getCodebookName(COLOR_TYPES, vehicle.color_type_id), icon: Palette },
+    { label: 'Počet stupňů', value: getCodebookName(GEARBOX_LEVELS, vehicle.gearbox_level_id), icon: Settings },
+    { label: 'Ověřený program', value: getCodebookName(CERTIFIED_PROGRAMS, vehicle.certified_id), icon: Shield },
+    { label: 'STK do', value: vehicle.stk_date, icon: Calendar },
+    { label: 'Záruka do', value: vehicle.guarantee_date, icon: Calendar },
+    { label: 'Spotřeba', value: vehicle.gas_mileage ? `${vehicle.gas_mileage} l/100km` : undefined, icon: Fuel },
+    { label: 'Hmotnost', value: vehicle.weight ? `${vehicle.weight} kg` : undefined, icon: Info },
     { label: 'VIN', value: vehicle.vin, icon: Key },
   ].filter((s) => s.value);
 
@@ -134,7 +143,7 @@ export default function VehicleDetailPage() {
                   </button>
                 </>
               )}
-              <span className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 bg-black/60 text-white text-sm rounded-lg">
+              <span className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 bg-black/60 text-surface-100 text-sm rounded-lg">
                 <Camera className="w-4 h-4" />
                 {currentImage + 1}/{images.length}
               </span>
@@ -395,7 +404,22 @@ export default function VehicleDetailPage() {
                   <Heart className={`w-4 h-4 ${fav ? 'fill-primary-400' : ''}`} />
                   {fav ? 'Uloženo' : 'Uložit'}
                 </button>
-                <button className="flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-300 hover:text-surface-100 transition-colors">
+                <button
+                  onClick={async () => {
+                    const url = window.location.href;
+                    if (navigator.share) {
+                      try {
+                        await navigator.share({ title: vehicle.title, url });
+                      } catch {
+                        // user cancelled
+                      }
+                    } else {
+                      await navigator.clipboard.writeText(url);
+                      alert('Odkaz zkopírován do schránky');
+                    }
+                  }}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-300 hover:text-surface-100 transition-colors"
+                >
                   <Share2 className="w-4 h-4" />
                   Sdílet
                 </button>
@@ -431,14 +455,34 @@ export default function VehicleDetailPage() {
               )}
 
               <div className="space-y-2">
-                <button className="w-full flex items-center justify-center gap-2 py-3 bg-primary-600 hover:bg-primary-700 rounded-lg text-sm font-semibold text-white transition-colors">
+                <button
+                  onClick={() => {
+                    if (vehicle.seller_email) {
+                      window.location.href = `mailto:${vehicle.seller_email}`;
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-primary-600 hover:bg-primary-700 rounded-lg text-sm font-semibold text-white transition-colors"
+                >
                   <Mail className="w-4 h-4" />
                   Napsat e-mail
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 py-3 bg-surface-800 border border-surface-700 rounded-lg text-sm font-medium text-surface-100 hover:bg-surface-700 transition-colors">
-                  <Phone className="w-4 h-4" />
-                  Zobrazit telefon
-                </button>
+                {phoneVisible && vehicle.seller_phone ? (
+                  <a
+                    href={`tel:${vehicle.seller_phone}`}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-surface-800 border border-surface-700 rounded-lg text-sm font-medium text-surface-100 hover:bg-surface-700 transition-colors"
+                  >
+                    <Phone className="w-4 h-4" />
+                    {vehicle.seller_phone}
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => setPhoneVisible(true)}
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-surface-800 border border-surface-700 rounded-lg text-sm font-medium text-surface-100 hover:bg-surface-700 transition-colors"
+                  >
+                    <Phone className="w-4 h-4" />
+                    Zobrazit telefon
+                  </button>
+                )}
               </div>
             </div>
           </div>

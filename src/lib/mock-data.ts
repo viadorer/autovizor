@@ -52,6 +52,92 @@ function pick<T>(arr: T[]): T {
 
 const PRICE_RATINGS: Array<'very_good' | 'good' | 'fair' | 'high'> = ['very_good', 'good', 'fair', 'high'];
 
+// WMI kódy pro generování VIN dle výrobce
+const MANUFACTURER_WMI: Record<number, string[]> = {
+  2: ['WAU', 'WUA'], // Audi
+  5: ['WBA', 'WBS'], // BMW
+  12: ['1FA', 'WF0'], // Ford
+  20: ['WDD', 'WDB'], // Mercedes-Benz
+  21: ['SAJ', 'SAL'], // Jaguar / Land Rover (fallback)
+  23: ['WVW', 'WV2'], // Volkswagen (used for Seat too)
+  25: ['TMB', 'TMP'], // Škoda
+  31: ['VF1', 'VF7'], // Renault / Peugeot / Citroën
+  40: ['TRU', 'TMB'], // Škoda fallback
+  42: ['ZFA', 'ZAR'], // Fiat / Alfa Romeo
+  47: ['JTD', 'JTE'], // Toyota
+  48: ['WVW', 'WV1'], // VW
+  49: ['WF0', '1FA'], // Ford
+  52: ['VF3', 'VF7'], // Peugeot
+  57: ['SAL', 'SAJ'], // Land Rover
+  61: ['WDB', 'WDD'], // Mercedes fallback
+  62: ['KMH', 'KNA'], // Hyundai / Kia
+  63: ['KNA', 'KMH'], // Kia / Hyundai
+  64: ['SJN', 'VSS'], // Nissan / Seat
+  65: ['WVW', 'WV2'], // VW fallback
+};
+
+const VIN_CHARS = 'ABCDEFGHJKLMNPRSTUVWXYZ0123456789'; // no I, O, Q
+
+function generateVIN(manufacturerId: number): string {
+  const wmis = MANUFACTURER_WMI[manufacturerId] || ['WBA'];
+  const wmi = pick(wmis);
+  let vin = wmi;
+  for (let i = 3; i < 17; i++) {
+    vin += VIN_CHARS[Math.floor(Math.random() * VIN_CHARS.length)];
+  }
+  return vin;
+}
+
+const CZECH_DESCRIPTIONS = [
+  'Vůz v perfektním stavu, pravidelně servisovaný u autorizovaného dealera. Nebourané, nekuřácké.',
+  'Velmi zachovalý automobil s kompletní historií servisu. Nový set zimních pneumatik v ceně.',
+  'Auto po prvním majiteli, garáži garážované. Žádné investice nutné, ihned k převzetí.',
+  'Elegantní vůz s bohatou výbavou včetně navigace a vyhřívaných sedadel. STK platná.',
+  'Spolehlivý a úsporný automobil ideální do města i na delší cesty. Nízká spotřeba.',
+  'Rodinné auto s velkým zavazadlovým prostorem. Klimatizace, tempomat, parkovací senzory.',
+  'Sportovní design s dynamickým motorem. Odpočet DPH možný. Původ ČR.',
+  'Prémiový automobil v nadstandardní výbavě. Kožené sedačky, panoramatická střecha.',
+  'Nízký nájezd, výborný technický stav. Vůz je pravidelně umýván a ošetřován.',
+  'Původní lak, bez koroze. Veškerá dokumentace k dispozici včetně servisní knížky.',
+  'Jedná se o velmi dobře udržovaný vůz s minimálním opotřebením. Bez nutnosti dalších investic.',
+  'Auto je vybaveno moderními asistenčními systémy. Adaptivní tempomat, LED světla.',
+];
+
+const NOTES = [
+  'Možnost financování na splátky.',
+  'Výměna za jiný vůz možná.',
+  'Cena k jednání při rychlém odběru.',
+  'Drobná kosmetická vada na zadním nárazníku.',
+  'Nové brzdy a olej vyměněn.',
+  'Možnost prohlídky kdykoliv po domluvě.',
+  '',
+  '',
+  '',
+];
+
+function generateSellerEmail(name: string): string {
+  const normalized = name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '.');
+  const domains = ['email.cz', 'seznam.cz', 'centrum.cz', 'autobazar.cz', 'gmail.com'];
+  return `${normalized}@${pick(domains)}`;
+}
+
+function generateCzechPhone(): string {
+  const prefix = pick(['601', '602', '603', '604', '605', '606', '607', '608', '702', '720', '721', '723', '724', '725', '730', '731', '732', '733', '734', '736', '737', '770', '771', '772', '773', '774', '775', '776', '777']);
+  const rest = String(rand(100000, 999999));
+  return `+420 ${prefix} ${rest.slice(0, 3)} ${rest.slice(3)}`;
+}
+
+function generateSTKDate(): string {
+  const now = new Date();
+  const futureMs = now.getTime() + rand(30, 730) * 86400000;
+  const d = new Date(futureMs);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function generateVehicle(id: number): Vehicle {
   const mfr = pick(MOCK_MANUFACTURERS);
   const model = pick(mfr.models);
@@ -67,6 +153,7 @@ function generateVehicle(id: number): Vehicle {
   const region = pick(REGIONS);
   const seller = pick(SELLERS);
   const imgIdx = id % MOCK_IMAGES.length;
+  const isCrashed = Math.random() < 0.08;
 
   const colorNames: Record<number, string> = {
     1: 'Bílá', 2: 'Žlutá', 3: 'Oranžová', 4: 'Červená', 5: 'Vínová',
@@ -85,6 +172,9 @@ function generateVehicle(id: number): Vehicle {
     1: 'Nové', 2: 'Ojeté', 3: 'Havarované', 4: 'Předváděcí', 5: 'Veterán',
   };
 
+  const note = pick(NOTES);
+  const ownerCountId = pick([1, 1, 1, 2, 2, 3, 4]);
+
   return {
     id,
     sauto_id: 400000 + id,
@@ -92,10 +182,12 @@ function generateVehicle(id: number): Vehicle {
     kind_id: 1,
     manufacturer_id: mfr.id,
     model_id: model.id,
+    body_type_id: rand(1, 19),
     condition_id: condition,
     price,
     fuel_type_id: fuel,
     gearbox_id: gearbox,
+    gearbox_level_id: gearbox === 1 ? pick([5, 6]) : pick([3, 4, 5, 6, 7, 8]),
     drive_id: pick([1, 2, 9, 10]),
     engine_volume: fuel === 4 ? undefined : rand(1000, 3500),
     engine_power: power,
@@ -104,12 +196,29 @@ function generateVehicle(id: number): Vehicle {
     made_year: year,
     made_month: month,
     color_id: color,
+    color_tone_id: pick([1, 2]),
+    color_type_id: rand(1, 5),
     door_count_id: pick([3, 4, 5]),
     capacity_id: 5,
     aircondition_id: pick([2, 3, 4]),
     euro_id: year >= 2016 ? 6 : year >= 2011 ? 5 : 4,
     region_id: region,
+    country_id: pick([1, 1, 1, 1, 1, 1, 1, 1, 2, 3]),
+    servicebook_id: pick([1, 1, 2]),
+    upholstery_id: rand(1, 9),
+    owner_count_id: ownerCountId,
+    deal_type_id: pick([1, 1, 1, 1, 2]),
+    vin: generateVIN(mfr.id),
+    description: pick(CZECH_DESCRIPTIONS),
+    note: note || undefined,
+    stk_date: generateSTKDate(),
+    gas_mileage: fuel === 4 ? undefined : Math.round((rand(40, 120) / 10) * 10) / 10,
+    weight: rand(1000, 2500),
+    first_owner: ownerCountId === 1 ? 1 : 2,
+    crashed: isCrashed,
     seller_name: seller.name,
+    seller_phone: generateCzechPhone(),
+    seller_email: generateSellerEmail(seller.name),
     seller_type: seller.type,
     seller_rating: seller.rating,
     seller_review_count: seller.reviews,

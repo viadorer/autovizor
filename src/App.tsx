@@ -9,6 +9,7 @@ import SellPage from './pages/SellPage';
 import AdvisoryPage from './pages/AdvisoryPage';
 import ComparisonPage from './pages/ComparisonPage';
 import LoginPage from './pages/LoginPage';
+import NotFoundPage from './pages/NotFoundPage';
 import { useThemeStore } from './stores/themeStore';
 
 export default function App() {
@@ -29,6 +30,7 @@ export default function App() {
             <Route path="/poradna" element={<AdvisoryPage />} />
             <Route path="/porovnani" element={<ComparisonPage />} />
             <Route path="/prihlaseni" element={<LoginPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
         <Footer />
