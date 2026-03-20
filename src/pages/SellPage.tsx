@@ -13,7 +13,7 @@ import {
   MOTORCYCLE_TYPES, TRUCK_TYPES, BUS_TYPES, TRAILER_TYPES,
   COLOR_TYPES, GEARBOX_LEVELS, CERTIFIED_PROGRAMS, SEATPLACE_TYPES,
 } from '../lib/codebooks';
-import { MOCK_MANUFACTURERS_LIST } from '../lib/mock-data';
+import { MANUFACTURERS } from '../lib/manufacturers';
 
 interface FormData {
   kind_id: string;
@@ -147,7 +147,7 @@ export default function SellPage() {
   const findManufacturerId = (name?: string): string => {
     if (!name) return '';
     const lower = name.toLowerCase();
-    const found = MOCK_MANUFACTURERS_LIST.find(
+    const found = MANUFACTURERS.find(
       (m) => m.name.toLowerCase() === lower || lower.includes(m.name.toLowerCase())
     );
     return found ? String(found.id) : '';
@@ -155,7 +155,7 @@ export default function SellPage() {
 
   const findModelId = (mfrId: string, modelName?: string): string => {
     if (!mfrId || !modelName) return '';
-    const mfr = MOCK_MANUFACTURERS_LIST.find((m) => m.id === Number(mfrId));
+    const mfr = MANUFACTURERS.find((m) => m.id === Number(mfrId));
     if (!mfr) return '';
     const lower = modelName.toLowerCase();
     const found = mfr.models.find(
@@ -309,7 +309,7 @@ export default function SellPage() {
                   className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
                 >
                   <option value="">Vyberte značku...</option>
-                  {MOCK_MANUFACTURERS_LIST.map((m) => (
+                  {MANUFACTURERS.map((m) => (
                     <option key={m.id} value={m.id}>{m.name}</option>
                   ))}
                 </select>
@@ -326,7 +326,7 @@ export default function SellPage() {
                   className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer disabled:opacity-50"
                 >
                   <option value="">Vyberte model...</option>
-                  {form.manufacturer_id && MOCK_MANUFACTURERS_LIST.find((m) => m.id === Number(form.manufacturer_id))?.models.map((mod) => (
+                  {form.manufacturer_id && MANUFACTURERS.find((m) => m.id === Number(form.manufacturer_id))?.models.map((mod) => (
                     <option key={mod.id} value={mod.id}>{mod.name}</option>
                   ))}
                 </select>

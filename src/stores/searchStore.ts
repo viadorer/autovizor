@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { SearchFilters, Vehicle } from '../types';
-import { searchMockVehicles } from '../lib/mock-data';
+import { searchVehicles } from '../lib/api';
 
 interface SearchState {
   filters: SearchFilters;
@@ -68,19 +68,21 @@ export const useSearchStore = create<SearchState>((set, get) => ({
     const { filters, page, perPage } = get();
     set({ isLoading: true });
 
-    // Mock - v produkci se nahradí Supabase RPC voláním
-    setTimeout(() => {
-      const result = searchMockVehicles(
-        filters as Record<string, unknown>,
-        page,
-        perPage,
-        filters.sort_by
-      );
-      set({
-        results: result.vehicles,
-        totalCount: result.total_count,
-        isLoading: false,
+    searchVehicles(
+      filters as Record<string, unknown>,
+      page,
+      perPage,
+      filters.sort_by
+    )
+      .then((result) => {
+        set({
+          results: result.vehicles,
+          totalCount: result.total_count,
+          isLoading: false,
+        });
+      })
+      .catch(() => {
+        set({ isLoading: false });
       });
-    }, 300);
   },
 }));

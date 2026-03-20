@@ -12,7 +12,7 @@ import {
   GEARBOX_LEVELS, CERTIFIED_PROGRAMS, SEATPLACE_TYPES,
   formatPrice,
 } from '../lib/codebooks';
-import { MOCK_MANUFACTURERS_LIST } from '../lib/mock-data';
+import { MANUFACTURERS } from '../lib/manufacturers';
 
 function Select({
   label,
@@ -52,7 +52,7 @@ export default function SearchFilters() {
 
   const selectedMfr = filters.manufacturer_id;
   const currentModels = selectedMfr
-    ? MOCK_MANUFACTURERS_LIST.find((m) => m.id === selectedMfr)?.models ?? []
+    ? MANUFACTURERS.find((m) => m.id === selectedMfr)?.models ?? []
     : [];
 
   const regionGroups = REGIONS.reduce<Record<string, typeof REGIONS>>((acc, r) => {
@@ -94,7 +94,7 @@ export default function SearchFilters() {
           className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
         >
           <option value="">Libovolná značka</option>
-          {MOCK_MANUFACTURERS_LIST.map((m) => (
+          {MANUFACTURERS.map((m) => (
             <option key={m.id} value={m.id}>{m.name}</option>
           ))}
         </select>

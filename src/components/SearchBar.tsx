@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { useSearchStore } from '../stores/searchStore';
 import { FUEL_TYPES, GEARBOX_TYPES, YEAR_OPTIONS, formatPrice } from '../lib/codebooks';
-import { MOCK_MANUFACTURERS_LIST } from '../lib/mock-data';
+import { MANUFACTURERS } from '../lib/manufacturers';
 
 interface SearchBarProps {
   variant?: 'hero' | 'compact';
@@ -15,7 +15,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
   const [selectedMfr, setSelectedMfr] = useState<number | undefined>(filters.manufacturer_id);
 
   const currentModels = selectedMfr
-    ? MOCK_MANUFACTURERS_LIST.find((m) => m.id === selectedMfr)?.models ?? []
+    ? MANUFACTURERS.find((m) => m.id === selectedMfr)?.models ?? []
     : [];
 
   const handleManufacturer = (id: number | undefined) => {
@@ -92,7 +92,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
           className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
         >
           <option value="">Značka</option>
-          {MOCK_MANUFACTURERS_LIST.map((m) => (
+          {MANUFACTURERS.map((m) => (
             <option key={m.id} value={m.id}>{m.name}</option>
           ))}
         </select>

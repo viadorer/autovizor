@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Car, Truck, Bike, Caravan, Search, TrendingUp, Shield, Zap } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import VehicleCard from '../components/VehicleCard';
-import { getMockVehicles } from '../lib/mock-data';
+import { getTopVehicles } from '../lib/api';
 import type { Vehicle } from '../types';
 
 const VEHICLE_CATEGORIES = [
@@ -28,8 +28,7 @@ export default function HomePage() {
   const [topDeals, setTopDeals] = useState<Vehicle[]>([]);
 
   useEffect(() => {
-    const vehicles = getMockVehicles(200);
-    setTopDeals(vehicles.filter((v) => v.is_top || v.is_promoted).slice(0, 6));
+    getTopVehicles(6).then(setTopDeals);
   }, []);
 
   return (

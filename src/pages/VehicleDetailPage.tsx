@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import { decodeVin, type VinDecodeResult } from '../lib/vin-decoder';
 import type { Vehicle } from '../types';
-import { getMockVehicle } from '../lib/mock-data';
+import { getVehicle } from '../lib/api';
 import { EQUIPMENT } from '../lib/codebooks';
 import {
   formatPrice, formatKm, formatPower, formatVolume,
@@ -40,12 +40,15 @@ export default function VehicleDetailPage() {
 
   useEffect(() => {
     if (id) {
-      const v = getMockVehicle(Number(id));
-      if (v) {
-        // Přidáme mock výbavu
-        v.equipment = EQUIPMENT.slice(0, 15 + (Number(id) % 20));
-      }
-      setVehicle(v ?? null);
+      getVehicle(Number(id)).then((v) => {
+        if (v) {
+          // Pokud nemá výbavu z DB, přidáme mock výbavu
+          if (!v.equipment || v.equipment.length === 0) {
+            v.equipment = EQUIPMENT.slice(0, 15 + (Number(id) % 20));
+          }
+        }
+        setVehicle(v ?? null);
+      });
     }
     window.scrollTo(0, 0);
   }, [id]);

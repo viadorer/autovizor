@@ -5,7 +5,7 @@ import {
   Car, Gauge, Zap, Fuel, Settings, Calendar, Palette,
 } from 'lucide-react';
 import type { Vehicle } from '../types';
-import { getMockVehicles } from '../lib/mock-data';
+import { searchVehicles } from '../lib/api';
 import {
   formatPrice, formatKm, formatPower, formatVolume, formatRegistration,
   getCodebookName, FUEL_TYPES, GEARBOX_TYPES, COLORS, CONDITIONS,
@@ -21,19 +21,14 @@ export default function ComparisonPage() {
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Vehicle[]>([]);
 
-  const allVehicles = getMockVehicles(200);
-
   useEffect(() => {
+    const filters: Record<string, unknown> = {};
     if (query.length >= 2) {
-      const q = query.toLowerCase();
-      setSearchResults(
-        allVehicles
-          .filter((v) => v.title.toLowerCase().includes(q) || v.manufacturer_name?.toLowerCase().includes(q))
-          .slice(0, 8)
-      );
-    } else {
-      setSearchResults(allVehicles.slice(0, 8));
+      filters.query = query;
     }
+    searchVehicles(filters, 1, 8).then((result) => {
+      setSearchResults(result.vehicles);
+    });
   }, [query]);
 
   const addVehicle = (slot: number, vehicle: Vehicle) => {

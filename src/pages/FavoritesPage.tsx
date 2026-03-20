@@ -3,7 +3,7 @@ import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import VehicleCard from '../components/VehicleCard';
 import { useFavoritesStore } from '../stores/favoritesStore';
-import { getMockVehicles } from '../lib/mock-data';
+import { getVehiclesByIds } from '../lib/api';
 import type { Vehicle } from '../types';
 
 export default function FavoritesPage() {
@@ -11,8 +11,7 @@ export default function FavoritesPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
   useEffect(() => {
-    const allVehicles = getMockVehicles(200);
-    setVehicles(allVehicles.filter((v) => favoriteIds.includes(v.id)));
+    getVehiclesByIds(favoriteIds).then(setVehicles);
   }, [favoriteIds]);
 
   return (
