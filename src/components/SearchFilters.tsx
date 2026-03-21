@@ -491,7 +491,7 @@ export default function SearchFilters() {
 
       {/* Desktop */}
       <aside className="hidden lg:block w-60 shrink-0">
-        <div className="sticky top-20 bg-accent-600/5 rounded-xl border border-accent-600/10 p-4 max-h-[calc(100vh-6rem)] overflow-y-auto">
+        <div className="sticky top-20 bg-gradient-to-b from-accent-600/10 to-accent-600/5 rounded-xl border border-accent-600/10 p-4 max-h-[calc(100vh-6rem)] overflow-y-auto">
           {filtersContent}
         </div>
       </aside>

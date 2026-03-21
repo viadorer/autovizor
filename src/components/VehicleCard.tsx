@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart, MapPin, Fuel, Settings, Calendar, Gauge, Zap, Camera, ArrowRight, BadgeCheck, Sparkles } from 'lucide-react';
+import { Heart, MapPin, Fuel, Settings, Calendar, Gauge, Zap, Camera, BadgeCheck, Sparkles } from 'lucide-react';
 import type { Vehicle } from '../types';
 import { formatPrice, formatKm, formatPower, formatRegistration } from '../lib/codebooks';
 import { useFavoritesStore } from '../stores/favoritesStore';
@@ -17,8 +17,8 @@ const RATING_LABELS: Record<string, { label: string; className: string }> = {
 };
 
 function isNew(vehicle: Vehicle): boolean {
-  if (!vehicle.published_at && !vehicle.created_at) return false;
-  const date = new Date(vehicle.published_at || vehicle.created_at);
+  if (!vehicle.created_at) return false;
+  const date = new Date(vehicle.created_at);
   const threeDaysAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
   return date.getTime() > threeDaysAgo;
 }

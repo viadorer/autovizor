@@ -123,11 +123,6 @@ const YEAR_CODES_OLD: Record<string, number> = {
 
 function decodeYear(vin: string): number | undefined {
   const yearChar = vin[9];
-  // Position 7: if it's a digit → new cycle (2001+), if letter → old cycle (1980-2000)
-  // But modern VINs (2010+) also use letters at pos 7. Use heuristic:
-  // If the VIN uses ZZZ fillers (European) at pos 4-6, check production sequence
-  const pos7 = vin[6];
-  // Most cars after 2009 use a letter at pos 10 that overlaps with 1980-2009
   // Prefer newer cycle by default (more likely to be searching for recent cars)
   return YEAR_CODES_NEW[yearChar] ?? YEAR_CODES_OLD[yearChar];
 }

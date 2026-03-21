@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Car, Truck, Bike, Caravan, Search, TrendingUp, Shield, Zap, BadgeCheck, ArrowRight } from 'lucide-react';
+import { Car, Truck, Bike, Caravan, TrendingUp, Shield, Zap, BadgeCheck, ArrowRight } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import VehicleCard from '../components/VehicleCard';
 import { getManufacturerLogoUrl } from '../lib/manufacturers';
