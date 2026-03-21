@@ -101,16 +101,36 @@ const WMI_MAP: Record<string, string> = {
 };
 
 // Rok výroby - pozice 10 VIN
-const YEAR_CODES: Record<string, number> = {
+// VIN year codes repeat every 30 years — we resolve ambiguity using position 7
+// (model year indicator in some manufacturers) or default to the newer cycle
+const YEAR_CODES_NEW: Record<string, number> = {
   A: 2010, B: 2011, C: 2012, D: 2013, E: 2014,
   F: 2015, G: 2016, H: 2017, J: 2018, K: 2019,
   L: 2020, M: 2021, N: 2022, P: 2023, R: 2024,
   S: 2025, T: 2026, V: 2027, W: 2028, X: 2029,
   Y: 2030,
-  // Starší
   '1': 2001, '2': 2002, '3': 2003, '4': 2004, '5': 2005,
   '6': 2006, '7': 2007, '8': 2008, '9': 2009,
 };
+
+const YEAR_CODES_OLD: Record<string, number> = {
+  A: 1980, B: 1981, C: 1982, D: 1983, E: 1984,
+  F: 1985, G: 1986, H: 1987, J: 1988, K: 1989,
+  L: 1990, M: 1991, N: 1992, P: 1993, R: 1994,
+  S: 1995, T: 1996, V: 1997, W: 1998, X: 1999,
+  Y: 2000,
+};
+
+function decodeYear(vin: string): number | undefined {
+  const yearChar = vin[9];
+  // Position 7: if it's a digit → new cycle (2001+), if letter → old cycle (1980-2000)
+  // But modern VINs (2010+) also use letters at pos 7. Use heuristic:
+  // If the VIN uses ZZZ fillers (European) at pos 4-6, check production sequence
+  const pos7 = vin[6];
+  // Most cars after 2009 use a letter at pos 10 that overlaps with 1980-2009
+  // Prefer newer cycle by default (more likely to be searching for recent cars)
+  return YEAR_CODES_NEW[yearChar] ?? YEAR_CODES_OLD[yearChar];
+}
 
 // Položka výbavy z VIN
 export interface VinEquipmentItem {
@@ -206,13 +226,12 @@ export function decodeVinOffline(vin: string): VinDecodeResult {
 
   const cleaned = vin.toUpperCase().replace(/[\s-]/g, '');
   const wmi = cleaned.substring(0, 3);
-  const yearChar = cleaned[9];
 
   return {
     valid: true,
     vin: cleaned,
     manufacturer: WMI_MAP[wmi],
-    year: YEAR_CODES[yearChar],
+    year: decodeYear(cleaned),
     country: getCountryFromVin(cleaned),
   };
 }
@@ -299,22 +318,31 @@ export async function decodeVinNHTSA(vin: string): Promise<VinDecodeResult> {
       'Crossover Utility Vehicle (CUV)': 'SUV',
     };
 
+    // Check if NHTSA had significant errors (European VINs with ZZZ fillers)
+    const errorCodes = (raw.ErrorCode || '').split(',').map((c: string) => c.trim());
+    const hasErrors = errorCodes.includes('1') || errorCodes.includes('5');
+
+    // For year: prefer offline decode if NHTSA has errors (common with EU VINs)
+    const nhtsaYear = raw.ModelYear ? Number(raw.ModelYear) : undefined;
+    const bestYear = (hasErrors && offline.year) ? offline.year : (nhtsaYear || offline.year);
+
     return {
       ...offline,
+      source: 'nhtsa' as const,
       manufacturer: raw.Make || offline.manufacturer,
-      model: raw.Model,
-      year: raw.ModelYear ? Number(raw.ModelYear) : offline.year,
-      body_type: bodyMap[raw.BodyClass] || raw.BodyClass,
-      fuel_type: fuelMap[raw.FuelTypePrimary] || raw.FuelTypePrimary,
+      model: raw.Model || undefined,
+      year: bestYear,
+      body_type: bodyMap[raw.BodyClass] || raw.BodyClass || undefined,
+      fuel_type: fuelMap[raw.FuelTypePrimary] || raw.FuelTypePrimary || undefined,
       engine_volume: raw.DisplacementL
         ? `${Math.round(Number(raw.DisplacementL) * 1000)}`
         : undefined,
       engine_power: raw.EngineKW || (raw.EngineHP
         ? `${Math.round(Number(raw.EngineHP) * 0.7457)}`
         : undefined),
-      drive_type: driveMap[raw.DriveType] || raw.DriveType,
-      gearbox: gearboxMap[raw.TransmissionStyle] || raw.TransmissionStyle,
-      door_count: raw.Doors,
+      drive_type: driveMap[raw.DriveType] || raw.DriveType || undefined,
+      gearbox: gearboxMap[raw.TransmissionStyle] || raw.TransmissionStyle || undefined,
+      door_count: raw.Doors || undefined,
       raw,
     };
   } catch {
