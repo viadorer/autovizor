@@ -128,13 +128,6 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
             )}
           </div>
 
-          {/* Gradient CTA */}
-          <div className="mt-auto pt-3">
-            <span className="flex items-center justify-center gap-2 w-full py-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 rounded-lg text-sm font-medium text-white transition-all group-hover:shadow-md group-hover:shadow-primary-600/20">
-              Detail nabídky
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </span>
-          </div>
         </div>
       </Link>
     );
