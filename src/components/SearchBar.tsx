@@ -99,7 +99,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent-500" />
         <input
           type="text"
-          placeholder="Popiš, jaké auto hledáš — např. „SUV do 500 tisíc, automat, nafta"..."
+          placeholder='Popiš jaké auto hledáš, např. "SUV do 500 tisíc, automat"'
           value={aiQuery}
           onChange={(e) => setAiQuery(e.target.value)}
           className="w-full pl-12 pr-14 py-4 bg-surface-800 rounded-xl text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-accent-500 text-base"
