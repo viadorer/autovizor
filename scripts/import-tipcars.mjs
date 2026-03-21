@@ -105,24 +105,27 @@ const CONDITION_MAP = {
   'veterán': 5,
 };
 
-// ── Manufacturer seo → our DB IDs ───────────────────────────
+// ── Manufacturer seo → Sauto DB IDs (from carList XML) ──────
 const MANUFACTURER_SEO_MAP = {
-  'alfa-romeo': 1, 'audi': 2, 'austin': 3, 'bentley': 4, 'bmw': 5,
-  'bugatti': 6, 'buick': 7, 'cadillac': 8, 'caterham': 9, 'chevrolet': 10,
-  'chrysler': 11, 'citroen': 12, 'cupra': 13, 'dacia': 14, 'daewoo': 15,
-  'daihatsu': 16, 'dodge': 17, 'ds': 18, 'ferrari': 19, 'fiat': 20,
-  'ford': 21, 'genesis': 22, 'honda': 23, 'hummer': 24, 'hyundai': 25,
-  'infiniti': 26, 'isuzu': 27, 'iveco': 28, 'jaguar': 29, 'jeep': 30,
-  'kia': 31, 'lada': 32, 'lamborghini': 33, 'lancia': 34, 'land-rover': 35,
-  'lexus': 36, 'lincoln': 37, 'lotus': 38, 'maserati': 39, 'mazda': 40,
-  'mclaren': 41, 'mercedes-benz': 42, 'mg': 43, 'mini': 44, 'mitsubishi': 45,
-  'morgan': 46, 'nissan': 47, 'opel': 48, 'peugeot': 49, 'polestar': 50,
-  'porsche': 51, 'renault': 52, 'rolls-royce': 53, 'rover': 54, 'saab': 55,
-  'seat': 56, 'skoda': 57, 'smart': 58, 'ssangyong': 59, 'subaru': 60,
-  'suzuki': 61, 'tesla': 62, 'toyota': 63, 'volkswagen': 64, 'volvo': 65,
-  'byd': 66, 'lynk-co': 67, 'ora': 68, 'nio': 69, 'aiways': 70,
-  'xpeng': 71, 'gwm': 72, 'abarth': 73, 'alpine': 74, 'aston-martin': 75,
-  'dfsk': 76, 'maxus': 77, 'ram': 78, 'tatra': 79, 'wiesmann': 80,
+  'abarth': 1049, 'alfa-romeo': 1, 'alpine': 1506, 'aston-martin': 138,
+  'audi': 2, 'austin': 3, 'bentley': 4, 'bmw': 5, 'bugatti': 298,
+  'buick': 8, 'byd': 1512, 'cadillac': 10, 'caterham': 12, 'chevrolet': 34,
+  'chrysler': 37, 'citroen': 13, 'cupra': 1354, 'dacia': 15, 'daewoo': 16,
+  'daihatsu': 18, 'dodge': 134, 'ds': 1176, 'ferrari': 21, 'fiat': 22,
+  'ford': 24, 'genesis': 1517, 'honda': 28, 'hummer': 399, 'hyundai': 31,
+  'infiniti': 122, 'isuzu': 112, 'iveco': 439, 'jaguar': 38, 'jeep': 392,
+  'kia': 39, 'lada': 42, 'lamborghini': 141, 'lancia': 44, 'land-rover': 391,
+  'leapmotor': 1536, 'lexus': 45, 'lincoln': 124, 'lotus': 142, 'lynk-co': 1500,
+  'maserati': 143, 'maxus': 1426, 'mazda': 48, 'mclaren': 1055,
+  'mercedes-benz': 51, 'mg': 146, 'mini': 147, 'mitsubishi': 56,
+  'morgan': 148, 'nio': 1503, 'nissan': 62, 'omoda': 1545, 'opel': 67,
+  'peugeot': 70, 'polestar': 1429, 'porsche': 75, 'ram': 1430,
+  'renault': 78, 'rolls-royce': 82, 'rover': 83, 'saab': 85, 'seat': 86,
+  'skoda': 93, 'smart': 266, 'ssangyong': 393, 'subaru': 88, 'suzuki': 90,
+  'tatra': 95, 'tesla': 951, 'toyota': 99, 'volkswagen': 103, 'volvo': 106,
+  'xpeng': 1564, 'aiways': 1515, 'chery': 1567, 'dongfeng': 1461,
+  'geely': 1568, 'hongqi': 1527, 'jaecoo': 1546, 'xiaomi': 1572,
+  'zeekr': 1524,
 };
 
 // ── Models cache (loaded from DB) ───────────────────────────
