@@ -9,7 +9,7 @@ export default function Footer() {
           {/* Logo a popis */}
           <div className="md:col-span-1">
             <Link to="/" className="flex items-center gap-2.5 mb-4">
-              <AutovizorLogo size={32} />
+              <AutovizorLogo size={36} color="#f97316" />
               <span className="text-lg font-bold text-surface-100">
                 Auto<span className="text-primary-400">vizor</span>.cz
               </span>

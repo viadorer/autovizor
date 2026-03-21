@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Car, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Car, Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 type Mode = 'login' | 'register' | 'forgot';
 
@@ -11,15 +12,43 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { signIn, signUp, signInWithGoogle, resetPassword } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (mode === 'forgot') {
-      setSubmitted(true);
-      return;
+    setError(null);
+    setLoading(true);
+
+    try {
+      if (mode === 'forgot') {
+        await resetPassword(email);
+        setSubmitted(true);
+      } else if (mode === 'login') {
+        await signIn(email, password);
+        navigate('/');
+      } else {
+        await signUp(email, password, name);
+        navigate('/');
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Něco se pokazilo';
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
-    // TODO: Supabase auth
-    alert(mode === 'login' ? 'Přihlášení bude dostupné po připojení Supabase.' : 'Registrace bude dostupná po připojení Supabase.');
+  };
+
+  const handleGoogleLogin = async () => {
+    setError(null);
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Přihlášení přes Google selhalo';
+      setError(msg);
+    }
   };
 
   if (submitted && mode === 'forgot') {
@@ -57,7 +86,7 @@ export default function LoginPage() {
         {mode !== 'forgot' && (
           <div className="flex mb-6 bg-surface-800 rounded-lg p-1">
             <button
-              onClick={() => setMode('login')}
+              onClick={() => { setMode('login'); setError(null); }}
               className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
                 mode === 'login' ? 'bg-surface-700 text-surface-100' : 'text-surface-400 hover:text-surface-100'
               }`}
@@ -65,7 +94,7 @@ export default function LoginPage() {
               Přihlásit se
             </button>
             <button
-              onClick={() => setMode('register')}
+              onClick={() => { setMode('register'); setError(null); }}
               className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
                 mode === 'register' ? 'bg-surface-700 text-surface-100' : 'text-surface-400 hover:text-surface-100'
               }`}
@@ -79,6 +108,12 @@ export default function LoginPage() {
           <div className="mb-6">
             <h2 className="text-lg font-bold text-surface-100 mb-1">Zapomenuté heslo</h2>
             <p className="text-sm text-surface-400">Zadejte e-mail a zašleme vám odkaz pro obnovení.</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-600/10 border border-red-600/30 rounded-lg text-sm text-red-400">
+            {error}
           </div>
         )}
 
@@ -144,7 +179,7 @@ export default function LoginPage() {
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={() => setMode('forgot')}
+                onClick={() => { setMode('forgot'); setError(null); }}
                 className="text-xs text-primary-400 hover:text-primary-300"
               >
                 Zapomenuté heslo?
@@ -154,15 +189,17 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="w-full py-3 bg-primary-600 hover:bg-primary-700 rounded-lg text-sm font-bold text-white transition-colors"
+            disabled={loading}
+            className="w-full py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-surface-700 rounded-lg text-sm font-bold text-white transition-colors flex items-center justify-center gap-2"
           >
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {mode === 'login' ? 'Přihlásit se' : mode === 'register' ? 'Vytvořit účet' : 'Odeslat odkaz'}
           </button>
         </form>
 
         {mode === 'forgot' && (
           <button
-            onClick={() => setMode('login')}
+            onClick={() => { setMode('login'); setError(null); }}
             className="w-full mt-3 text-sm text-surface-400 hover:text-surface-100 text-center"
           >
             Zpět na přihlášení
@@ -180,7 +217,10 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <button className="w-full flex items-center justify-center gap-3 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-100 hover:bg-surface-700 transition-colors">
+            <button
+              onClick={handleGoogleLogin}
+              className="w-full flex items-center justify-center gap-3 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-100 hover:bg-surface-700 transition-colors"
+            >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -197,7 +237,7 @@ export default function LoginPage() {
         <p className="text-xs text-surface-500 text-center mt-4">
           {mode === 'login' ? 'Nemáte účet? ' : 'Máte již účet? '}
           <button
-            onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+            onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(null); }}
             className="text-primary-400 hover:text-primary-300"
           >
             {mode === 'login' ? 'Zaregistrujte se' : 'Přihlaste se'}

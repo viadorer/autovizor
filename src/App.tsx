@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
@@ -21,17 +22,19 @@ export default function App() {
       <div className="min-h-screen bg-surface-950 text-surface-100 flex flex-col">
         <Header />
         <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/hledat" element={<SearchPage />} />
-            <Route path="/vozidlo/:id" element={<VehicleDetailPage />} />
-            <Route path="/oblibene" element={<FavoritesPage />} />
-            <Route path="/prodat" element={<SellPage />} />
-            <Route path="/poradna" element={<AdvisoryPage />} />
-            <Route path="/porovnani" element={<ComparisonPage />} />
-            <Route path="/prihlaseni" element={<LoginPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/hledat" element={<SearchPage />} />
+              <Route path="/vozidlo/:id" element={<VehicleDetailPage />} />
+              <Route path="/oblibene" element={<FavoritesPage />} />
+              <Route path="/prodat" element={<SellPage />} />
+              <Route path="/poradna" element={<AdvisoryPage />} />
+              <Route path="/porovnani" element={<ComparisonPage />} />
+              <Route path="/prihlaseni" element={<LoginPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </ErrorBoundary>
         </main>
         <Footer />
       </div>

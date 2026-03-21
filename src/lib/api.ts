@@ -308,7 +308,11 @@ export async function getManufacturers(): Promise<ManufacturerWithModels[]> {
     return (data ?? []).map((m: Record<string, unknown>) => ({
       id: m.id as number,
       name: m.name as string,
-      models: modelsByMfr[m.id as number] ?? [],
+      seo_name: (m.seo_name as string) ?? '',
+      models: (modelsByMfr[m.id as number] ?? []).map(mod => ({
+        ...mod,
+        seo_name: '',
+      })),
     }));
   } catch (err) {
     console.error('Supabase getManufacturers error, falling back to static:', err);

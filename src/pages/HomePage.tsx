@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Car, Truck, Bike, Caravan, Search, TrendingUp, Shield, Zap } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import VehicleCard from '../components/VehicleCard';
-import { getTopVehicles } from '../lib/api';
 import { getManufacturerLogoUrl } from '../lib/manufacturers';
-import type { Vehicle } from '../types';
+import { useTopVehicles } from '../hooks/useVehicles';
 
 const VEHICLE_CATEGORIES = [
   { id: 1, name: 'Osobní', icon: Car, count: '1 245 832' },
@@ -26,11 +24,7 @@ const POPULAR_BRANDS = [
 ];
 
 export default function HomePage() {
-  const [topDeals, setTopDeals] = useState<Vehicle[]>([]);
-
-  useEffect(() => {
-    getTopVehicles(6).then(setTopDeals);
-  }, []);
+  const { data: topDeals = [] } = useTopVehicles(6);
 
   return (
     <div className="min-h-screen">

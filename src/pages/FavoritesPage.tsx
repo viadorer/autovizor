@@ -1,18 +1,12 @@
-import { useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import VehicleCard from '../components/VehicleCard';
 import { useFavoritesStore } from '../stores/favoritesStore';
-import { getVehiclesByIds } from '../lib/api';
-import type { Vehicle } from '../types';
+import { useVehiclesByIds } from '../hooks/useVehicles';
 
 export default function FavoritesPage() {
   const { favoriteIds } = useFavoritesStore();
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-
-  useEffect(() => {
-    getVehiclesByIds(favoriteIds).then(setVehicles);
-  }, [favoriteIds]);
+  const { data: vehicles = [] } = useVehiclesByIds(favoriteIds);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

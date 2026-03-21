@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, Heart, Share2, Phone, Mail, MapPin,
@@ -8,9 +8,8 @@ import {
   Wind, Leaf, Key, Search, Loader2,
 } from 'lucide-react';
 import { decodeVin, type VinDecodeResult } from '../lib/vin-decoder';
-import type { Vehicle } from '../types';
-import { getVehicle } from '../lib/api';
 import { EQUIPMENT } from '../lib/codebooks';
+import { useVehicle } from '../hooks/useVehicles';
 import {
   formatPrice, formatKm, formatPower, formatVolume,
   formatRegistration, getCodebookName,
@@ -31,27 +30,30 @@ const RATING_LABELS: Record<string, { label: string; className: string }> = {
 
 export default function VehicleDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const { data: rawVehicle, isLoading } = useVehicle(id ? Number(id) : undefined);
   const [currentImage, setCurrentImage] = useState(0);
   const [vinResult, setVinResult] = useState<VinDecodeResult | null>(null);
   const [vinLoading, setVinLoading] = useState(false);
   const [phoneVisible, setPhoneVisible] = useState(false);
   const { toggleFavorite, isFavorite } = useFavoritesStore();
 
-  useEffect(() => {
-    if (id) {
-      getVehicle(Number(id)).then((v) => {
-        if (v) {
-          // Pokud nemá výbavu z DB, přidáme mock výbavu
-          if (!v.equipment || v.equipment.length === 0) {
-            v.equipment = EQUIPMENT.slice(0, 15 + (Number(id) % 20));
-          }
-        }
-        setVehicle(v ?? null);
-      });
-    }
-    window.scrollTo(0, 0);
-  }, [id]);
+  // Scroll to top on mount
+  useState(() => { window.scrollTo(0, 0); });
+
+  // Add mock equipment if missing
+  const vehicle = rawVehicle ? {
+    ...rawVehicle,
+    equipment: rawVehicle.equipment?.length ? rawVehicle.equipment : EQUIPMENT.slice(0, 15 + (Number(id) % 20)),
+  } : null;
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+        <Loader2 className="w-8 h-8 text-primary-500 mx-auto mb-4 animate-spin" />
+        <p className="text-sm text-surface-400">Načítání vozidla...</p>
+      </div>
+    );
+  }
 
   if (!vehicle) {
     return (
