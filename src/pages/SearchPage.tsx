@@ -8,7 +8,7 @@ import { SORT_OPTIONS } from '../lib/codebooks';
 
 export default function SearchPage() {
   const { results, totalCount, isLoading, page, perPage, filters, setPage, setSortBy, search } = useSearchStore();
-  const [layout, setLayout] = useState<'list' | 'grid'>('list');
+  const [layout, setLayout] = useState<'list' | 'grid'>('grid');
   const totalPages = Math.ceil(totalCount / perPage);
 
   useEffect(() => {
