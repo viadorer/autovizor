@@ -231,7 +231,8 @@ export async function getTopVehicles(limit = 6): Promise<Vehicle[]> {
   }
 
   try {
-    const { data, error } = await supabase
+    // Try promoted/top vehicles first
+    let { data, error } = await supabase
       .from('vehicles')
       .select('*')
       .eq('is_active', true)
@@ -240,6 +241,21 @@ export async function getTopVehicles(limit = 6): Promise<Vehicle[]> {
       .limit(limit);
 
     if (error) throw error;
+
+    // Fallback: if no top vehicles, show newest with images
+    if (!data || data.length === 0) {
+      const fallback = await supabase
+        .from('vehicles')
+        .select('*')
+        .eq('is_active', true)
+        .not('main_image_url', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (fallback.error) throw fallback.error;
+      data = fallback.data;
+    }
+
     return (data ?? []).map(v => normalizeVehicle(v as Record<string, unknown>));
   } catch (err) {
     console.error('Supabase getTopVehicles error, falling back to mock:', err);
@@ -369,18 +385,18 @@ export async function getCategoryCounts(): Promise<{ kind_id: number; count: num
   }
 
   try {
-    const { data, error } = await supabase
-      .from('vehicles')
-      .select('kind_id')
-      .eq('is_active', true);
-
-    if (error) throw error;
-
+    // Count per kind_id efficiently
+    const kindIds = [1, 3, 4, 5, 6, 7, 9, 10, 11];
     const counts: Record<number, number> = {};
-    for (const row of data ?? []) {
-      const k = (row as Record<string, unknown>).kind_id as number;
-      counts[k] = (counts[k] ?? 0) + 1;
-    }
+
+    await Promise.all(kindIds.map(async (k) => {
+      const { count, error } = await supabase
+        .from('vehicles')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true)
+        .eq('kind_id', k);
+      if (!error && count !== null) counts[k] = count;
+    }));
     return Object.entries(counts).map(([kind_id, count]) => ({
       kind_id: Number(kind_id),
       count,
