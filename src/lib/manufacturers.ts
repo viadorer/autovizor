@@ -6,6 +6,7 @@
 export interface ManufacturerWithModels {
   id: number;
   name: string;
+  kind_ids?: number[]; // 1=Osobní, 3=Motocykl, 4=Užitkové, 5=Nákladní, 6=Autobus, 7=Přívěs, 9=Obytné
   models: { id: number; name: string }[];
 }
 
@@ -49,7 +50,7 @@ export const MANUFACTURERS: ManufacturerWithModels[] = [
     { id: 401, name: 'Bentayga' }, { id: 402, name: 'Continental GT' },
     { id: 403, name: 'Continental Flying Spur' }, { id: 404, name: 'Mulsanne' },
   ]},
-  { id: 5, name: 'BMW', models: [
+  { id: 5, name: 'BMW', kind_ids: [1, 3], models: [
     { id: 501, name: 'Řada 1' }, { id: 502, name: 'Řada 2' }, { id: 503, name: 'Řada 2 Active Tourer' },
     { id: 504, name: 'Řada 2 Gran Tourer' }, { id: 505, name: 'Řada 3' }, { id: 506, name: 'Řada 3 GT' },
     { id: 507, name: 'Řada 4' }, { id: 508, name: 'Řada 4 Gran Coupé' }, { id: 509, name: 'Řada 5' },
@@ -160,7 +161,7 @@ export const MANUFACTURERS: ManufacturerWithModels[] = [
     { id: 2201, name: 'G70' }, { id: 2202, name: 'G80' }, { id: 2203, name: 'G90' },
     { id: 2204, name: 'GV60' }, { id: 2205, name: 'GV70' }, { id: 2206, name: 'GV80' },
   ]},
-  { id: 23, name: 'Honda', models: [
+  { id: 23, name: 'Honda', kind_ids: [1, 3], models: [
     { id: 2301, name: 'Accord' }, { id: 2302, name: 'City' }, { id: 2303, name: 'Civic' },
     { id: 2304, name: 'CR-V' }, { id: 2305, name: 'CR-Z' }, { id: 2306, name: 'e' },
     { id: 2307, name: 'FR-V' }, { id: 2308, name: 'HR-V' }, { id: 2309, name: 'Insight' },
@@ -190,7 +191,7 @@ export const MANUFACTURERS: ManufacturerWithModels[] = [
   { id: 27, name: 'Isuzu', models: [
     { id: 2701, name: 'D-Max' }, { id: 2702, name: 'Trooper' },
   ]},
-  { id: 28, name: 'Iveco', models: [
+  { id: 28, name: 'Iveco', kind_ids: [4, 5], models: [
     { id: 2801, name: 'Daily' }, { id: 2802, name: 'Eurocargo' }, { id: 2803, name: 'Stralis' },
   ]},
   { id: 29, name: 'Jaguar', models: [
@@ -258,7 +259,7 @@ export const MANUFACTURERS: ManufacturerWithModels[] = [
     { id: 4104, name: '620R' }, { id: 4105, name: '720S' }, { id: 4106, name: 'GT' },
     { id: 4107, name: 'Artura' },
   ]},
-  { id: 42, name: 'Mercedes-Benz', models: [
+  { id: 42, name: 'Mercedes-Benz', kind_ids: [1, 4, 5, 6], models: [
     { id: 4201, name: 'Třída A' }, { id: 4202, name: 'Třída B' }, { id: 4203, name: 'Třída C' },
     { id: 4204, name: 'CLA' }, { id: 4205, name: 'CLS' }, { id: 4206, name: 'Třída E' },
     { id: 4207, name: 'Třída G' }, { id: 4208, name: 'GLA' }, { id: 4209, name: 'GLB' },
@@ -379,7 +380,7 @@ export const MANUFACTURERS: ManufacturerWithModels[] = [
     { id: 6007, name: 'Outback' }, { id: 6008, name: 'Solterra' }, { id: 6009, name: 'WRX' },
     { id: 6010, name: 'XV' },
   ]},
-  { id: 61, name: 'Suzuki', models: [
+  { id: 61, name: 'Suzuki', kind_ids: [1, 3], models: [
     { id: 6101, name: 'Across' }, { id: 6102, name: 'Alto' }, { id: 6103, name: 'Baleno' },
     { id: 6104, name: 'Celerio' }, { id: 6105, name: 'Grand Vitara' }, { id: 6106, name: 'Ignis' },
     { id: 6107, name: 'Jimny' }, { id: 6108, name: 'Kizashi' }, { id: 6109, name: 'Liana' },
@@ -472,5 +473,186 @@ export const MANUFACTURERS: ManufacturerWithModels[] = [
   ]},
   { id: 80, name: 'Wiesmann', models: [
     { id: 8001, name: 'GT MF4' }, { id: 8002, name: 'GT MF5' },
+  ]},
+
+  // ===== Motocykly =====
+  { id: 81, name: 'Harley-Davidson', kind_ids: [3], models: [
+    { id: 8101, name: 'Sportster' }, { id: 8102, name: 'Iron 883' }, { id: 8103, name: 'Forty-Eight' },
+    { id: 8104, name: 'Street Glide' }, { id: 8105, name: 'Road King' }, { id: 8106, name: 'Fat Boy' },
+    { id: 8107, name: 'Softail' }, { id: 8108, name: 'Breakout' }, { id: 8109, name: 'Road Glide' },
+    { id: 8110, name: 'Electra Glide' }, { id: 8111, name: 'Low Rider' }, { id: 8112, name: 'Pan America' },
+    { id: 8113, name: 'LiveWire' }, { id: 8114, name: 'Nightster' },
+  ]},
+  { id: 82, name: 'Yamaha', kind_ids: [3], models: [
+    { id: 8201, name: 'YZF-R1' }, { id: 8202, name: 'YZF-R6' }, { id: 8203, name: 'YZF-R3' },
+    { id: 8204, name: 'MT-07' }, { id: 8205, name: 'MT-09' }, { id: 8206, name: 'MT-10' },
+    { id: 8207, name: 'Tracer 9' }, { id: 8208, name: 'Ténéré 700' }, { id: 8209, name: 'XSR 700' },
+    { id: 8210, name: 'XSR 900' }, { id: 8211, name: 'XMAX' }, { id: 8212, name: 'TMAX' },
+    { id: 8213, name: 'Dragstar' }, { id: 8214, name: 'FJR 1300' }, { id: 8215, name: 'WR 250' },
+  ]},
+  { id: 83, name: 'Kawasaki', kind_ids: [3], models: [
+    { id: 8301, name: 'Ninja ZX-6R' }, { id: 8302, name: 'Ninja ZX-10R' }, { id: 8303, name: 'Ninja 400' },
+    { id: 8304, name: 'Z900' }, { id: 8305, name: 'Z650' }, { id: 8306, name: 'Z1000' },
+    { id: 8307, name: 'Versys 650' }, { id: 8308, name: 'Versys 1000' }, { id: 8309, name: 'Vulcan S' },
+    { id: 8310, name: 'KLR 650' }, { id: 8311, name: 'KX 250' }, { id: 8312, name: 'ZH2' },
+    { id: 8313, name: 'Ninja H2' }, { id: 8314, name: 'W800' },
+  ]},
+  { id: 84, name: 'Ducati', kind_ids: [3], models: [
+    { id: 8401, name: 'Panigale V4' }, { id: 8402, name: 'Panigale V2' }, { id: 8403, name: 'Monster' },
+    { id: 8404, name: 'Multistrada V4' }, { id: 8405, name: 'Diavel' }, { id: 8406, name: 'Scrambler' },
+    { id: 8407, name: 'Streetfighter V4' }, { id: 8408, name: 'Hypermotard' }, { id: 8409, name: 'DesertX' },
+    { id: 8410, name: 'SuperSport' }, { id: 8411, name: 'XDiavel' },
+  ]},
+  { id: 85, name: 'KTM', kind_ids: [3], models: [
+    { id: 8501, name: '125 Duke' }, { id: 8502, name: '200 Duke' }, { id: 8503, name: '390 Duke' },
+    { id: 8504, name: '690 Duke' }, { id: 8505, name: '790 Duke' }, { id: 8506, name: '890 Duke' },
+    { id: 8507, name: '1290 Super Duke' }, { id: 8508, name: '390 Adventure' },
+    { id: 8509, name: '890 Adventure' }, { id: 8510, name: '1290 Super Adventure' },
+    { id: 8511, name: 'RC 390' }, { id: 8512, name: 'EXC 300' }, { id: 8513, name: 'SX-F 450' },
+  ]},
+  { id: 86, name: 'Triumph', kind_ids: [3], models: [
+    { id: 8601, name: 'Street Triple' }, { id: 8602, name: 'Speed Triple' }, { id: 8603, name: 'Tiger 900' },
+    { id: 8604, name: 'Tiger 1200' }, { id: 8605, name: 'Bonneville T120' }, { id: 8606, name: 'Thruxton' },
+    { id: 8607, name: 'Scrambler 900' }, { id: 8608, name: 'Rocket 3' }, { id: 8609, name: 'Trident 660' },
+    { id: 8610, name: 'Speed 400' }, { id: 8611, name: 'Daytona 660' },
+  ]},
+  { id: 87, name: 'Aprilia', kind_ids: [3], models: [
+    { id: 8701, name: 'RSV4' }, { id: 8702, name: 'Tuono V4' }, { id: 8703, name: 'RS 660' },
+    { id: 8704, name: 'Tuono 660' }, { id: 8705, name: 'Shiver 900' }, { id: 8706, name: 'Dorsoduro' },
+    { id: 8707, name: 'SR GT' }, { id: 8708, name: 'SX 125' },
+  ]},
+  { id: 88, name: 'MV Agusta', kind_ids: [3], models: [
+    { id: 8801, name: 'Brutale' }, { id: 8802, name: 'F3' }, { id: 8803, name: 'Dragster' },
+    { id: 8804, name: 'Turismo Veloce' }, { id: 8805, name: 'Superveloce' }, { id: 8806, name: 'Rush' },
+  ]},
+  { id: 89, name: 'Royal Enfield', kind_ids: [3], models: [
+    { id: 8901, name: 'Classic 350' }, { id: 8902, name: 'Meteor 350' }, { id: 8903, name: 'Himalayan' },
+    { id: 8904, name: 'Continental GT 650' }, { id: 8905, name: 'Interceptor 650' },
+    { id: 8906, name: 'Hunter 350' }, { id: 8907, name: 'Super Meteor 650' },
+  ]},
+  { id: 90, name: 'Husqvarna', kind_ids: [3], models: [
+    { id: 9001, name: 'Svartpilen 401' }, { id: 9002, name: 'Vitpilen 401' },
+    { id: 9003, name: 'Norden 901' }, { id: 9004, name: 'FE 350' }, { id: 9005, name: 'FC 450' },
+  ]},
+  { id: 91, name: 'Indian', kind_ids: [3], models: [
+    { id: 9101, name: 'Scout' }, { id: 9102, name: 'Chief' }, { id: 9103, name: 'Chieftain' },
+    { id: 9104, name: 'Challenger' }, { id: 9105, name: 'FTR' }, { id: 9106, name: 'Springfield' },
+  ]},
+  { id: 92, name: 'Moto Guzzi', kind_ids: [3], models: [
+    { id: 9201, name: 'V7' }, { id: 9202, name: 'V85 TT' }, { id: 9203, name: 'V100 Mandello' },
+    { id: 9204, name: 'Stelvio' }, { id: 9205, name: 'Griso' },
+  ]},
+  { id: 93, name: 'Benelli', kind_ids: [3], models: [
+    { id: 9301, name: 'TRK 502' }, { id: 9302, name: 'Leoncino 500' }, { id: 9303, name: '752S' },
+    { id: 9304, name: 'TNT 125' },
+  ]},
+  { id: 94, name: 'CF Moto', kind_ids: [3], models: [
+    { id: 9401, name: '700 CL-X' }, { id: 9402, name: '800MT' }, { id: 9403, name: '450SR' },
+    { id: 9404, name: '300SR' }, { id: 9405, name: '650GT' },
+  ]},
+  { id: 95, name: 'Gas Gas', kind_ids: [3], models: [
+    { id: 9501, name: 'SM 700' }, { id: 9502, name: 'ES 700' }, { id: 9503, name: 'EC 350F' },
+    { id: 9504, name: 'MC 250F' },
+  ]},
+  { id: 96, name: 'Beta', kind_ids: [3], models: [
+    { id: 9601, name: 'RR 300' }, { id: 9602, name: 'RR 350' }, { id: 9603, name: 'Xtrainer' },
+  ]},
+  { id: 97, name: 'SWM', kind_ids: [3], models: [
+    { id: 9701, name: 'Gran Milano' }, { id: 9702, name: 'Silver Vase' }, { id: 9703, name: 'Superdual' },
+  ]},
+
+  // ===== Nákladní vozy =====
+  { id: 98, name: 'MAN', kind_ids: [5], models: [
+    { id: 9801, name: 'TGX' }, { id: 9802, name: 'TGS' }, { id: 9803, name: 'TGM' },
+    { id: 9804, name: 'TGL' }, { id: 9805, name: 'TGE' },
+  ]},
+  { id: 99, name: 'DAF', kind_ids: [5], models: [
+    { id: 9901, name: 'XF' }, { id: 9902, name: 'XG' }, { id: 9903, name: 'XG+' },
+    { id: 9904, name: 'CF' }, { id: 9905, name: 'LF' },
+  ]},
+  { id: 100, name: 'Scania', kind_ids: [5], models: [
+    { id: 10001, name: 'R-série' }, { id: 10002, name: 'S-série' }, { id: 10003, name: 'G-série' },
+    { id: 10004, name: 'P-série' }, { id: 10005, name: 'L-série' },
+  ]},
+  { id: 101, name: 'Volvo Trucks', kind_ids: [5], models: [
+    { id: 10101, name: 'FH' }, { id: 10102, name: 'FM' }, { id: 10103, name: 'FMX' },
+    { id: 10104, name: 'FE' }, { id: 10105, name: 'FL' },
+  ]},
+  { id: 102, name: 'Renault Trucks', kind_ids: [5], models: [
+    { id: 10201, name: 'T' }, { id: 10202, name: 'T High' }, { id: 10203, name: 'C' },
+    { id: 10204, name: 'K' }, { id: 10205, name: 'D' }, { id: 10206, name: 'D Wide' },
+  ]},
+  { id: 103, name: 'LIAZ', kind_ids: [5], models: [
+    { id: 10301, name: '110' }, { id: 10302, name: '150' }, { id: 10303, name: '300' },
+  ]},
+  { id: 104, name: 'Avia', kind_ids: [5], models: [
+    { id: 10401, name: 'D60' }, { id: 10402, name: 'D75' }, { id: 10403, name: 'D90' },
+    { id: 10404, name: 'D120' },
+  ]},
+
+  // ===== Autobusy =====
+  { id: 105, name: 'SOR', kind_ids: [6], models: [
+    { id: 10501, name: 'NB 12' }, { id: 10502, name: 'NS 12' }, { id: 10503, name: 'EBN 11' },
+    { id: 10504, name: 'CN 12' },
+  ]},
+  { id: 106, name: 'Solaris', kind_ids: [6], models: [
+    { id: 10601, name: 'Urbino' }, { id: 10602, name: 'InterUrbino' }, { id: 10603, name: 'Trollino' },
+  ]},
+  { id: 107, name: 'Setra', kind_ids: [6], models: [
+    { id: 10701, name: 'S 515 HD' }, { id: 10702, name: 'S 516 HD' }, { id: 10703, name: 'S 531 DT' },
+  ]},
+  { id: 108, name: 'Irisbus', kind_ids: [6], models: [
+    { id: 10801, name: 'Citelis' }, { id: 10802, name: 'Crossway' }, { id: 10803, name: 'Magelys' },
+  ]},
+
+  // ===== Obytné vozy =====
+  { id: 109, name: 'Adria', kind_ids: [9], models: [
+    { id: 10901, name: 'Matrix' }, { id: 10902, name: 'Coral' }, { id: 10903, name: 'Twin' },
+    { id: 10904, name: 'Compact' }, { id: 10905, name: 'Sonic' },
+  ]},
+  { id: 110, name: 'Hymer', kind_ids: [9], models: [
+    { id: 11001, name: 'Exsis-i' }, { id: 11002, name: 'B-Klasse' }, { id: 11003, name: 'ML-T' },
+    { id: 11004, name: 'Free' }, { id: 11005, name: 'Grand Canyon' },
+  ]},
+  { id: 111, name: 'Bürstner', kind_ids: [9], models: [
+    { id: 11101, name: 'Lyseo' }, { id: 11102, name: 'Ixeo' }, { id: 11103, name: 'Delfin' },
+    { id: 11104, name: 'Nexxo' }, { id: 11105, name: 'Copa' },
+  ]},
+  { id: 112, name: 'Knaus', kind_ids: [9], models: [
+    { id: 11201, name: 'Van TI' }, { id: 11202, name: 'Sky TI' }, { id: 11203, name: 'Live I' },
+    { id: 11204, name: 'BoxStar' }, { id: 11205, name: 'Sun TI' },
+  ]},
+  { id: 113, name: 'Carthago', kind_ids: [9], models: [
+    { id: 11301, name: 'Liner-for-two' }, { id: 11302, name: 'Chic C-Line' },
+    { id: 11303, name: 'Chic E-Line' }, { id: 11304, name: 'Malibu' },
+  ]},
+  { id: 114, name: 'Dethleffs', kind_ids: [9], models: [
+    { id: 11401, name: 'Globebus' }, { id: 11402, name: 'Trend' }, { id: 11403, name: 'Pulse' },
+    { id: 11404, name: 'Esprit' }, { id: 11405, name: 'Just Go' },
+  ]},
+  { id: 115, name: 'Carado', kind_ids: [9], models: [
+    { id: 11501, name: 'T337' }, { id: 11502, name: 'T449' }, { id: 11503, name: 'V337' },
+    { id: 11504, name: 'I338' },
+  ]},
+  { id: 116, name: 'Weinsberg', kind_ids: [9], models: [
+    { id: 11601, name: 'CaraCompact' }, { id: 11602, name: 'CaraBus' }, { id: 11603, name: 'CaraHome' },
+  ]},
+  { id: 117, name: 'Sunlight', kind_ids: [9], models: [
+    { id: 11701, name: 'T68' }, { id: 11702, name: 'T69' }, { id: 11703, name: 'V66' },
+    { id: 11704, name: 'Cliff' },
+  ]},
+
+  // ===== Přívěsy =====
+  { id: 118, name: 'Kögel', kind_ids: [7], models: [
+    { id: 11801, name: 'Cargo' }, { id: 11802, name: 'Cool' }, { id: 11803, name: 'Mega' },
+  ]},
+  { id: 119, name: 'Schmitz Cargobull', kind_ids: [7], models: [
+    { id: 11901, name: 'S.CS' }, { id: 11902, name: 'S.KO' }, { id: 11903, name: 'S.KI' },
+  ]},
+  { id: 120, name: 'Schwarzmüller', kind_ids: [7], models: [
+    { id: 12001, name: 'Plato' }, { id: 12002, name: 'Sklápěč' }, { id: 12003, name: 'Cisterna' },
+  ]},
+  { id: 121, name: 'Agados', kind_ids: [7], models: [
+    { id: 12101, name: 'Handy' }, { id: 12102, name: 'Atlas' }, { id: 12103, name: 'Dona' },
   ]},
 ];

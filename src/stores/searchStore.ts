@@ -34,10 +34,30 @@ export const useSearchStore = create<SearchState>((set, get) => ({
   perPage: 20,
 
   setFilter: (key, value) => {
-    set((state) => ({
-      filters: { ...state.filters, [key]: value || undefined },
-      page: 1,
-    }));
+    set((state) => {
+      const newFilters = { ...state.filters, [key]: value || undefined };
+      // Reset category-specific filters when changing vehicle kind
+      if (key === 'kind_id') {
+        newFilters.manufacturer_id = undefined;
+        newFilters.model_id = undefined;
+        newFilters.body_type_id = undefined;
+        newFilters.motorcycle_type_id = undefined;
+        newFilters.truck_type_id = undefined;
+        newFilters.bus_type_id = undefined;
+        newFilters.trailer_type_id = undefined;
+        newFilters.seatplace_id = undefined;
+        newFilters.gearbox_id = undefined;
+        newFilters.gearbox_level_id = undefined;
+        newFilters.door_count_id = undefined;
+        newFilters.bed_count_id = undefined;
+        newFilters.airbag_count_id = undefined;
+        newFilters.volume_from = undefined;
+        newFilters.volume_to = undefined;
+        newFilters.power_from = undefined;
+        newFilters.power_to = undefined;
+      }
+      return { filters: newFilters, page: 1 };
+    });
   },
 
   setFilters: (filters) => {

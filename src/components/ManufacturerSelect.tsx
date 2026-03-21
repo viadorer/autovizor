@@ -7,6 +7,7 @@ interface ManufacturerSelectProps {
   onChange: (id: number | undefined) => void;
   placeholder?: string;
   className?: string;
+  kindId?: number;
 }
 
 export default function ManufacturerSelect({
@@ -14,6 +15,7 @@ export default function ManufacturerSelect({
   onChange,
   placeholder = 'Značka',
   className = '',
+  kindId,
 }: ManufacturerSelectProps) {
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState('');
@@ -22,9 +24,14 @@ export default function ManufacturerSelect({
 
   const selected = value ? MANUFACTURERS.find((m) => m.id === value) : undefined;
 
-  const filtered = filter
-    ? MANUFACTURERS.filter((m) => m.name.toLowerCase().includes(filter.toLowerCase()))
+  // Filter manufacturers by kind_id if specified
+  const kindFiltered = kindId
+    ? MANUFACTURERS.filter((m) => !m.kind_ids || m.kind_ids.includes(kindId))
     : MANUFACTURERS;
+
+  const filtered = filter
+    ? kindFiltered.filter((m) => m.name.toLowerCase().includes(filter.toLowerCase()))
+    : kindFiltered;
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {

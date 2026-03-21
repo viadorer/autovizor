@@ -86,6 +86,7 @@ export default function SearchFilters() {
         <label className="block text-xs font-medium text-surface-400 mb-1">Značka</label>
         <ManufacturerSelect
           value={filters.manufacturer_id}
+          kindId={filters.kind_id as number | undefined}
           onChange={(val) => {
             setFilter('manufacturer_id', val);
             setFilter('model_id', undefined);
@@ -200,21 +201,40 @@ export default function SearchFilters() {
         options={FUEL_TYPES}
       />
 
-      {/* Převodovka */}
-      <Select
-        label="Převodovka"
-        value={filters.gearbox_id}
-        onChange={(v) => { setFilter('gearbox_id', v); search(); }}
-        options={GEARBOX_TYPES}
-      />
+      {/* Převodovka - skrýt pro motorky a přívěsy */}
+      {filters.kind_id !== 3 && filters.kind_id !== 7 && (
+        <>
+          <Select
+            label="Převodovka"
+            value={filters.gearbox_id}
+            onChange={(v) => { setFilter('gearbox_id', v); search(); }}
+            options={GEARBOX_TYPES}
+          />
+          <Select
+            label="Počet stupňů"
+            value={filters.gearbox_level_id}
+            onChange={(v) => { setFilter('gearbox_level_id', v); search(); }}
+            options={GEARBOX_LEVELS}
+          />
+        </>
+      )}
 
-      {/* Počet stupňů převodovky */}
-      <Select
-        label="Počet stupňů"
-        value={filters.gearbox_level_id}
-        onChange={(v) => { setFilter('gearbox_level_id', v); search(); }}
-        options={GEARBOX_LEVELS}
-      />
+      {/* Typově specifické filtry - zobrazit hned, ne v "Další filtry" */}
+      {filters.kind_id === 3 && (
+        <Select label="Typ motocyklu" value={filters.motorcycle_type_id} onChange={(v) => { setFilter('motorcycle_type_id', v); search(); }} options={MOTORCYCLE_TYPES} />
+      )}
+      {filters.kind_id === 5 && (
+        <Select label="Typ nákladního vozu" value={filters.truck_type_id} onChange={(v) => { setFilter('truck_type_id', v); search(); }} options={TRUCK_TYPES} />
+      )}
+      {filters.kind_id === 6 && (
+        <>
+          <Select label="Typ autobusu" value={filters.bus_type_id} onChange={(v) => { setFilter('bus_type_id', v); search(); }} options={BUS_TYPES} />
+          <Select label="Kategorie sedadel" value={filters.seatplace_id} onChange={(v) => { setFilter('seatplace_id', v); search(); }} options={SEATPLACE_TYPES} />
+        </>
+      )}
+      {filters.kind_id === 7 && (
+        <Select label="Typ přívěsu" value={filters.trailer_type_id} onChange={(v) => { setFilter('trailer_type_id', v); search(); }} options={TRAILER_TYPES} />
+      )}
 
       {/* Rozšířené filtry */}
       <button
@@ -227,46 +247,67 @@ export default function SearchFilters() {
 
       {showMore && (
         <div className="space-y-4 pt-2 border-t border-surface-800">
-          <Select label="Karoserie" value={filters.body_type_id} onChange={(v) => { setFilter('body_type_id', v); search(); }} options={BODY_TYPES} />
-          <Select label="Pohon" value={filters.drive_id} onChange={(v) => { setFilter('drive_id', v); search(); }} options={DRIVE_TYPES} />
+          {/* Karoserie - jen pro osobní a užitkové */}
+          {(filters.kind_id === 1 || filters.kind_id === 4 || !filters.kind_id) && (
+            <Select label="Karoserie" value={filters.body_type_id} onChange={(v) => { setFilter('body_type_id', v); search(); }} options={BODY_TYPES} />
+          )}
+
+          {/* Pohon - relevantní pro auta, motorky, užitkové */}
+          {filters.kind_id !== 7 && (
+            <Select label="Pohon" value={filters.drive_id} onChange={(v) => { setFilter('drive_id', v); search(); }} options={DRIVE_TYPES} />
+          )}
+
           <Select label="Barva" value={filters.color_id} onChange={(v) => { setFilter('color_id', v); search(); }} options={COLORS} />
           <Select label="Odstín laku" value={filters.color_tone_id} onChange={(v) => { setFilter('color_tone_id', v); search(); }} options={COLOR_TONES} />
           <Select label="Typ laku" value={filters.color_type_id} onChange={(v) => { setFilter('color_type_id', v); search(); }} options={COLOR_TYPES} />
-          <Select label="Klimatizace" value={filters.aircondition_id} onChange={(v) => { setFilter('aircondition_id', v); search(); }} options={AIRCONDITION_TYPES} />
+
+          {/* Klimatizace - ne pro motorky a přívěsy */}
+          {filters.kind_id !== 3 && filters.kind_id !== 7 && (
+            <Select label="Klimatizace" value={filters.aircondition_id} onChange={(v) => { setFilter('aircondition_id', v); search(); }} options={AIRCONDITION_TYPES} />
+          )}
+
           <Select label="Emisní norma" value={filters.euro_id} onChange={(v) => { setFilter('euro_id', v); search(); }} options={EURO_TYPES} />
-          <Select label="Počet dveří" value={filters.door_count_id} onChange={(v) => { setFilter('door_count_id', v); search(); }} options={DOOR_COUNTS} />
-          <Select label="Počet míst" value={filters.capacity_id} onChange={(v) => { setFilter('capacity_id', v); search(); }} options={CAPACITY_TYPES} />
-          <Select label="Počet airbagů" value={filters.airbag_count_id} onChange={(v) => { setFilter('airbag_count_id', v); search(); }} options={AIRBAG_COUNTS} />
-          <Select label="Počet lůžek" value={filters.bed_count_id} onChange={(v) => { setFilter('bed_count_id', v); search(); }} options={BED_COUNTS} placeholder="Pro obytné vozy" />
+
+          {/* Počet dveří - jen pro auta */}
+          {(filters.kind_id === 1 || filters.kind_id === 4 || !filters.kind_id) && (
+            <Select label="Počet dveří" value={filters.door_count_id} onChange={(v) => { setFilter('door_count_id', v); search(); }} options={DOOR_COUNTS} />
+          )}
+
+          {/* Počet míst - ne pro motorky a přívěsy */}
+          {filters.kind_id !== 3 && filters.kind_id !== 7 && (
+            <Select label="Počet míst" value={filters.capacity_id} onChange={(v) => { setFilter('capacity_id', v); search(); }} options={CAPACITY_TYPES} />
+          )}
+
+          {/* Airbagy - jen pro auta */}
+          {(filters.kind_id === 1 || filters.kind_id === 4 || !filters.kind_id) && (
+            <Select label="Počet airbagů" value={filters.airbag_count_id} onChange={(v) => { setFilter('airbag_count_id', v); search(); }} options={AIRBAG_COUNTS} />
+          )}
+
+          {/* Počet lůžek - jen pro obytné */}
+          {filters.kind_id === 9 && (
+            <Select label="Počet lůžek" value={filters.bed_count_id} onChange={(v) => { setFilter('bed_count_id', v); search(); }} options={BED_COUNTS} />
+          )}
+
           <Select label="Dostupnost" value={filters.availability_id} onChange={(v) => { setFilter('availability_id', v); search(); }} options={AVAILABILITY_TYPES} />
           <Select label="Servisní knížka" value={filters.servicebook_id} onChange={(v) => { setFilter('servicebook_id', v); search(); }} options={SERVICEBOOK_TYPES} />
           <Select label="Země původu" value={filters.country_id} onChange={(v) => { setFilter('country_id', v); search(); }} options={COUNTRIES} />
-          <Select label="Potahy sedadel" value={filters.upholstery_id} onChange={(v) => { setFilter('upholstery_id', v); search(); }} options={UPHOLSTERY_TYPES} />
+
+          {/* Potahy - ne pro motorky a přívěsy */}
+          {filters.kind_id !== 3 && filters.kind_id !== 7 && (
+            <Select label="Potahy sedadel" value={filters.upholstery_id} onChange={(v) => { setFilter('upholstery_id', v); search(); }} options={UPHOLSTERY_TYPES} />
+          )}
+
           <Select label="Počet vlastníků" value={filters.owner_count_id} onChange={(v) => { setFilter('owner_count_id', v); search(); }} options={OWNER_COUNTS} />
           <Select label="Typ obchodu" value={filters.deal_type_id} onChange={(v) => { setFilter('deal_type_id', v); search(); }} options={DEAL_TYPES} />
           <Select label="Typ prodejce" value={filters.seller_type_id} onChange={(v) => { setFilter('seller_type_id', v); search(); }} options={SELLER_TYPES} />
           <Select label="Ověřený program" value={filters.certified_id} onChange={(v) => { setFilter('certified_id', v); search(); }} options={CERTIFIED_PROGRAMS} />
 
-          {/* Typově specifické filtry */}
-          {filters.kind_id === 3 && (
-            <Select label="Typ motocyklu" value={filters.motorcycle_type_id} onChange={(v) => { setFilter('motorcycle_type_id', v); search(); }} options={MOTORCYCLE_TYPES} />
-          )}
-          {filters.kind_id === 5 && (
-            <Select label="Typ nákladního vozu" value={filters.truck_type_id} onChange={(v) => { setFilter('truck_type_id', v); search(); }} options={TRUCK_TYPES} />
-          )}
-          {filters.kind_id === 6 && (
-            <>
-              <Select label="Typ autobusu" value={filters.bus_type_id} onChange={(v) => { setFilter('bus_type_id', v); search(); }} options={BUS_TYPES} />
-              <Select label="Kategorie sedadel" value={filters.seatplace_id} onChange={(v) => { setFilter('seatplace_id', v); search(); }} options={SEATPLACE_TYPES} />
-            </>
-          )}
-          {filters.kind_id === 7 && (
-            <Select label="Typ přívěsu" value={filters.trailer_type_id} onChange={(v) => { setFilter('trailer_type_id', v); search(); }} options={TRAILER_TYPES} />
-          )}
-
-          {/* Objem motoru (ccm) */}
+          {/* Objem motoru (ccm) - s jinými rozsahy pro motorky */}
+          {filters.kind_id !== 7 && (
           <div>
-            <label className="block text-xs font-medium text-surface-400 mb-1">Objem motoru (ccm)</label>
+            <label className="block text-xs font-medium text-surface-400 mb-1">
+              {filters.kind_id === 3 ? 'Objem motoru (ccm)' : 'Objem motoru (ccm)'}
+            </label>
             <div className="grid grid-cols-2 gap-2">
               <select
                 value={filters.volume_from ?? ''}
@@ -274,8 +315,11 @@ export default function SearchFilters() {
                 className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
               >
                 <option value="">od</option>
-                {[800, 1000, 1200, 1400, 1600, 1800, 2000, 2500, 3000].map((v) => (
-                  <option key={v} value={v}>{(v / 1000).toFixed(1)} l</option>
+                {(filters.kind_id === 3
+                  ? [50, 125, 250, 400, 500, 600, 750, 900, 1000, 1200, 1400, 1800]
+                  : [800, 1000, 1200, 1400, 1600, 1800, 2000, 2500, 3000]
+                ).map((v) => (
+                  <option key={v} value={v}>{filters.kind_id === 3 ? `${v} ccm` : `${(v / 1000).toFixed(1)} l`}</option>
                 ))}
               </select>
               <select
@@ -284,14 +328,19 @@ export default function SearchFilters() {
                 className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
               >
                 <option value="">do</option>
-                {[1000, 1200, 1400, 1600, 1800, 2000, 2500, 3000, 4000, 5000, 6000].map((v) => (
-                  <option key={v} value={v}>{(v / 1000).toFixed(1)} l</option>
+                {(filters.kind_id === 3
+                  ? [125, 250, 400, 500, 600, 750, 900, 1000, 1200, 1400, 1800, 2500]
+                  : [1000, 1200, 1400, 1600, 1800, 2000, 2500, 3000, 4000, 5000, 6000]
+                ).map((v) => (
+                  <option key={v} value={v}>{filters.kind_id === 3 ? `${v} ccm` : `${(v / 1000).toFixed(1)} l`}</option>
                 ))}
               </select>
             </div>
           </div>
+          )}
 
           {/* Výkon */}
+          {filters.kind_id !== 7 && (
           <div>
             <label className="block text-xs font-medium text-surface-400 mb-1">Výkon (kW)</label>
             <div className="grid grid-cols-2 gap-2">
@@ -301,7 +350,10 @@ export default function SearchFilters() {
                 className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
               >
                 <option value="">od</option>
-                {[44, 55, 66, 85, 100, 120, 150, 200, 250].map((p) => (
+                {(filters.kind_id === 3
+                  ? [5, 11, 15, 25, 35, 48, 70, 100, 150]
+                  : [44, 55, 66, 85, 100, 120, 150, 200, 250]
+                ).map((p) => (
                   <option key={p} value={p}>{p} kW ({Math.round(p * 1.36)} PS)</option>
                 ))}
               </select>
@@ -311,12 +363,16 @@ export default function SearchFilters() {
                 className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
               >
                 <option value="">do</option>
-                {[66, 85, 100, 120, 150, 200, 250, 300, 400].map((p) => (
+                {(filters.kind_id === 3
+                  ? [11, 15, 25, 35, 48, 70, 100, 150, 200]
+                  : [66, 85, 100, 120, 150, 200, 250, 300, 400]
+                ).map((p) => (
                   <option key={p} value={p}>{p} kW ({Math.round(p * 1.36)} PS)</option>
                 ))}
               </select>
             </div>
           </div>
+          )}
 
           {/* Standort / Region */}
           <div>
