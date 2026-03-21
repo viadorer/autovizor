@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { useSearchStore } from '../stores/searchStore';
 import { FUEL_TYPES, GEARBOX_TYPES, YEAR_OPTIONS, formatPrice } from '../lib/codebooks';
 import { MANUFACTURERS } from '../lib/manufacturers';
+import ManufacturerSelect from './ManufacturerSelect';
 
 interface SearchBarProps {
   variant?: 'hero' | 'compact';
@@ -86,16 +87,11 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
       {/* Filtry */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {/* Značka */}
-        <select
-          value={selectedMfr ?? ''}
-          onChange={(e) => handleManufacturer(e.target.value ? Number(e.target.value) : undefined)}
-          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
-        >
-          <option value="">Značka</option>
-          {MANUFACTURERS.map((m) => (
-            <option key={m.id} value={m.id}>{m.name}</option>
-          ))}
-        </select>
+        <ManufacturerSelect
+          value={selectedMfr}
+          onChange={handleManufacturer}
+          placeholder="Značka"
+        />
 
         {/* Model */}
         <select

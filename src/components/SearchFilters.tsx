@@ -12,7 +12,8 @@ import {
   GEARBOX_LEVELS, CERTIFIED_PROGRAMS, SEATPLACE_TYPES,
   formatPrice,
 } from '../lib/codebooks';
-import { MANUFACTURERS, getManufacturerLogoUrl } from '../lib/manufacturers';
+import { MANUFACTURERS } from '../lib/manufacturers';
+import ManufacturerSelect from './ManufacturerSelect';
 
 function Select({
   label,
@@ -83,21 +84,15 @@ export default function SearchFilters() {
       {/* Značka */}
       <div>
         <label className="block text-xs font-medium text-surface-400 mb-1">Značka</label>
-        <select
-          value={filters.manufacturer_id ?? ''}
-          onChange={(e) => {
-            const val = e.target.value ? Number(e.target.value) : undefined;
+        <ManufacturerSelect
+          value={filters.manufacturer_id}
+          onChange={(val) => {
             setFilter('manufacturer_id', val);
             setFilter('model_id', undefined);
             search();
           }}
-          className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
-        >
-          <option value="">Libovolná značka</option>
-          {MANUFACTURERS.map((m) => (
-            <option key={m.id} value={m.id}>{m.name}</option>
-          ))}
-        </select>
+          placeholder="Libovolná značka"
+        />
       </div>
 
       {/* Model */}
