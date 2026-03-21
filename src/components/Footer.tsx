@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Car } from 'lucide-react';
+import { AutovizorLogo } from './AutovizorLogo';
 
 export default function Footer() {
   return (
@@ -8,11 +8,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo a popis */}
           <div className="md:col-span-1">
-            <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <Car className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-lg font-bold text-surface-100">Autovizor.cz</span>
+            <Link to="/" className="flex items-center gap-2.5 mb-4">
+              <AutovizorLogo size={32} />
+              <span className="text-lg font-bold text-surface-100">
+                Auto<span className="text-primary-400">vizor</span>.cz
+              </span>
             </Link>
             <p className="text-sm text-surface-400 leading-relaxed">
               Největší výběr aut v České republice. Najděte své vysněné vozidlo mezi tisíci nabídkami.

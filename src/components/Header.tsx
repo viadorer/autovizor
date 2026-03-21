@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Heart, ArrowLeftRight, User, Car, Menu, X, Sun, Moon } from 'lucide-react';
+import { Search, Heart, ArrowLeftRight, User, Menu, X, Sun, Moon, Car } from 'lucide-react';
+import { AutovizorLogo } from './AutovizorLogo';
 import { useState } from 'react';
 import { useFavoritesStore } from '../stores/favoritesStore';
 import { useThemeStore } from '../stores/themeStore';
@@ -22,14 +23,11 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <Car className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex flex-col leading-none">
-              <span className="text-lg font-bold text-surface-100 tracking-tight">Autovizor</span>
-              <span className="text-[10px] text-surface-400 -mt-0.5">.cz</span>
-            </div>
+          <Link to="/" className="flex items-center gap-2.5 shrink-0">
+            <AutovizorLogo size={32} />
+            <span className="text-lg font-bold text-surface-100 tracking-tight">
+              Auto<span className="text-primary-400">vizor</span>
+            </span>
           </Link>
 
           {/* Navigace - desktop */}

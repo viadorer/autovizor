@@ -64,9 +64,9 @@ const FUEL_MAP = {
 };
 
 const GEARBOX_MAP = {
-  'manuální': 1, 'manuální převodovka': 1, 'manual': 1,
-  'poloautomatická': 2, 'poloautomatická převodovka': 2,
-  'automatická': 3, 'automatická převodovka': 3, 'automat': 3,
+  'manuální': 1, 'manuální převodovka': 1, 'manual': 1, 'man. převodovka': 1,
+  'poloautomatická': 2, 'poloautomatická převodovka': 2, 'poloaut. převodovka': 2,
+  'automatická': 3, 'automatická převodovka': 3, 'automat': 3, 'aut. převodovka': 3,
 };
 
 const BODY_TYPE_MAP = {
@@ -373,6 +373,26 @@ function parseDetailPage(html, sourceUrl) {
   if (gpsMatch) {
     vehicle.latitude = parseFloat(gpsMatch[1]);
     vehicle.longitude = parseFloat(gpsMatch[2]);
+  }
+
+  // 2b. Fallback: parse dataLayer JSON for missing fields
+  const dlMatch = html.match(/"fuel":"([^"]+)".*?"color":"([^"]+)"/);
+  if (dlMatch) {
+    if (!vehicle.fuel_type_id) {
+      const dlFuel = dlMatch[1].toLowerCase();
+      vehicle.fuel_type_id = FUEL_MAP[dlFuel] || null;
+    }
+    if (!vehicle.color_id) {
+      // dataLayer uses ASCII names like "bila", "cerna", "modra"
+      const DL_COLOR_MAP = {
+        'bila': 1, 'zluta': 2, 'oranzova': 3, 'cervena': 4,
+        'vinova': 5, 'ruzova': 6, 'fialova': 7, 'modra': 8,
+        'zelena': 9, 'hneda': 10, 'seda': 11, 'cerna': 12,
+        'bezova': 13, 'stribrna': 14, 'zlata': 15, 'jina': 16,
+        'bronzova': 17,
+      };
+      vehicle.color_id = DL_COLOR_MAP[dlMatch[2].toLowerCase()] || null;
+    }
   }
 
   // 3. Parse equipment (výbava)
