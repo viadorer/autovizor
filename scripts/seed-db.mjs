@@ -24,23 +24,23 @@ function parseManufacturers() {
   const MANUFACTURERS = [];
   const MODELS = [];
 
-  // Match each manufacturer block: { id: N, name: 'X', models: [...] }
-  const mfrRegex = /\{\s*id:\s*(\d+),\s*name:\s*'([^']+)',\s*models:\s*\[([\s\S]*?)\]\s*\}/g;
+  // Match each manufacturer block: { id: N, name: 'X', seo_name: 'x', ... models: [...] }
+  const mfrRegex = /\{\s*id:\s*(\d+),\s*name:\s*'([^']+)',\s*seo_name:\s*'([^']+)',[^}]*?models:\s*\[([\s\S]*?)\]\s*\}/g;
   let m;
   while ((m = mfrRegex.exec(src)) !== null) {
     const mfrId = parseInt(m[1]);
     const mfrName = m[2];
-    const seoName = mfrName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const seoName = m[3];
     MANUFACTURERS.push({ id: mfrId, name: mfrName, seo_name: seoName });
 
     // Parse models inside this manufacturer
-    const modelsBlock = m[3];
-    const modelRegex = /\{\s*id:\s*(\d+),\s*name:\s*'([^']+)'\s*\}/g;
+    const modelsBlock = m[4];
+    const modelRegex = /\{\s*id:\s*(\d+),\s*name:\s*'([^']+)',\s*seo_name:\s*'([^']+)'\s*\}/g;
     let mm;
     while ((mm = modelRegex.exec(modelsBlock)) !== null) {
       const modelId = parseInt(mm[1]);
       const modelName = mm[2];
-      const modelSeo = modelName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      const modelSeo = mm[3];
       MODELS.push({ id: modelId, name: modelName, manufacturer_id: mfrId, seo_name: modelSeo });
     }
   }
@@ -76,14 +76,28 @@ function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + m
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 const VIN_CHARS = 'ABCDEFGHJKLMNPRSTUVWXYZ0123456789';
-const MANUFACTURER_WMI = {
-  2: ['WAU', 'WUA'], 5: ['WBA', 'WBS'], 12: ['VF7'], 14: ['UU1'],
-  20: ['ZFA'], 21: ['WF0', '1FA'], 23: ['SHH'], 25: ['KMH', 'TMA'],
-  31: ['KNA', 'KNE'], 40: ['JMZ'], 42: ['WDD', 'WDB'], 47: ['SJN'],
-  48: ['W0L'], 49: ['VF3'], 52: ['VF1'], 56: ['VSS'], 57: ['TMB', 'TMP'],
-  61: ['JSA'], 62: ['5YJ'], 63: ['JTD', 'SB1'], 64: ['WVW', 'WV2'],
-  65: ['YV1', 'YV4'],
+
+// Helper: find manufacturer ID by seo_name
+function mfrIdBySeo(seo) {
+  return MANUFACTURERS.find(m => m.seo_name === seo)?.id;
+}
+
+// WMI codes by manufacturer seo_name
+const MANUFACTURER_WMI_BY_SEO = {
+  'audi': ['WAU', 'WUA'], 'bmw': ['WBA', 'WBS'], 'citroen': ['VF7'], 'dacia': ['UU1'],
+  'fiat': ['ZFA'], 'ford': ['WF0', '1FA'], 'honda': ['SHH'], 'hyundai': ['KMH', 'TMA'],
+  'kia': ['KNA', 'KNE'], 'mazda': ['JMZ'], 'mercedes-benz': ['WDD', 'WDB'], 'nissan': ['SJN'],
+  'opel': ['W0L'], 'peugeot': ['VF3'], 'renault': ['VF1'], 'seat': ['VSS'], 'skoda': ['TMB', 'TMP'],
+  'suzuki': ['JSA'], 'tesla': ['5YJ'], 'toyota': ['JTD', 'SB1'], 'volkswagen': ['WVW', 'WV2'],
+  'volvo': ['YV1', 'YV4'],
 };
+
+// Build runtime ID-based map after parsing
+const MANUFACTURER_WMI = {};
+for (const [seo, wmis] of Object.entries(MANUFACTURER_WMI_BY_SEO)) {
+  const id = mfrIdBySeo(seo);
+  if (id) MANUFACTURER_WMI[id] = wmis;
+}
 
 function generateVIN(mfrId) {
   const wmis = MANUFACTURER_WMI[mfrId] || ['WBA'];
@@ -257,7 +271,7 @@ function generateVehicle(idx) {
 
   // Fuel: diesel dominant for older, more hybrid/electric for newer
   let fuel;
-  if (model.manufacturer_id === 62) { // Tesla
+  if (model.manufacturer_id === mfrIdBySeo('tesla')) { // Tesla
     fuel = 4; // elektro
   } else if (model.id === 5702) { // Enyaq
     fuel = 4;
@@ -277,10 +291,10 @@ function generateVehicle(idx) {
 
   // Realistic pricing based on brand/age
   let basePrice;
-  const premiumBrands = [2, 5, 42, 51, 35, 29, 62, 65]; // Audi, BMW, MB, Porsche, LR, Jaguar, Tesla, Volvo
+  const premiumBrands = ['audi', 'bmw', 'mercedes-benz', 'porsche', 'land-rover', 'jaguar', 'tesla', 'volvo'].map(s => mfrIdBySeo(s)).filter(Boolean);
   if (premiumBrands.includes(model.manufacturer_id)) {
     basePrice = rand(200, 2500) * 1000;
-  } else if (model.manufacturer_id === 14) { // Dacia = budget
+  } else if (model.manufacturer_id === mfrIdBySeo('dacia')) { // Dacia = budget
     basePrice = rand(100, 500) * 1000;
   } else {
     basePrice = rand(80, 1200) * 1000;

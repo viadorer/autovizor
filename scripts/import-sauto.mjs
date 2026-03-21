@@ -51,12 +51,12 @@ const s3 = new S3Client({
 // ── Sauto API ───────────────────────────────────────────────
 const SAUTO_API = 'https://www.sauto.cz/api/v1/items/search?';
 
-// Default search params — osobní vozy, all conditions
+// Default search params
 const DEFAULT_PARAMS = {
   limit: '200',
   offset: '0',
   condition_seo: 'nove,ojete,predvadeci',
-  category_id: '838',
+  category_id: '838', // overridden by --category flag
   operating_lease: 'false',
 };
 
@@ -138,30 +138,38 @@ const DRIVE_MAP = {
   'zadni': 10, 'pohon-zadnich-kol': 10,
 };
 
-// ── Manufacturer seo_name → our DB IDs ──────────────────────
-// Key mapping: Sauto seo_name → our manufacturer_id
-const MANUFACTURER_SEO_MAP = {
-  'alfa-romeo': 1, 'audi': 2, 'austin': 3, 'bentley': 4, 'bmw': 5,
-  'bugatti': 6, 'buick': 7, 'cadillac': 8, 'caterham': 9, 'chevrolet': 10,
-  'chrysler': 11, 'citroen': 12, 'cupra': 13, 'dacia': 14, 'daewoo': 15,
-  'daihatsu': 16, 'dodge': 17, 'ds': 18, 'ferrari': 19, 'fiat': 20,
-  'ford': 21, 'genesis': 22, 'honda': 23, 'hummer': 24, 'hyundai': 25,
-  'infiniti': 26, 'isuzu': 27, 'iveco': 28, 'jaguar': 29, 'jeep': 30,
-  'kia': 31, 'lada': 32, 'lamborghini': 33, 'lancia': 34, 'land-rover': 35,
-  'lexus': 36, 'lincoln': 37, 'lotus': 38, 'maserati': 39, 'mazda': 40,
-  'mclaren': 41, 'mercedes-benz': 42, 'mg': 43, 'mini': 44, 'mitsubishi': 45,
-  'morgan': 46, 'nissan': 47, 'opel': 48, 'peugeot': 49, 'polestar': 50,
-  'porsche': 51, 'renault': 52, 'rolls-royce': 53, 'rover': 54, 'saab': 55,
-  'seat': 56, 'skoda': 57, 'smart': 58, 'ssangyong': 59, 'subaru': 60,
-  'suzuki': 61, 'tesla': 62, 'toyota': 63, 'volkswagen': 64, 'volvo': 65,
-  'byd': 66, 'lynk-co': 67, 'ora': 68, 'nio': 69, 'aiways': 70,
-  'xpeng': 71, 'gwm': 72, 'abarth': 73, 'alpine': 74, 'aston-martin': 75,
-  'dfsk': 76, 'maxus': 77, 'ram': 78, 'tatra': 79, 'wiesmann': 80,
+// ── Sauto category_id → kind_id mapping ──────────────────────
+const SAUTO_CATEGORY_TO_KIND = {
+  838: 1,   // Osobní
+  839: 4,   // Užitková
+  840: 5,   // Nákladní
+  841: 3,   // Motorky
+  842: 11,  // Čtyřkolky
+  843: 7,   // Přívěsy a návěsy
+  844: 9,   // Obytné
+  845: 10,  // Pracovní stroje
+  846: 6,   // Autobusy
 };
 
-// ── Model name → our model ID ───────────────────────────────
-// We'll load models from Supabase DB at runtime for dynamic matching
-let modelsCache = null; // { [manufacturer_id]: { [normalizedName]: model_id } }
+// Sauto SEO slug → URL path segment
+const CATEGORY_SEO_PATHS = {
+  838: 'osobni-auta',
+  839: 'uzitkova',
+  840: 'nakladni',
+  841: 'motorky',
+  842: 'ctyrkolky',
+  843: 'privesy-navesy',
+  844: 'obytne',
+  845: 'pracovni-stroje',
+  846: 'autobusy',
+};
+
+// ── Model matching ──────────────────────────────────────────
+// With Sauto-aligned IDs, we use manufacturer_cb.value and model_cb.value directly
+// No need for DB lookup — Sauto IDs are our IDs now
+
+// Legacy: keep model cache loading for backwards compat with existing DB data
+let modelsCache = null;
 
 async function loadModelsFromDB() {
   if (modelsCache) return modelsCache;
@@ -287,11 +295,9 @@ async function uploadImageToR2(imageUrl, vehicleId, index) {
 
 // ── Map Sauto listing → our DB vehicle row ──────────────────
 function mapSautoToVehicle(item) {
-  const mfrSeo = item.manufacturer_cb?.seo_name;
-  const manufacturerId = mfrSeo ? MANUFACTURER_SEO_MAP[mfrSeo] : null;
-
-  const modelName = item.model_cb?.name;
-  const modelId = manufacturerId && modelName ? findModelId(manufacturerId, modelName) : null;
+  // Use Sauto IDs directly — they match our manufacturers.ts
+  const manufacturerId = item.manufacturer_cb?.value || null;
+  const modelId = item.model_cb?.value || null;
 
   const fuelSeo = item.fuel_cb?.seo_name;
   const fuelId = fuelSeo ? (FUEL_MAP[fuelSeo] || null) : null;
@@ -348,7 +354,7 @@ function mapSautoToVehicle(item) {
   return {
     sauto_id: item.id,
     custom_id: item.custom_id || null,
-    kind_id: 1, // osobní (category 838)
+    kind_id: SAUTO_CATEGORY_TO_KIND[item.category?.id] || 1,
     manufacturer_id: manufacturerId,
     model_id: modelId,
     body_type_id: bodyTypeId,
@@ -378,7 +384,7 @@ function mapSautoToVehicle(item) {
     image_count: item.images_total_count || images.length,
     main_image_url: mainImage,
     source: 'sauto',
-    source_url: item.id ? `https://www.sauto.cz/osobni-auta/detail/${item.id}` : null,
+    source_url: item.id ? `https://www.sauto.cz/${CATEGORY_SEO_PATHS[item.category?.id] || 'osobni-auta'}/detail/${item.id}` : null,
     is_top: item.topped === true,
     is_promoted: item.promoted === true,
     is_active: true,
@@ -571,12 +577,22 @@ async function main() {
   let priceMax = 50000000;
   let maxListings = 10000;
   let dryRun = false;
+  let categoryId = 838; // default: osobní
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
       case '--manufacturer':
       case '-m':
         manufacturer = args[++i];
+        break;
+      case '--category':
+      case '-c':
+        categoryId = parseInt(args[++i]);
+        if (!SAUTO_CATEGORY_TO_KIND[categoryId]) {
+          console.error(`Unknown category_id: ${categoryId}`);
+          console.error('Valid IDs: 838(Osobní), 839(Užitková), 840(Nákladní), 841(Motorky), 842(Čtyřkolky), 843(Přívěsy), 844(Obytné), 845(Prac.stroje), 846(Autobusy)');
+          process.exit(1);
+        }
         break;
       case '--upload-images':
       case '-u':
@@ -603,6 +619,9 @@ Usage: node import-sauto.mjs [options]
 
 Options:
   -m, --manufacturer <seo>  Filter by manufacturer seo_name (e.g., "skoda", "volkswagen")
+  -c, --category <id>       Sauto category ID (default: 838)
+                             838=Osobní, 839=Užitková, 840=Nákladní, 841=Motorky,
+                             842=Čtyřkolky, 843=Přívěsy, 844=Obytné, 845=Prac.stroje, 846=Autobusy
   -u, --upload-images       Download images and upload to R2 (slower)
   --price-step <num>        Price range step in CZK (default: 200000)
   --price-max <num>         Max price in CZK (default: 50000000)
@@ -610,18 +629,24 @@ Options:
   --dry-run                 Fetch and map but don't insert into DB
 
 Examples:
-  node import-sauto.mjs -m skoda                    # Import all Škoda listings
-  node import-sauto.mjs -m volkswagen -u             # Import VW with R2 images
-  node import-sauto.mjs --price-step 50000 --max 500 # All brands, small price step
-  node import-sauto.mjs --dry-run -m bmw             # Test mapping without insert
+  node import-sauto.mjs -m skoda                       # Import all Škoda listings
+  node import-sauto.mjs -c 841 --max 500               # Import motorcycles (max 500)
+  node import-sauto.mjs -c 844 -u                      # Import RVs with images
+  node import-sauto.mjs --dry-run -c 841 -m yamaha     # Test motorcycle import
         `);
         process.exit(0);
     }
   }
 
+  // Set the category in default params
+  DEFAULT_PARAMS.category_id = String(categoryId);
+
+  const kindId = SAUTO_CATEGORY_TO_KIND[categoryId];
+  const categoryName = CATEGORY_SEO_PATHS[categoryId] || 'unknown';
   console.log('=== Sauto.cz → Supabase Import ===');
   console.log(`Supabase: ${SUPABASE_URL}`);
   console.log(`R2 bucket: ${R2_BUCKET}`);
+  console.log(`Category: ${categoryName} (sauto=${categoryId}, kind_id=${kindId})`);
   console.log(`Upload images: ${uploadImages}`);
   console.log(`Manufacturer: ${manufacturer || 'ALL'}`);
 
@@ -657,31 +682,16 @@ Examples:
     console.log(`  With manufacturer_id: ${withMfr.length} (${(withMfr.length / allMapped.length * 100).toFixed(1)}%)`);
     console.log(`  With model_id: ${withModel.length} (${(withModel.length / allMapped.length * 100).toFixed(1)}%)`);
 
-    // Unmapped manufacturers
-    const unmappedMfr = new Set();
+    // Show unique manufacturers found
+    const foundMfrs = new Map();
     for (const item of listings) {
-      const seo = item.manufacturer_cb?.seo_name;
-      if (seo && !MANUFACTURER_SEO_MAP[seo]) {
-        unmappedMfr.add(`${seo} (${item.manufacturer_cb.name})`);
+      const m = item.manufacturer_cb;
+      if (m?.value && !foundMfrs.has(m.value)) {
+        foundMfrs.set(m.value, m.name);
       }
     }
-    if (unmappedMfr.size > 0) {
-      console.log(`  Unmapped manufacturers: ${[...unmappedMfr].join(', ')}`);
-    }
-
-    // Unmapped models
-    const unmappedModels = new Set();
-    for (const item of listings) {
-      const mfrSeo = item.manufacturer_cb?.seo_name;
-      const mfrId = mfrSeo ? MANUFACTURER_SEO_MAP[mfrSeo] : null;
-      const modelName = item.model_cb?.name;
-      if (mfrId && modelName && !findModelId(mfrId, modelName)) {
-        unmappedModels.add(`${item.manufacturer_cb.name} ${modelName}`);
-      }
-    }
-    if (unmappedModels.size > 0) {
-      console.log(`  Unmapped models (${unmappedModels.size}): ${[...unmappedModels].slice(0, 20).join(', ')}${unmappedModels.size > 20 ? '...' : ''}`);
-    }
+    console.log(`  Unique manufacturers: ${foundMfrs.size}`);
+    console.log(`    ${[...foundMfrs.values()].sort().join(', ')}`);
 
     return;
   }
