@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart, MapPin, Fuel, Settings, Calendar, Gauge, Zap, Camera } from 'lucide-react';
+import { Heart, MapPin, Fuel, Settings, Calendar, Gauge, Zap, Camera, ArrowRight, BadgeCheck, Sparkles } from 'lucide-react';
 import type { Vehicle } from '../types';
 import { formatPrice, formatKm, formatPower, formatRegistration } from '../lib/codebooks';
 import { useFavoritesStore } from '../stores/favoritesStore';
@@ -16,22 +16,30 @@ const RATING_LABELS: Record<string, { label: string; className: string }> = {
   high: { label: 'Vyšší cena', className: 'bg-red-600' },
 };
 
+function isNew(vehicle: Vehicle): boolean {
+  if (!vehicle.published_at && !vehicle.created_at) return false;
+  const date = new Date(vehicle.published_at || vehicle.created_at);
+  const threeDaysAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
+  return date.getTime() > threeDaysAgo;
+}
+
 export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardProps) {
   const { toggleFavorite, isFavorite } = useFavoritesStore();
   const fav = isFavorite(vehicle.id);
   const rating = vehicle.price_rating ? RATING_LABELS[vehicle.price_rating] : null;
+  const isNewVehicle = isNew(vehicle);
+  const isCertified = !!vehicle.certified_id;
 
   if (layout === 'grid') {
     return (
       <Link
         to={`/vozidlo/${vehicle.id}`}
-        className="group bg-surface-900 rounded-xl overflow-hidden border border-surface-800 hover:border-surface-600 transition-all hover:shadow-lg hover:shadow-black/20"
+        className="group bg-surface-900 rounded-xl overflow-hidden border border-surface-800 hover:border-surface-600 transition-all hover:shadow-lg hover:shadow-black/20 flex flex-col"
       >
         {/* Obrázek */}
         <div className="relative aspect-[4/3] bg-surface-800 overflow-hidden">
           {vehicle.main_image_url ? (
             <>
-              {/* Blurred background for portrait photos */}
               <div
                 className="absolute inset-0 scale-110 blur-xl opacity-60"
                 style={{ backgroundImage: `url(${vehicle.main_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
@@ -48,11 +56,28 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
               <Fuel className="w-12 h-12" />
             </div>
           )}
-          {vehicle.is_top && (
-            <span className="absolute top-2 left-2 px-2 py-0.5 bg-primary-600 text-white text-xs font-bold rounded">
-              TOP
-            </span>
-          )}
+
+          {/* Badges top-left — stacked */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1">
+            {vehicle.is_top && (
+              <span className="px-2 py-0.5 bg-primary-600 text-white text-xs font-bold rounded">
+                TOP
+              </span>
+            )}
+            {isNewVehicle && (
+              <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-600 text-white text-xs font-bold rounded">
+                <Sparkles className="w-3 h-3" />
+                Novinka
+              </span>
+            )}
+            {isCertified && (
+              <span className="flex items-center gap-1 px-2 py-0.5 bg-accent-600 text-white text-xs font-bold rounded">
+                <BadgeCheck className="w-3 h-3" />
+                Ověřeno
+              </span>
+            )}
+          </div>
+
           {vehicle.image_count > 1 && (
             <span className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-black/60 text-white text-xs rounded">
               <Camera className="w-3 h-3" />
@@ -68,7 +93,7 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
         </div>
 
         {/* Info */}
-        <div className="p-4">
+        <div className="p-4 flex flex-col flex-1">
           <h3 className="text-sm font-semibold text-surface-100 truncate">{vehicle.title}</h3>
           <div className="flex items-center gap-2 mt-2">
             <span className="text-lg font-bold text-surface-100">{formatPrice(vehicle.price)}</span>
@@ -78,26 +103,36 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
               </span>
             )}
           </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-3 text-xs text-surface-400">
-            {vehicle.first_registration && (
-              <span className="flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {formatRegistration(vehicle.made_month, vehicle.made_year)}
+
+          {/* Spec chips */}
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {vehicle.made_year && (
+              <span className="px-2 py-0.5 border border-surface-700 rounded text-[10px] text-surface-300 uppercase tracking-wide">
+                <span className="text-surface-500">Rok</span> {vehicle.made_year}
               </span>
             )}
-            <span className="flex items-center gap-1">
-              <Gauge className="w-3 h-3" />
-              {formatKm(vehicle.tachometer)}
-            </span>
+            {vehicle.tachometer != null && (
+              <span className="px-2 py-0.5 border border-surface-700 rounded text-[10px] text-surface-300 uppercase tracking-wide">
+                <span className="text-surface-500">Km</span> {formatKm(vehicle.tachometer)}
+              </span>
+            )}
             {vehicle.engine_power && (
-              <span className="flex items-center gap-1">
-                <Zap className="w-3 h-3" />
-                {formatPower(vehicle.engine_power)}
+              <span className="px-2 py-0.5 border border-surface-700 rounded text-[10px] text-surface-300 uppercase tracking-wide">
+                <span className="text-surface-500">Výkon</span> {formatPower(vehicle.engine_power)}
               </span>
             )}
-            <span className="flex items-center gap-1">
-              <Fuel className="w-3 h-3" />
-              {vehicle.fuel_name}
+            {vehicle.fuel_name && (
+              <span className="px-2 py-0.5 border border-surface-700 rounded text-[10px] text-surface-300 uppercase tracking-wide">
+                {vehicle.fuel_name}
+              </span>
+            )}
+          </div>
+
+          {/* Gradient CTA */}
+          <div className="mt-auto pt-3">
+            <span className="flex items-center justify-center gap-2 w-full py-2 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 rounded-lg text-sm font-medium text-white transition-all group-hover:shadow-md group-hover:shadow-primary-600/20">
+              Detail nabídky
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </span>
           </div>
         </div>
@@ -131,11 +166,28 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
             <Fuel className="w-12 h-12" />
           </div>
         )}
-        {vehicle.is_top && (
-          <span className="absolute top-2 left-2 px-2 py-0.5 bg-primary-600 text-white text-xs font-bold rounded">
-            TOP
-          </span>
-        )}
+
+        {/* Badges top-left — stacked */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          {vehicle.is_top && (
+            <span className="px-2 py-0.5 bg-primary-600 text-white text-xs font-bold rounded">
+              TOP
+            </span>
+          )}
+          {isNewVehicle && (
+            <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-600 text-white text-xs font-bold rounded">
+              <Sparkles className="w-3 h-3" />
+              Novinka
+            </span>
+          )}
+          {isCertified && (
+            <span className="flex items-center gap-1 px-2 py-0.5 bg-accent-600 text-white text-xs font-bold rounded">
+              <BadgeCheck className="w-3 h-3" />
+              Ověřeno
+            </span>
+          )}
+        </div>
+
         {vehicle.image_count > 1 && (
           <span className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 bg-black/60 text-white text-xs rounded">
             <Camera className="w-3 h-3" />
