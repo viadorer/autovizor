@@ -16,6 +16,7 @@ const R2_LOGOS = import.meta.env.VITE_R2_PUBLIC_URL || 'https://pub-73649d5be632
 
 export function getManufacturerLogoUrl(name: string): string {
   const safeName = name.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // š→s, č→c, ë→e etc.
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
     .replace(/-+/g, '-');
