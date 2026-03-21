@@ -24,9 +24,9 @@ function normalizeVehicle(v: Record<string, unknown>): Vehicle {
   // Normalize: plain string URLs → VehicleImage objects {url, order}
   vehicle.images = vehicle.images.map((img: unknown, i: number) => {
     if (typeof img === 'string') return { url: img, order: i };
-    if (img && typeof img === 'object' && 'url' in img) return img;
+    if (img && typeof img === 'object' && 'url' in img) return img as { url: string; order: number };
     return null;
-  }).filter(Boolean);
+  }).filter((x): x is { url: string; order: number } => x !== null);
 
   return vehicle;
 }
