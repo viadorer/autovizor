@@ -8,43 +8,78 @@ import { FUEL_TYPES, GEARBOX_TYPES, BODY_TYPES, COLORS, DRIVE_TYPES, CONDITIONS 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
-// Build manufacturer name list for osobní (kind_id=1)
-const MFR_NAMES = MANUFACTURERS
-  .filter(m => !m.kind_ids || m.kind_ids.includes(1))
-  .map(m => m.name)
-  .slice(0, 100); // top 100 for prompt size
+// Build compact brand→models map for osobní (kind_id=1)
+// Format: "Škoda(93):Fabia|Octavia|Superb|Kodiaq|Karoq|Kamiq|Scala|Enyaq iV"
+const OSOBNI = MANUFACTURERS.filter(m => !m.kind_ids || m.kind_ids.includes(1));
+
+const BRAND_MODEL_LIST = OSOBNI
+  .map(m => {
+    const models = m.models
+      .filter(mod => mod.name !== 'Ostatní')
+      .map(mod => mod.name)
+      .join('|');
+    return `${m.name}(${m.id}):${models}`;
+  })
+  .join('\n');
+
+// Compact codebook lists
+const FUEL_LIST = FUEL_TYPES.map(f => `${f.name}(${f.id})`).join(', ');
+const GEARBOX_LIST = GEARBOX_TYPES.map(g => `${g.name}(${g.id})`).join(', ');
+const BODY_LIST = BODY_TYPES.map(b => `${b.name}(${b.id})`).join(', ');
+const COLOR_LIST = COLORS.map(c => `${c.name}(${c.id})`).join(', ');
+const DRIVE_LIST = DRIVE_TYPES.map(d => `${d.name}(${d.id})`).join(', ');
+const CONDITION_LIST = CONDITIONS.map(c => `${c.name}(${c.id})`).join(', ');
 
 const SYSTEM_PROMPT = `Jsi AI asistent pro český automobilový vyhledávač Autovizor.cz.
-Uživatel popíše slovně jaké auto hledá. Tvým úkolem je extrahovat strukturované filtry pro vyhledávání.
+Uživatel popíše slovně jaké auto hledá. Extrahuj strukturované filtry.
 
-Vrať POUZE validní JSON objekt (bez markdown, bez vysvětlení) s těmito poli (vynech pole která uživatel nezmínil):
-
+Vrať POUZE JSON (bez markdown, bez komentářů):
 {
-  "manufacturer": "název značky (přesný z tohoto seznamu: ${MFR_NAMES.join(', ')})",
-  "model": "název modelu (pokud zmíněn)",
-  "fuel_type": "benzín|nafta|lpg|elektro|hybrid|cng",
-  "gearbox": "manuální|automatická",
-  "body_type": "hatchback|sedan|kombi|suv|kabriolet|kupé|mpv|pick-up|van|liftback|roadster",
-  "color": "bílá|černá|šedá|stříbrná|modrá|červená|zelená|hnědá|béžová|oranžová|žlutá|zlatá|fialová",
-  "drive": "4x4|4x2",
-  "condition": "nové|ojeté",
-  "year_from": 2015,
-  "year_to": 2024,
-  "price_from": 100000,
-  "price_to": 500000,
-  "km_from": 0,
-  "km_to": 100000,
-  "power_from": 100,
-  "power_to": 200
+  "manufacturer_id": číslo,
+  "model_id": číslo,
+  "fuel_type_id": číslo,
+  "gearbox_id": číslo,
+  "body_type_id": číslo,
+  "color_id": číslo,
+  "drive_id": číslo,
+  "condition_id": číslo,
+  "year_from": číslo,
+  "year_to": číslo,
+  "price_from": číslo,
+  "price_to": číslo,
+  "km_from": číslo,
+  "km_to": číslo,
+  "power_from": číslo (kW),
+  "power_to": číslo (kW)
 }
 
+Vynech pole která uživatel nezmínil. Používej PŘESNÁ ID z číselníků níže.
+
+PALIVO: ${FUEL_LIST}
+PŘEVODOVKA: ${GEARBOX_LIST}
+KAROSERIE: ${BODY_LIST}
+BARVA: ${COLOR_LIST}
+POHON: ${DRIVE_LIST}
+STAV: ${CONDITION_LIST}
+
+ZNAČKY A MODELY (formát: Značka(manufacturer_id):Model1|Model2|...):
+${BRAND_MODEL_LIST}
+
+PRAVIDLA:
+- "do 150 tisíc" / "do 150k" = price_to: 150000
+- "do milionu" = price_to: 1000000
+- "nad 200 koní" → přepočet na kW: power_from = Math.round(200 * 0.7355) = 147
+- "1.9 TDI" = nafta (fuel_type_id pro Naftu)
+- "TSI" / "TFSI" / "benzín" = benzín
+- "automat" / "DSG" / "tiptronic" = automatická
+- Pokud uživatel zmíní motor (1.9 TDI, 2.0 TSI), urči palivo z názvu motoru
+- Pokud zmíní jen značku a model bez dalších filtrů, vrať manufacturer_id + model_id
+
 Příklady:
-- "rodinné SUV do 500 tisíc, automat" → {"body_type":"suv","price_to":500000,"gearbox":"automatická"}
-- "Škoda Octavia kombi, nafta, do 100 000 km" → {"manufacturer":"Škoda","model":"Octavia","body_type":"kombi","fuel_type":"nafta","km_to":100000}
-- "elektromobil do milionu" → {"fuel_type":"elektro","price_to":1000000}
-- "BMW řady 3, 2020 a novější, automat" → {"manufacturer":"BMW","model":"Řada 3","year_from":2020,"gearbox":"automatická"}
-- "levné auto do 200 tisíc" → {"price_to":200000}
-- "sportovní kupé nad 200 koní" → {"body_type":"kupé","power_from":200}`;
+"škoda octavia 1.9 tdi do 150k" → {"manufacturer_id":93,"model_id":705,"fuel_type_id":2,"price_to":150000}
+"bmw řady 3 automat 2020+" → {"manufacturer_id":5,"model_id":39,"gearbox_id":3,"year_from":2020}
+"suv do 500 tisíc nafta" → {"body_type_id":9,"price_to":500000,"fuel_type_id":2}
+"elektromobil do milionu" → {"fuel_type_id":4,"price_to":1000000}`;
 
 interface ParsedFilters {
   manufacturer_id?: number;
@@ -63,15 +98,6 @@ interface ParsedFilters {
   km_to?: number;
   power_from?: number;
   power_to?: number;
-}
-
-function matchId(list: { id: number; name: string }[], value: string | undefined): number | undefined {
-  if (!value) return undefined;
-  const lower = value.toLowerCase();
-  const exact = list.find(item => item.name.toLowerCase() === lower);
-  if (exact) return exact.id;
-  const partial = list.find(item => item.name.toLowerCase().includes(lower) || lower.includes(item.name.toLowerCase()));
-  return partial?.id;
 }
 
 export async function aiParseQuery(query: string): Promise<ParsedFilters | null> {
@@ -110,34 +136,39 @@ export async function aiParseQuery(query: string): Promise<ParsedFilters | null>
     const parsed = JSON.parse(jsonMatch[0]);
     const filters: ParsedFilters = {};
 
-    // Map text values to IDs
-    if (parsed.manufacturer) {
-      const mfr = MANUFACTURERS.find(m =>
-        m.name.toLowerCase() === parsed.manufacturer.toLowerCase() ||
-        m.name.toLowerCase().includes(parsed.manufacturer.toLowerCase())
-      );
+    // Gemini now returns direct IDs — just validate and pass through
+    if (parsed.manufacturer_id) {
+      const mfr = OSOBNI.find(m => m.id === parsed.manufacturer_id);
       if (mfr) {
         filters.manufacturer_id = mfr.id;
-        // Try to match model within manufacturer
-        if (parsed.model && mfr.models) {
-          const model = mfr.models.find(m =>
-            m.name.toLowerCase() === parsed.model.toLowerCase() ||
-            m.name.toLowerCase().includes(parsed.model.toLowerCase()) ||
-            parsed.model.toLowerCase().includes(m.name.toLowerCase())
-          );
+        if (parsed.model_id) {
+          const model = mfr.models.find(m => m.id === parsed.model_id);
           if (model) filters.model_id = model.id;
         }
       }
     }
 
-    if (parsed.fuel_type) filters.fuel_type_id = matchId(FUEL_TYPES, parsed.fuel_type);
-    if (parsed.gearbox) filters.gearbox_id = matchId(GEARBOX_TYPES, parsed.gearbox);
-    if (parsed.body_type) filters.body_type_id = matchId(BODY_TYPES, parsed.body_type);
-    if (parsed.color) filters.color_id = matchId(COLORS, parsed.color);
-    if (parsed.drive) filters.drive_id = matchId(DRIVE_TYPES, parsed.drive);
-    if (parsed.condition) filters.condition_id = matchId(CONDITIONS, parsed.condition);
+    // Validate codebook IDs
+    if (parsed.fuel_type_id && FUEL_TYPES.some(f => f.id === parsed.fuel_type_id)) {
+      filters.fuel_type_id = parsed.fuel_type_id;
+    }
+    if (parsed.gearbox_id && GEARBOX_TYPES.some(g => g.id === parsed.gearbox_id)) {
+      filters.gearbox_id = parsed.gearbox_id;
+    }
+    if (parsed.body_type_id && BODY_TYPES.some(b => b.id === parsed.body_type_id)) {
+      filters.body_type_id = parsed.body_type_id;
+    }
+    if (parsed.color_id && COLORS.some(c => c.id === parsed.color_id)) {
+      filters.color_id = parsed.color_id;
+    }
+    if (parsed.drive_id && DRIVE_TYPES.some(d => d.id === parsed.drive_id)) {
+      filters.drive_id = parsed.drive_id;
+    }
+    if (parsed.condition_id && CONDITIONS.some(c => c.id === parsed.condition_id)) {
+      filters.condition_id = parsed.condition_id;
+    }
 
-    // Numeric filters
+    // Numeric filters — pass through
     if (parsed.year_from) filters.year_from = parsed.year_from;
     if (parsed.year_to) filters.year_to = parsed.year_to;
     if (parsed.price_from) filters.price_from = parsed.price_from;
