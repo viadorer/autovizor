@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search } from 'lucide-react';
+import { Search, Sparkles, Loader2 } from 'lucide-react';
 import { useSearchStore } from '../stores/searchStore';
 import { FUEL_TYPES, GEARBOX_TYPES, YEAR_OPTIONS, formatPrice } from '../lib/codebooks';
 import ManufacturerSelect from './ManufacturerSelect';
 import { useManufacturers } from '../hooks/useVehicles';
+import { aiParseQuery } from '../lib/gemini-search';
 
 interface SearchBarProps {
   variant?: 'hero' | 'compact';
@@ -12,9 +13,11 @@ interface SearchBarProps {
 
 export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
   const navigate = useNavigate();
-  const { filters, setFilter, setFilters, search } = useSearchStore();
+  const { filters, setFilter, setFilters, search, resetFilters } = useSearchStore();
   const [selectedMfr, setSelectedMfr] = useState<number | undefined>(filters.manufacturer_id);
   const { data: manufacturers = [] } = useManufacturers(1);
+  const [aiQuery, setAiQuery] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
 
   const currentModels = selectedMfr
     ? manufacturers.find((m) => m.id === selectedMfr)?.models ?? []
@@ -30,6 +33,34 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
     navigate('/hledat');
   };
 
+  const handleAiSearch = async (query: string) => {
+    if (!query.trim()) return;
+    setAiLoading(true);
+    try {
+      const parsed = await aiParseQuery(query);
+      if (parsed && Object.keys(parsed).length > 0) {
+        // Reset existing filters, apply AI-parsed ones
+        resetFilters();
+        setFilters(parsed);
+        if (parsed.manufacturer_id) setSelectedMfr(parsed.manufacturer_id);
+        // Auto-search
+        setTimeout(() => {
+          search();
+          navigate('/hledat');
+        }, 50);
+      } else {
+        // Fallback: text search
+        setFilter('query', query);
+        handleSearch();
+      }
+    } catch {
+      setFilter('query', query);
+      handleSearch();
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   if (variant === 'compact') {
     return (
       <div className="flex items-center gap-2 bg-surface-900 rounded-xl p-2">
@@ -38,20 +69,20 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
           <input
             type="text"
             placeholder="Popiš, jaké auto hledáš..."
+            value={aiQuery}
+            onChange={(e) => setAiQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-surface-800 rounded-lg text-sm text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600"
             onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                setFilter('query', (e.target as HTMLInputElement).value);
-                handleSearch();
-              }
+              if (e.key === 'Enter') handleAiSearch(aiQuery);
             }}
           />
         </div>
         <button
-          onClick={handleSearch}
-          className="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 rounded-lg text-sm font-medium text-white transition-colors"
+          onClick={() => handleAiSearch(aiQuery)}
+          disabled={aiLoading}
+          className="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-50"
         >
-          Hledat
+          {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Hledat'}
         </button>
       </div>
     );
@@ -65,24 +96,27 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
 
       {/* AI vyhledávání */}
       <div className="relative mb-6">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
+        <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-accent-500" />
         <input
           type="text"
-          placeholder="Popiš, jaké auto hledáš..."
-          className="w-full pl-12 pr-14 py-4 bg-surface-800 rounded-xl text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-primary-600 text-base"
+          placeholder="Popiš, jaké auto hledáš — např. „SUV do 500 tisíc, automat, nafta"..."
+          value={aiQuery}
+          onChange={(e) => setAiQuery(e.target.value)}
+          className="w-full pl-12 pr-14 py-4 bg-surface-800 rounded-xl text-surface-100 placeholder-surface-500 outline-none focus:ring-2 focus:ring-accent-500 text-base"
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              setFilter('query', (e.target as HTMLInputElement).value);
-              handleSearch();
-            }
+            if (e.key === 'Enter') handleAiSearch(aiQuery);
           }}
         />
         <button
-          onClick={handleSearch}
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-primary-600 hover:bg-primary-700 rounded-lg flex items-center justify-center text-white transition-colors"
+          onClick={() => handleAiSearch(aiQuery)}
+          disabled={aiLoading}
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 rounded-lg flex items-center justify-center text-white transition-all disabled:opacity-50"
         >
-          <Search className="w-5 h-5" />
+          {aiLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
         </button>
+        <span className="absolute right-14 top-1/2 -translate-y-1/2 text-[10px] text-accent-500 font-medium">
+          AI
+        </span>
       </div>
 
       {/* Filtry */}

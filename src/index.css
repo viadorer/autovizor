@@ -5,18 +5,18 @@
 @theme {
   --font-sans: 'Inter', system-ui, sans-serif;
 
-  /* Primary: #F04D23 */
-  --color-primary-50: #fef3f0;
-  --color-primary-100: #fee3db;
-  --color-primary-200: #fdc4b3;
-  --color-primary-300: #fb9b7e;
-  --color-primary-400: #f36e4a;
-  --color-primary-500: #F04D23;
-  --color-primary-600: #d9411b;
-  --color-primary-700: #b53316;
-  --color-primary-800: #922c16;
-  --color-primary-900: #782918;
-  --color-primary-950: #41110a;
+  /* Primary: #FF6B00 — svítivá oranžová (Porsche-style) */
+  --color-primary-50: #fff7ed;
+  --color-primary-100: #ffedd5;
+  --color-primary-200: #fed7aa;
+  --color-primary-300: #fdba74;
+  --color-primary-400: #fb923c;
+  --color-primary-500: #FF6B00;
+  --color-primary-600: #ea5d00;
+  --color-primary-700: #c24e00;
+  --color-primary-800: #9a3e02;
+  --color-primary-900: #7c3308;
+  --color-primary-950: #431a04;
 
   /* Accent/Tertiary: #008ECF */
   --color-accent-50: #eef8ff;
