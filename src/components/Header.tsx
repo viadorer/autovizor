@@ -24,8 +24,8 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <AutovizorLogo size={36} color="#f97316" />
-            <span className="text-lg font-bold text-surface-100 tracking-tight">
+            <AutovizorLogo size={24} />
+            <span className="text-2xl font-bold text-surface-100 tracking-tight">
               Auto<span className="text-primary-400">vizor</span>
             </span>
           </Link>
