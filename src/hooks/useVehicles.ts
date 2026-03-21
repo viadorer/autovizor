@@ -35,10 +35,10 @@ export function useVehiclesByIds(ids: number[]) {
   });
 }
 
-export function useManufacturers() {
+export function useManufacturers(kindId?: number) {
   return useQuery({
-    queryKey: ['manufacturers'],
-    queryFn: getManufacturers,
+    queryKey: ['manufacturers', kindId],
+    queryFn: () => getManufacturers(kindId),
     staleTime: 30 * 60 * 1000,
   });
 }

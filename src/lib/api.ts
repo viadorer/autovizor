@@ -277,23 +277,26 @@ export async function getVehiclesByIds(ids: number[]): Promise<Vehicle[]> {
 // ============================================================
 // getManufacturers - seznam výrobců
 // ============================================================
-export async function getManufacturers(): Promise<ManufacturerWithModels[]> {
+export async function getManufacturers(kindId?: number): Promise<ManufacturerWithModels[]> {
   if (!isSupabaseConfigured()) {
-    return MANUFACTURERS;
+    return kindId ? MANUFACTURERS.filter(m => !m.kind_ids || m.kind_ids.includes(kindId)) : MANUFACTURERS;
   }
 
   try {
-    const { data, error } = await supabase
-      .from('manufacturers')
-      .select('*')
-      .order('name');
+    let query = supabase.from('manufacturers').select('*').order('name');
+    if (kindId) {
+      query = query.eq('kind_id', kindId);
+    }
+    const { data, error } = await query;
 
     if (error) throw error;
 
-    // Fetch models for each manufacturer
+    // Fetch models for matched manufacturers
+    const mfrIds = (data ?? []).map((m: Record<string, unknown>) => m.id as number);
     const { data: modelsData, error: modelsError } = await supabase
       .from('models')
       .select('*')
+      .in('manufacturer_id', mfrIds)
       .order('name');
 
     if (modelsError) throw modelsError;

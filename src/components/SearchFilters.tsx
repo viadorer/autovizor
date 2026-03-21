@@ -51,7 +51,7 @@ export default function SearchFilters() {
   const [showEquipment, setShowEquipment] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const { data: manufacturers = [] } = useManufacturers();
+  const { data: manufacturers = [] } = useManufacturers(filters.kind_id as number | undefined);
   const selectedMfr = filters.manufacturer_id;
   const currentModels = selectedMfr
     ? manufacturers.find((m) => m.id === selectedMfr)?.models ?? []

@@ -23,18 +23,13 @@ export default function ManufacturerSelect({
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { data: manufacturers = [] } = useManufacturers();
+  const { data: manufacturers = [] } = useManufacturers(kindId);
 
   const selected = value ? manufacturers.find((m) => m.id === value) : undefined;
 
-  // Filter manufacturers by kind_id if specified
-  const kindFiltered = kindId
-    ? manufacturers.filter((m) => !m.kind_ids || m.kind_ids.includes(kindId))
-    : manufacturers;
-
   const filtered = filter
-    ? kindFiltered.filter((m) => m.name.toLowerCase().includes(filter.toLowerCase()))
-    : kindFiltered;
+    ? manufacturers.filter((m) => m.name.toLowerCase().includes(filter.toLowerCase()))
+    : manufacturers;
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {

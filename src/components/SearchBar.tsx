@@ -14,7 +14,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
   const navigate = useNavigate();
   const { filters, setFilter, setFilters, search } = useSearchStore();
   const [selectedMfr, setSelectedMfr] = useState<number | undefined>(filters.manufacturer_id);
-  const { data: manufacturers = [] } = useManufacturers();
+  const { data: manufacturers = [] } = useManufacturers(1);
 
   const currentModels = selectedMfr
     ? manufacturers.find((m) => m.id === selectedMfr)?.models ?? []
@@ -92,6 +92,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
           value={selectedMfr}
           onChange={handleManufacturer}
           placeholder="Značka"
+          kindId={1}
         />
 
         {/* Model */}
