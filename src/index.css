@@ -4,17 +4,34 @@
 
 @theme {
   --font-sans: 'Inter', system-ui, sans-serif;
-  --color-primary-50: #fff5f2;
-  --color-primary-100: #ffe6de;
-  --color-primary-200: #ffc9b8;
-  --color-primary-300: #ffa388;
-  --color-primary-400: #ff7a52;
-  --color-primary-500: #ff5526;
-  --color-primary-600: #e63e10;
-  --color-primary-700: #bf310d;
-  --color-primary-800: #9c2b12;
-  --color-primary-900: #802814;
-  --color-primary-950: #451008;
+
+  /* Primary: #F04D23 */
+  --color-primary-50: #fef3f0;
+  --color-primary-100: #fee3db;
+  --color-primary-200: #fdc4b3;
+  --color-primary-300: #fb9b7e;
+  --color-primary-400: #f36e4a;
+  --color-primary-500: #F04D23;
+  --color-primary-600: #d9411b;
+  --color-primary-700: #b53316;
+  --color-primary-800: #922c16;
+  --color-primary-900: #782918;
+  --color-primary-950: #41110a;
+
+  /* Accent/Tertiary: #008ECF */
+  --color-accent-50: #eef8ff;
+  --color-accent-100: #d8eeff;
+  --color-accent-200: #b9e2ff;
+  --color-accent-300: #89d2ff;
+  --color-accent-400: #51b8ff;
+  --color-accent-500: #2899ff;
+  --color-accent-600: #008ECF;
+  --color-accent-700: #0a6aab;
+  --color-accent-800: #0f578c;
+  --color-accent-900: #134a73;
+  --color-accent-950: #112e48;
+
+  /* Surface: mapped to CSS vars for light/dark switching */
   --color-surface-50: var(--surface-50);
   --color-surface-100: var(--surface-100);
   --color-surface-200: var(--surface-200);
@@ -29,20 +46,20 @@
   --color-surface-950: var(--surface-950);
 }
 
-/* Light mode (default) */
+/* Light mode (default) — based on #F8F9FA neutral + #E9ECEF secondary */
 :root {
   --surface-50: #0a0a0a;
-  --surface-100: #111827;
-  --surface-200: #1f2937;
-  --surface-300: #374151;
-  --surface-400: #4b5563;
-  --surface-500: #6b7280;
-  --surface-600: #9ca3af;
-  --surface-700: #d1d5db;
-  --surface-800: #e5e7eb;
-  --surface-850: #f0f1f3;
-  --surface-900: #ffffff;
-  --surface-950: #f5f5f7;
+  --surface-100: #1a1a2e;
+  --surface-200: #2d2d3f;
+  --surface-300: #4a4a5a;
+  --surface-400: #6b7280;
+  --surface-500: #9ca3af;
+  --surface-600: #c4c8d0;
+  --surface-700: #dee1e6;
+  --surface-800: #E9ECEF;
+  --surface-850: #f1f3f5;
+  --surface-900: #F8F9FA;
+  --surface-950: #ffffff;
 }
 
 /* Dark mode */
