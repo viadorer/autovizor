@@ -9,6 +9,16 @@ export interface ManufacturerWithModels {
   models: { id: number; name: string }[];
 }
 
+const R2_LOGOS = import.meta.env.VITE_R2_PUBLIC_URL || 'https://pub-73649d5be63240648a58ace4d4c57318.r2.dev';
+
+export function getManufacturerLogoUrl(name: string): string {
+  const safeName = name.toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-');
+  return `${R2_LOGOS}/logos/${safeName}.png`;
+}
+
 export const MANUFACTURERS: ManufacturerWithModels[] = [
   { id: 1, name: 'Alfa Romeo', models: [
     { id: 101, name: '145' }, { id: 102, name: '146' }, { id: 103, name: '147' },

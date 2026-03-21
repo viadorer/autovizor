@@ -4,6 +4,7 @@ import { Car, Truck, Bike, Caravan, Search, TrendingUp, Shield, Zap } from 'luci
 import SearchBar from '../components/SearchBar';
 import VehicleCard from '../components/VehicleCard';
 import { getTopVehicles } from '../lib/api';
+import { getManufacturerLogoUrl } from '../lib/manufacturers';
 import type { Vehicle } from '../types';
 
 const VEHICLE_CATEGORIES = [
@@ -102,12 +103,20 @@ export default function HomePage() {
             <Link
               key={brand.name}
               to={`/hledat?brand=${encodeURIComponent(brand.name)}`}
-              className="flex items-center justify-between p-4 bg-surface-900 rounded-xl border border-surface-800 hover:border-surface-600 transition-all group"
+              className="flex items-center gap-3 p-4 bg-surface-900 rounded-xl border border-surface-800 hover:border-surface-600 transition-all group"
             >
-              <span className="text-sm font-medium text-surface-100 group-hover:text-primary-400 transition-colors">
-                {brand.name}
-              </span>
-              <span className="text-xs text-surface-500">{brand.count}</span>
+              <img
+                src={getManufacturerLogoUrl(brand.name)}
+                alt={brand.name}
+                className="w-8 h-8 object-contain shrink-0"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-surface-100 group-hover:text-primary-400 transition-colors truncate">
+                  {brand.name}
+                </p>
+                <p className="text-xs text-surface-500">{brand.count}</p>
+              </div>
             </Link>
           ))}
         </div>

@@ -12,7 +12,7 @@ import {
   GEARBOX_LEVELS, CERTIFIED_PROGRAMS, SEATPLACE_TYPES,
   formatPrice,
 } from '../lib/codebooks';
-import { MANUFACTURERS } from '../lib/manufacturers';
+import { MANUFACTURERS, getManufacturerLogoUrl } from '../lib/manufacturers';
 
 function Select({
   label,

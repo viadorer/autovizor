@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ============================================================
-// Scrape manufacturer logos from Wikipedia/Wikimedia Commons
+// Scrape manufacturer logos from Wikimedia Commons API
 // and upload to Cloudflare R2
 // ============================================================
 
@@ -35,101 +35,162 @@ const s3 = new S3Client({
 const R2_BUCKET = env.R2_BUCKET_NAME;
 const R2_PUBLIC_URL = env.R2_PUBLIC_URL;
 
-// ── Manufacturer → Wikipedia page mapping ────────────────────
-// Most Wikipedia car articles follow pattern: "{Name}_(automobile)" or just "{Name}"
-const LOGO_SOURCES = {
-  'Abarth':        'https://upload.wikimedia.org/wikipedia/en/7/7b/Abarth_logo.png',
-  'Aiways':        'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Aiways_logo.svg/200px-Aiways_logo.svg.png',
-  'Alfa Romeo':    'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Alfa_Romeo_logo_%282015%29.svg/200px-Alfa_Romeo_logo_%282015%29.svg.png',
-  'Alpine':        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Alpine_logo.svg/200px-Alpine_logo.svg.png',
-  'Aston Martin':  'https://upload.wikimedia.org/wikipedia/en/thumb/1/1f/Aston_Martin_Logo_2022.svg/200px-Aston_Martin_Logo_2022.svg.png',
-  'Audi':          'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Audi_rings_2016.svg/200px-Audi_rings_2016.svg.png',
-  'Austin':        'https://upload.wikimedia.org/wikipedia/en/thumb/6/61/Austin_Motor_Company_Logo.svg/200px-Austin_Motor_Company_Logo.svg.png',
-  'Bentley':       'https://upload.wikimedia.org/wikipedia/en/thumb/5/5e/Bentley_logo_2.svg/200px-Bentley_logo_2.svg.png',
-  'BMW':           'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/BMW.svg/200px-BMW.svg.png',
-  'Bugatti':       'https://upload.wikimedia.org/wikipedia/en/thumb/6/60/Bugatti_logo.svg/200px-Bugatti_logo.svg.png',
-  'Buick':         'https://upload.wikimedia.org/wikipedia/en/thumb/1/1b/Buick_logo.svg/200px-Buick_logo.svg.png',
-  'BYD':           'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/BYD_Auto_Logo_%282021%29.svg/200px-BYD_Auto_Logo_%282021%29.svg.png',
-  'Cadillac':      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Cadillac_logo.svg/200px-Cadillac_logo.svg.png',
-  'Caterham':      'https://upload.wikimedia.org/wikipedia/en/thumb/f/f1/Caterham_Cars_logo.svg/200px-Caterham_Cars_logo.svg.png',
-  'Chevrolet':     'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Chevrolet_logo_%282013%29.svg/200px-Chevrolet_logo_%282013%29.svg.png',
-  'Chrysler':      'https://upload.wikimedia.org/wikipedia/en/thumb/2/24/Chrysler_logo_2024.svg/200px-Chrysler_logo_2024.svg.png',
-  'Citroën':       'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Citro%C3%ABn_2022.svg/200px-Citro%C3%ABn_2022.svg.png',
-  'Cupra':         'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Cupra_logo_2018.svg/200px-Cupra_logo_2018.svg.png',
-  'Dacia':         'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Dacia_2021.svg/200px-Dacia_2021.svg.png',
-  'Daewoo':        'https://upload.wikimedia.org/wikipedia/en/thumb/9/94/Daewoo_Motor_logo.svg/200px-Daewoo_Motor_logo.svg.png',
-  'Daihatsu':      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Daihatsu_Logo.svg/200px-Daihatsu_Logo.svg.png',
-  'DFSK':          'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Dongfeng_Motor_logo.svg/200px-Dongfeng_Motor_logo.svg.png',
-  'Dodge':         'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Dodge_logo.svg/200px-Dodge_logo.svg.png',
-  'DS':            'https://upload.wikimedia.org/wikipedia/en/thumb/4/42/DS_Automobiles_logo.svg/200px-DS_Automobiles_logo.svg.png',
-  'Ferrari':       'https://upload.wikimedia.org/wikipedia/en/thumb/d/d0/Ferrari_logo.svg/200px-Ferrari_logo.svg.png',
-  'Fiat':          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Fiat_Automobiles_logo_%282006%29.svg/200px-Fiat_Automobiles_logo_%282006%29.svg.png',
-  'Ford':          'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Ford_Motor_Company_Logo.svg/200px-Ford_Motor_Company_Logo.svg.png',
-  'Genesis':       'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Genesis_motors_badge.svg/200px-Genesis_motors_badge.svg.png',
-  'GWM':           'https://upload.wikimedia.org/wikipedia/en/thumb/6/60/GWM_logo.svg/200px-GWM_logo.svg.png',
-  'Honda':         'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Honda.svg/200px-Honda.svg.png',
-  'Hummer':        'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Hummer_logo.svg/200px-Hummer_logo.svg.png',
-  'Hyundai':       'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Hyundai_Motor_Company_logo.svg/200px-Hyundai_Motor_Company_logo.svg.png',
-  'Infiniti':      'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Infiniti_logo.svg/200px-Infiniti_logo.svg.png',
-  'Isuzu':         'https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Isuzu_logo.svg/200px-Isuzu_logo.svg.png',
-  'Iveco':         'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Iveco_logo_%282022%29.svg/200px-Iveco_logo_%282022%29.svg.png',
-  'Jaguar':        'https://upload.wikimedia.org/wikipedia/en/thumb/5/5e/Jaguar_Cars_logo_2012.svg/200px-Jaguar_Cars_logo_2012.svg.png',
-  'Jeep':          'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Jeep_logo_2022.svg/200px-Jeep_logo_2022.svg.png',
-  'Kia':           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Kia-logo.svg/200px-Kia-logo.svg.png',
-  'Lada':          'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Lada_Logo.svg/200px-Lada_Logo.svg.png',
-  'Lamborghini':   'https://upload.wikimedia.org/wikipedia/en/thumb/d/df/Lamborghini_Logo.svg/200px-Lamborghini_Logo.svg.png',
-  'Lancia':        'https://upload.wikimedia.org/wikipedia/en/thumb/7/79/Lancia_logo_2022.svg/200px-Lancia_logo_2022.svg.png',
-  'Land Rover':    'https://upload.wikimedia.org/wikipedia/en/thumb/4/44/Land_Rover_logo_2020.svg/200px-Land_Rover_logo_2020.svg.png',
-  'Lexus':         'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Lexus_division_emblem.svg/200px-Lexus_division_emblem.svg.png',
-  'Lincoln':       'https://upload.wikimedia.org/wikipedia/en/thumb/a/a4/Lincoln_Motor_Company_logo.svg/200px-Lincoln_Motor_Company_logo.svg.png',
-  'Lotus':         'https://upload.wikimedia.org/wikipedia/en/thumb/5/59/Lotus_Cars_logo.svg/200px-Lotus_Cars_logo.svg.png',
-  'Lynk & Co':     'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Lynk_%26_Co_logo.svg/200px-Lynk_%26_Co_logo.svg.png',
-  'Maserati':      'https://upload.wikimedia.org/wikipedia/en/thumb/2/22/Maserati_logo.svg/200px-Maserati_logo.svg.png',
-  'Maxus':         'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Maxus_logo_2022.svg/200px-Maxus_logo_2022.svg.png',
-  'Mazda':         'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Mazda_Motor_logo.svg/200px-Mazda_Motor_logo.svg.png',
-  'McLaren':       'https://upload.wikimedia.org/wikipedia/en/thumb/2/2e/McLaren_Automotive_logo.svg/200px-McLaren_Automotive_logo.svg.png',
-  'Mercedes-Benz': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Mercedes-Benz_Logo_2010.svg/200px-Mercedes-Benz_Logo_2010.svg.png',
-  'MG':            'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/MG_Motor_2021_logo.svg/200px-MG_Motor_2021_logo.svg.png',
-  'MINI':          'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Mini_logo_2018.svg/200px-Mini_logo_2018.svg.png',
-  'Mitsubishi':    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Mitsubishi_logo.svg/200px-Mitsubishi_logo.svg.png',
-  'Morgan':        'https://upload.wikimedia.org/wikipedia/en/thumb/d/d6/Morgan_Motor_Company_logo.svg/200px-Morgan_Motor_Company_logo.svg.png',
-  'NIO':           'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/NIO_Logo.svg/200px-NIO_Logo.svg.png',
-  'Nissan':        'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Nissan_2020_logo.svg/200px-Nissan_2020_logo.svg.png',
-  'Opel':          'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Opel_logo_2024.svg/200px-Opel_logo_2024.svg.png',
-  'ORA':           'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Ora_%28marque%29_Logo.svg/200px-Ora_%28marque%29_Logo.svg.png',
-  'Peugeot':       'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Peugeot_2021_Logo.svg/200px-Peugeot_2021_Logo.svg.png',
-  'Polestar':      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Polestar_logo.svg/200px-Polestar_logo.svg.png',
-  'Porsche':       'https://upload.wikimedia.org/wikipedia/en/thumb/6/6a/Porsche_logo.svg/200px-Porsche_logo.svg.png',
-  'RAM':           'https://upload.wikimedia.org/wikipedia/en/thumb/3/38/Ram_Trucks_logo.svg/200px-Ram_Trucks_logo.svg.png',
-  'Renault':       'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Renault_2021_Text.svg/200px-Renault_2021_Text.svg.png',
-  'Rolls-Royce':   'https://upload.wikimedia.org/wikipedia/en/thumb/7/7c/Rolls-Royce_Motor_Cars_logo.svg/200px-Rolls-Royce_Motor_Cars_logo.svg.png',
-  'Rover':         'https://upload.wikimedia.org/wikipedia/en/thumb/b/b5/Rover_logo.svg/200px-Rover_logo.svg.png',
-  'Saab':          'https://upload.wikimedia.org/wikipedia/en/thumb/8/83/Saab_Automobile_logo.svg/200px-Saab_Automobile_logo.svg.png',
-  'SEAT':          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Seat_Logo_from_2017.svg/200px-Seat_Logo_from_2017.svg.png',
-  'Škoda':         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/%C5%A0koda_Auto_2022.svg/200px-%C5%A0koda_Auto_2022.svg.png',
-  'Smart':         'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Smart_Automobile_logo.svg/200px-Smart_Automobile_logo.svg.png',
-  'SsangYong':     'https://upload.wikimedia.org/wikipedia/en/thumb/f/f3/SsangYong_Motor_logo.svg/200px-SsangYong_Motor_logo.svg.png',
-  'Subaru':        'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Subaru_logo_%282019%29.svg/200px-Subaru_logo_%282019%29.svg.png',
-  'Suzuki':        'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Suzuki_logo_2.svg/200px-Suzuki_logo_2.svg.png',
-  'Tatra':         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Tatra_logo.svg/200px-Tatra_logo.svg.png',
-  'Tesla':         'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Tesla_logo.svg/200px-Tesla_logo.svg.png',
-  'Toyota':        'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Toyota.svg/200px-Toyota.svg.png',
-  'Volkswagen':    'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Volkswagen_logo_2019.svg/200px-Volkswagen_logo_2019.svg.png',
-  'Volvo':         'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Volvo_Cars_logo.svg/200px-Volvo_Cars_logo.svg.png',
-  'Wiesmann':      'https://upload.wikimedia.org/wikipedia/en/thumb/2/25/Wiesmann_logo.svg/200px-Wiesmann_logo.svg.png',
-  'XPeng':         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/XPeng_Motors_logo.svg/200px-XPeng_Motors_logo.svg.png',
+// ── Manufacturer → Wikimedia Commons file name mapping ───────
+// These are the exact file names on Wikimedia Commons
+const WIKI_FILES = {
+  'Abarth':        ['Abarth logo', 'Abarth & C. logo'],
+  'Aiways':        ['Aiways logo'],
+  'Alfa Romeo':    ['Alfa Romeo logo', 'Alfa Romeo 2015 logo'],
+  'Alpine':        ['Alpine logo'],
+  'Aston Martin':  ['Aston Martin Logo 2022', 'Aston Martin logo'],
+  'Audi':          ['Audi rings 2016', 'Audi logo'],
+  'Austin':        ['Austin Motor Company Logo'],
+  'Bentley':       ['Bentley logo 2', 'Bentley logo'],
+  'BMW':           ['BMW', 'BMW logo (gray)'],
+  'Bugatti':       ['Bugatti logo'],
+  'Buick':         ['Buick logo'],
+  'BYD':           ['BYD Auto Logo (2021)', 'BYD Auto logo'],
+  'Cadillac':      ['Cadillac logo', 'Cadillac Crest'],
+  'Caterham':      ['Caterham Cars logo'],
+  'Chevrolet':     ['Chevrolet logo (2013)'],
+  'Chrysler':      ['Chrysler logo 2024', 'Chrysler logo'],
+  'Citroën':       ['Citroën 2022', 'Citroen Logo'],
+  'Cupra':         ['Cupra logo 2018', 'CUPRA logo'],
+  'Dacia':         ['Dacia 2021', 'Dacia logo'],
+  'Daewoo':        ['Daewoo Motor logo'],
+  'Daihatsu':      ['Daihatsu Logo'],
+  'DFSK':          ['Dongfeng Motor logo', 'DFSK logo'],
+  'Dodge':         ['Dodge logo'],
+  'DS':            ['DS Automobiles logo'],
+  'Ferrari':       ['Ferrari logo', 'Scuderia Ferrari Logo'],
+  'Fiat':          ['Fiat Automobiles logo (2006)', 'Fiat logo'],
+  'Ford':          ['Ford Motor Company Logo', 'Ford logo'],
+  'Genesis':       ['Genesis motors badge', 'Genesis Motor logo'],
+  'GWM':           ['GWM logo', 'Great Wall Motors logo'],
+  'Honda':         ['Honda', 'Honda logo'],
+  'Hummer':        ['Hummer logo'],
+  'Hyundai':       ['Hyundai Motor Company logo'],
+  'Infiniti':      ['Infiniti logo'],
+  'Isuzu':         ['Isuzu logo'],
+  'Iveco':         ['Iveco logo (2022)', 'Iveco logo'],
+  'Jaguar':        ['Jaguar Cars logo 2012', 'Jaguar logo'],
+  'Jeep':          ['Jeep logo 2022', 'Jeep logo'],
+  'Kia':           ['Kia-logo', 'Kia logo 2021'],
+  'Lada':          ['Lada Logo'],
+  'Lamborghini':   ['Lamborghini Logo'],
+  'Lancia':        ['Lancia logo 2022', 'Lancia logo'],
+  'Land Rover':    ['Land Rover logo 2020', 'Land Rover logo'],
+  'Lexus':         ['Lexus division emblem'],
+  'Lincoln':       ['Lincoln Motor Company logo'],
+  'Lotus':         ['Lotus Cars logo'],
+  'Lynk & Co':     ['Lynk & Co logo'],
+  'Maserati':      ['Maserati logo'],
+  'Maxus':         ['Maxus logo 2022', 'Maxus logo'],
+  'Mazda':         ['Mazda Motor logo', 'Mazda logo'],
+  'McLaren':       ['McLaren Automotive logo'],
+  'Mercedes-Benz': ['Mercedes-Benz Logo 2010', 'Mercedes-Benz free logo'],
+  'MG':            ['MG Motor 2021 logo', 'MG logo'],
+  'MINI':          ['Mini logo 2018', 'MINI logo'],
+  'Mitsubishi':    ['Mitsubishi logo'],
+  'Morgan':        ['Morgan Motor Company logo'],
+  'NIO':           ['NIO Logo'],
+  'Nissan':        ['Nissan 2020 logo', 'Nissan logo'],
+  'Opel':          ['Opel logo 2024', 'Opel logo'],
+  'ORA':           ['Ora (marque) Logo'],
+  'Peugeot':       ['Peugeot 2021 Logo', 'Peugeot logo'],
+  'Polestar':      ['Polestar logo'],
+  'Porsche':       ['Porsche logo'],
+  'RAM':           ['Ram Trucks logo'],
+  'Renault':       ['Renault 2021 Text', 'Renault logo'],
+  'Rolls-Royce':   ['Rolls-Royce Motor Cars logo'],
+  'Rover':         ['Rover logo'],
+  'Saab':          ['Saab Automobile logo'],
+  'SEAT':          ['Seat Logo from 2017', 'SEAT logo'],
+  'Škoda':         ['Škoda Auto 2022', 'Skoda Auto logo'],
+  'Smart':         ['Smart Automobile logo'],
+  'SsangYong':     ['SsangYong Motor logo'],
+  'Subaru':        ['Subaru logo (2019)', 'Subaru logo'],
+  'Suzuki':        ['Suzuki logo 2', 'Suzuki logo'],
+  'Tatra':         ['Tatra logo'],
+  'Tesla':         ['Tesla Motors Logo', 'Tesla wordmark'],
+  'Toyota':        ['Toyota', 'Toyota logo'],
+  'Volkswagen':    ['Volkswagen logo 2019'],
+  'Volvo':         ['Volvo Cars logo', 'Volvo logo'],
+  'Wiesmann':      ['Wiesmann logo'],
+  'XPeng':         ['XPeng Motors logo', 'Xpeng logo'],
 };
 
 function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
+// Search Wikimedia Commons for a logo file and get its thumb URL
+async function findLogoUrl(searchTerms) {
+  for (const term of searchTerms) {
+    // Try both commons and en wikipedia
+    for (const wiki of ['commons.wikimedia.org', 'en.wikipedia.org']) {
+      try {
+        // Search for the file
+        const searchUrl = `https://${wiki}/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(term + ' logo svg')}&srnamespace=6&srlimit=5&format=json`;
+        const searchRes = await fetch(searchUrl, {
+          headers: { 'User-Agent': 'AutovizorBot/1.0 (autovizor.cz; logo scraper)' },
+        });
+        if (!searchRes.ok) continue;
+        const searchData = await searchRes.json();
+        const results = searchData.query?.search || [];
+
+        for (const result of results) {
+          const title = result.title; // e.g. "File:Tesla Motors Logo.svg"
+          // Get image info with thumb
+          const infoUrl = `https://${wiki}/w/api.php?action=query&titles=${encodeURIComponent(title)}&prop=imageinfo&iiprop=url&iiurlwidth=200&format=json`;
+          const infoRes = await fetch(infoUrl, {
+            headers: { 'User-Agent': 'AutovizorBot/1.0 (autovizor.cz; logo scraper)' },
+          });
+          if (!infoRes.ok) continue;
+          const infoData = await infoRes.json();
+          const pages = infoData.query?.pages || {};
+          for (const page of Object.values(pages)) {
+            const ii = page.imageinfo?.[0];
+            if (ii?.thumburl) return { thumbUrl: ii.thumburl, originalUrl: ii.url, title };
+            if (ii?.url) return { thumbUrl: ii.url, originalUrl: ii.url, title };
+          }
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    // Also try direct file name match
+    for (const ext of ['svg', 'png']) {
+      const fileName = `File:${term}.${ext}`;
+      for (const wiki of ['commons.wikimedia.org', 'en.wikipedia.org']) {
+        try {
+          const infoUrl = `https://${wiki}/w/api.php?action=query&titles=${encodeURIComponent(fileName)}&prop=imageinfo&iiprop=url&iiurlwidth=200&format=json`;
+          const infoRes = await fetch(infoUrl, {
+            headers: { 'User-Agent': 'AutovizorBot/1.0 (autovizor.cz; logo scraper)' },
+          });
+          if (!infoRes.ok) continue;
+          const infoData = await infoRes.json();
+          const pages = infoData.query?.pages || {};
+          for (const page of Object.values(pages)) {
+            if (page.missing !== undefined) continue;
+            const ii = page.imageinfo?.[0];
+            if (ii?.thumburl) return { thumbUrl: ii.thumburl, originalUrl: ii.url, title: fileName };
+            if (ii?.url) return { thumbUrl: ii.url, originalUrl: ii.url, title: fileName };
+          }
+        } catch {
+          continue;
+        }
+      }
+    }
+  }
+  return null;
+}
+
 async function downloadImage(url) {
   try {
     const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
+      headers: { 'User-Agent': 'AutovizorBot/1.0 (autovizor.cz; logo scraper)' },
     });
     if (!res.ok) return null;
     const buffer = Buffer.from(await res.arrayBuffer());
@@ -140,13 +201,16 @@ async function downloadImage(url) {
   }
 }
 
-async function uploadToR2(buffer, contentType, name) {
-  const ext = contentType.includes('svg') ? 'svg' : contentType.includes('png') ? 'png' : 'jpg';
-  const safeName = name.toLowerCase()
+function safeName(name) {
+  return name.toLowerCase()
     .replace(/\s+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
     .replace(/-+/g, '-');
-  const key = `logos/${safeName}.${ext}`;
+}
+
+async function uploadToR2(buffer, contentType, name) {
+  const ext = contentType.includes('svg') ? 'svg' : contentType.includes('png') ? 'png' : 'jpg';
+  const key = `logos/${safeName(name)}.${ext}`;
 
   await s3.send(new PutObjectCommand({
     Bucket: R2_BUCKET,
@@ -160,18 +224,14 @@ async function uploadToR2(buffer, contentType, name) {
 }
 
 async function checkExists(name) {
-  const safeName = name.toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-    .replace(/-+/g, '-');
-
+  const sn = safeName(name);
   for (const ext of ['png', 'svg', 'jpg']) {
     try {
       await s3.send(new HeadObjectCommand({
         Bucket: R2_BUCKET,
-        Key: `logos/${safeName}.${ext}`,
+        Key: `logos/${sn}.${ext}`,
       }));
-      return `${R2_PUBLIC_URL}/logos/${safeName}.${ext}`;
+      return `${R2_PUBLIC_URL}/logos/${sn}.${ext}`;
     } catch {
       // not found
     }
@@ -181,8 +241,9 @@ async function checkExists(name) {
 
 async function main() {
   const forceAll = process.argv.includes('--force');
-  console.log('=== Manufacturer Logo Scraper ===');
-  console.log(`Brands: ${Object.keys(LOGO_SOURCES).length}`);
+  const brands = Object.keys(WIKI_FILES);
+  console.log('=== Manufacturer Logo Scraper (Wikimedia API) ===');
+  console.log(`Brands: ${brands.length}`);
   console.log(`R2 Bucket: ${R2_BUCKET}\n`);
 
   let downloaded = 0;
@@ -190,8 +251,8 @@ async function main() {
   let failed = 0;
   const results = {};
 
-  for (const [name, url] of Object.entries(LOGO_SOURCES)) {
-    // Check if already exists
+  for (const name of brands) {
+    // Check if already exists in R2
     if (!forceAll) {
       const existing = await checkExists(name);
       if (existing) {
@@ -202,10 +263,34 @@ async function main() {
       }
     }
 
-    const imgData = await downloadImage(url);
-    if (!imgData || imgData.buffer.length < 100) {
-      console.log(`  ✗ ${name} — download failed from ${url}`);
+    // Find logo URL via Wikimedia API
+    const logoInfo = await findLogoUrl(WIKI_FILES[name]);
+    if (!logoInfo) {
+      console.log(`  ✗ ${name} — not found on Wikimedia`);
       failed++;
+      continue;
+    }
+
+    // Download the thumbnail (PNG rendered from SVG, 200px wide)
+    const imgData = await downloadImage(logoInfo.thumbUrl);
+    if (!imgData || imgData.buffer.length < 100) {
+      // Try original URL as fallback
+      const origData = await downloadImage(logoInfo.originalUrl);
+      if (!origData || origData.buffer.length < 100) {
+        console.log(`  ✗ ${name} — download failed (${logoInfo.title})`);
+        failed++;
+        continue;
+      }
+      try {
+        const r2Url = await uploadToR2(origData.buffer, origData.contentType, name);
+        results[name] = r2Url;
+        process.stdout.write(`  ✓ ${name} → ${r2Url} (${(origData.buffer.length / 1024).toFixed(1)} KB) [original]\n`);
+        downloaded++;
+      } catch (err) {
+        console.log(`  ✗ ${name} — R2 upload failed: ${err.message}`);
+        failed++;
+      }
+      await sleep(300);
       continue;
     }
 
@@ -219,7 +304,7 @@ async function main() {
       failed++;
     }
 
-    await sleep(200); // polite delay
+    await sleep(300); // polite delay for Wikimedia API
   }
 
   console.log(`\nDone!`);
@@ -227,7 +312,7 @@ async function main() {
   console.log(`  Skipped (already in R2): ${skipped}`);
   console.log(`  Failed: ${failed}`);
 
-  // Output URL mapping for frontend use
+  // Output URL mapping
   console.log(`\n--- Logo URL mapping ---`);
   for (const [name, url] of Object.entries(results)) {
     console.log(`  ${name}: ${url}`);
