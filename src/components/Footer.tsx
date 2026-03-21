@@ -11,7 +11,7 @@ export default function Footer() {
             <Link to="/" className="flex items-center gap-2.5 mb-4">
               <AutovizorLogo size={24} />
               <span className="text-lg font-bold text-surface-100">
-                Auto<span className="text-primary-400">vizor</span>.cz
+                Auto<span className="text-primary-600">vizor</span>.cz
               </span>
             </Link>
             <p className="text-sm text-surface-400 leading-relaxed">

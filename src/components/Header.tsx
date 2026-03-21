@@ -26,7 +26,7 @@ export default function Header() {
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
             <AutovizorLogo size={24} />
             <span className="text-2xl font-bold text-surface-100 tracking-tight">
-              Auto<span className="text-primary-400">vizor</span>
+              Auto<span className="text-primary-600">vizor</span>
             </span>
           </Link>
 
