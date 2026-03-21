@@ -30,12 +30,19 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
         {/* Obrázek */}
         <div className="relative aspect-[4/3] bg-surface-800 overflow-hidden">
           {vehicle.main_image_url ? (
-            <img
-              src={vehicle.main_image_url}
-              alt={vehicle.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
-            />
+            <>
+              {/* Blurred background for portrait photos */}
+              <div
+                className="absolute inset-0 scale-110 blur-xl opacity-60"
+                style={{ backgroundImage: `url(${vehicle.main_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+              />
+              <img
+                src={vehicle.main_image_url}
+                alt={vehicle.title}
+                className="relative w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+              />
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-surface-600">
               <Fuel className="w-12 h-12" />
@@ -107,12 +114,18 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
       {/* Obrázek */}
       <div className="relative w-full sm:w-72 lg:w-80 shrink-0 aspect-[4/3] sm:aspect-auto sm:h-auto bg-surface-800 overflow-hidden">
         {vehicle.main_image_url ? (
-          <img
-            src={vehicle.main_image_url}
-            alt={vehicle.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-          />
+          <>
+            <div
+              className="absolute inset-0 scale-110 blur-xl opacity-60"
+              style={{ backgroundImage: `url(${vehicle.main_image_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+            />
+            <img
+              src={vehicle.main_image_url}
+              alt={vehicle.title}
+              className="relative w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+              loading="lazy"
+            />
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-surface-600">
             <Fuel className="w-12 h-12" />
