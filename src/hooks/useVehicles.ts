@@ -6,6 +6,7 @@ import {
   getManufacturers,
   getModels,
   getManufacturerCounts,
+  getCategoryCounts,
 } from '../lib/api';
 
 export function useTopVehicles(limit = 6) {
@@ -55,6 +56,14 @@ export function useManufacturerCounts() {
   return useQuery({
     queryKey: ['manufacturerCounts'],
     queryFn: getManufacturerCounts,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+export function useCategoryCounts() {
+  return useQuery({
+    queryKey: ['categoryCounts'],
+    queryFn: getCategoryCounts,
     staleTime: 10 * 60 * 1000,
   });
 }

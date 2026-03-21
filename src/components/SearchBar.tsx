@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { useSearchStore } from '../stores/searchStore';
 import { FUEL_TYPES, GEARBOX_TYPES, YEAR_OPTIONS, formatPrice } from '../lib/codebooks';
-import { MANUFACTURERS } from '../lib/manufacturers';
 import ManufacturerSelect from './ManufacturerSelect';
+import { useManufacturers } from '../hooks/useVehicles';
 
 interface SearchBarProps {
   variant?: 'hero' | 'compact';
@@ -14,9 +14,10 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
   const navigate = useNavigate();
   const { filters, setFilter, setFilters, search } = useSearchStore();
   const [selectedMfr, setSelectedMfr] = useState<number | undefined>(filters.manufacturer_id);
+  const { data: manufacturers = [] } = useManufacturers();
 
   const currentModels = selectedMfr
-    ? MANUFACTURERS.find((m) => m.id === selectedMfr)?.models ?? []
+    ? manufacturers.find((m) => m.id === selectedMfr)?.models ?? []
     : [];
 
   const handleManufacturer = (id: number | undefined) => {

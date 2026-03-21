@@ -12,8 +12,8 @@ import {
   GEARBOX_LEVELS, CERTIFIED_PROGRAMS, SEATPLACE_TYPES,
   formatPrice,
 } from '../lib/codebooks';
-import { MANUFACTURERS } from '../lib/manufacturers';
 import ManufacturerSelect from './ManufacturerSelect';
+import { useManufacturers } from '../hooks/useVehicles';
 
 function Select({
   label,
@@ -51,9 +51,10 @@ export default function SearchFilters() {
   const [showEquipment, setShowEquipment] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const { data: manufacturers = [] } = useManufacturers();
   const selectedMfr = filters.manufacturer_id;
   const currentModels = selectedMfr
-    ? MANUFACTURERS.find((m) => m.id === selectedMfr)?.models ?? []
+    ? manufacturers.find((m) => m.id === selectedMfr)?.models ?? []
     : [];
 
   const regionGroups = REGIONS.reduce<Record<string, typeof REGIONS>>((acc, r) => {

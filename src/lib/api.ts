@@ -349,30 +349,127 @@ export async function getModels(manufacturerId: number): Promise<{ id: number; n
 }
 
 // ============================================================
-// getManufacturerCounts - počty vozidel dle výrobce
+// getCategoryCounts - počty vozidel dle kategorie (kind_id)
 // ============================================================
-export async function getManufacturerCounts(): Promise<ManufacturerCount[]> {
+export async function getCategoryCounts(): Promise<{ kind_id: number; count: number }[]> {
   if (!isSupabaseConfigured()) {
-    // Mock: generujeme náhodné počty pro hlavní značky
-    return MANUFACTURERS.slice(0, 20).map((m) => ({
-      id: m.id,
-      name: m.name,
-      vehicle_count: Math.floor(Math.random() * 5000) + 100,
-    }));
+    // Mock: stabilní realistické počty dle kategorií
+    return [
+      { kind_id: 1, count: 245832 },  // Osobní
+      { kind_id: 3, count: 15621 },   // Motocykly
+      { kind_id: 4, count: 27234 },   // Užitkové
+      { kind_id: 5, count: 8912 },    // Nákladní
+      { kind_id: 6, count: 1245 },    // Autobusy
+      { kind_id: 7, count: 6789 },    // Přívěsy
+      { kind_id: 9, count: 4456 },    // Obytné
+    ];
   }
 
   try {
     const { data, error } = await supabase
-      .rpc('get_manufacturer_counts');
+      .from('vehicles')
+      .select('kind_id')
+      .eq('is_active', true);
 
     if (error) throw error;
-    return (data as ManufacturerCount[]) ?? [];
+
+    const counts: Record<number, number> = {};
+    for (const row of data ?? []) {
+      const k = (row as Record<string, unknown>).kind_id as number;
+      counts[k] = (counts[k] ?? 0) + 1;
+    }
+    return Object.entries(counts).map(([kind_id, count]) => ({
+      kind_id: Number(kind_id),
+      count,
+    }));
+  } catch (err) {
+    console.error('Supabase getCategoryCounts error, falling back to mock:', err);
+    return [
+      { kind_id: 1, count: 245832 },
+      { kind_id: 3, count: 15621 },
+      { kind_id: 4, count: 27234 },
+      { kind_id: 5, count: 8912 },
+      { kind_id: 6, count: 1245 },
+      { kind_id: 7, count: 6789 },
+      { kind_id: 9, count: 4456 },
+    ];
+  }
+}
+
+// ============================================================
+// getManufacturerCounts - počty vozidel dle výrobce
+// ============================================================
+export async function getManufacturerCounts(): Promise<ManufacturerCount[]> {
+  if (!isSupabaseConfigured()) {
+    // Mock: stabilní počty pro nejpopulárnější značky v ČR
+    const popularBrands: { name: string; count: number }[] = [
+      { name: 'Škoda', count: 48523 },
+      { name: 'Volkswagen', count: 31247 },
+      { name: 'BMW', count: 24891 },
+      { name: 'Mercedes-Benz', count: 22156 },
+      { name: 'Audi', count: 19834 },
+      { name: 'Ford', count: 17562 },
+      { name: 'Toyota', count: 14389 },
+      { name: 'Hyundai', count: 12745 },
+      { name: 'Peugeot', count: 11203 },
+      { name: 'Renault', count: 10891 },
+      { name: 'Kia', count: 9876 },
+      { name: 'Opel', count: 9234 },
+      { name: 'Citroën', count: 7891 },
+      { name: 'Mazda', count: 6543 },
+      { name: 'Honda', count: 5678 },
+      { name: 'Volvo', count: 5432 },
+      { name: 'Nissan', count: 4987 },
+      { name: 'SEAT', count: 4756 },
+      { name: 'Fiat', count: 4523 },
+      { name: 'Dacia', count: 4312 },
+    ];
+    return popularBrands.map((b, i) => {
+      const mfr = MANUFACTURERS.find((m) => m.name === b.name);
+      return { id: mfr?.id ?? i + 1, name: b.name, vehicle_count: b.count };
+    });
+  }
+
+  try {
+    // Fetch vehicle counts grouped by manufacturer
+    const { data: vehicleData, error: vError } = await supabase
+      .from('vehicles')
+      .select('manufacturer_id')
+      .eq('is_active', true);
+
+    if (vError) throw vError;
+
+    const counts: Record<number, number> = {};
+    for (const row of vehicleData ?? []) {
+      const mid = (row as Record<string, unknown>).manufacturer_id as number;
+      counts[mid] = (counts[mid] ?? 0) + 1;
+    }
+
+    // Fetch manufacturer names from DB
+    const mfrIds = Object.keys(counts).map(Number);
+    const { data: mfrData, error: mError } = await supabase
+      .from('manufacturers')
+      .select('id, name')
+      .in('id', mfrIds);
+
+    if (mError) throw mError;
+
+    const mfrMap = new Map((mfrData ?? []).map((m: Record<string, unknown>) => [m.id as number, m.name as string]));
+
+    return Object.entries(counts)
+      .map(([id, count]) => ({
+        id: Number(id),
+        name: mfrMap.get(Number(id)) ?? `Výrobce ${id}`,
+        vehicle_count: count,
+      }))
+      .sort((a, b) => b.vehicle_count - a.vehicle_count);
   } catch (err) {
     console.error('Supabase getManufacturerCounts error, falling back to mock:', err);
-    return MANUFACTURERS.slice(0, 20).map((m) => ({
-      id: m.id,
-      name: m.name,
-      vehicle_count: Math.floor(Math.random() * 5000) + 100,
-    }));
+    const popularNames = ['Škoda','Volkswagen','BMW','Mercedes-Benz','Audi','Ford','Toyota','Hyundai'];
+    const popularCounts = [48523, 31247, 24891, 22156, 19834, 17562, 14389, 12745];
+    return popularNames.map((name, i) => {
+      const mfr = MANUFACTURERS.find((m) => m.name === name);
+      return { id: mfr?.id ?? i + 1, name, vehicle_count: popularCounts[i] };
+    });
   }
 }

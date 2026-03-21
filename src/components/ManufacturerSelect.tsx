@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, X } from 'lucide-react';
-import { MANUFACTURERS, getManufacturerLogoUrl } from '../lib/manufacturers';
+import { getManufacturerLogoUrl } from '../lib/manufacturers';
+import { useManufacturers } from '../hooks/useVehicles';
 
 interface ManufacturerSelectProps {
   value: number | undefined;
@@ -22,12 +23,14 @@ export default function ManufacturerSelect({
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const selected = value ? MANUFACTURERS.find((m) => m.id === value) : undefined;
+  const { data: manufacturers = [] } = useManufacturers();
+
+  const selected = value ? manufacturers.find((m) => m.id === value) : undefined;
 
   // Filter manufacturers by kind_id if specified
   const kindFiltered = kindId
-    ? MANUFACTURERS.filter((m) => !m.kind_ids || m.kind_ids.includes(kindId))
-    : MANUFACTURERS;
+    ? manufacturers.filter((m) => !m.kind_ids || m.kind_ids.includes(kindId))
+    : manufacturers;
 
   const filtered = filter
     ? kindFiltered.filter((m) => m.name.toLowerCase().includes(filter.toLowerCase()))

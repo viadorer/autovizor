@@ -3,28 +3,42 @@ import { Car, Truck, Bike, Caravan, Search, TrendingUp, Shield, Zap } from 'luci
 import SearchBar from '../components/SearchBar';
 import VehicleCard from '../components/VehicleCard';
 import { getManufacturerLogoUrl } from '../lib/manufacturers';
-import { useTopVehicles } from '../hooks/useVehicles';
+import { useTopVehicles, useManufacturerCounts, useCategoryCounts } from '../hooks/useVehicles';
 
-const VEHICLE_CATEGORIES = [
-  { id: 1, name: 'Osobní', icon: Car, count: '1 245 832' },
-  { id: 3, name: 'Motocykly', icon: Bike, count: '45 621' },
-  { id: 4, name: 'Užitkové', icon: Truck, count: '67 234' },
-  { id: 9, name: 'Obytné', icon: Caravan, count: '12 456' },
-];
+const CATEGORY_META: Record<number, { name: string; icon: typeof Car }> = {
+  1: { name: 'Osobní', icon: Car },
+  3: { name: 'Motocykly', icon: Bike },
+  4: { name: 'Užitkové', icon: Truck },
+  9: { name: 'Obytné', icon: Caravan },
+};
 
-const POPULAR_BRANDS = [
-  { name: 'Škoda', count: '234 567' },
-  { name: 'Volkswagen', count: '198 432' },
-  { name: 'BMW', count: '167 890' },
-  { name: 'Mercedes-Benz', count: '145 678' },
-  { name: 'Audi', count: '134 567' },
-  { name: 'Ford', count: '112 345' },
-  { name: 'Toyota', count: '98 765' },
-  { name: 'Hyundai', count: '87 654' },
-];
+const CATEGORY_ORDER = [1, 3, 4, 9];
+
+function formatCount(n: number): string {
+  return n.toLocaleString('cs-CZ');
+}
 
 export default function HomePage() {
   const { data: topDeals = [] } = useTopVehicles(6);
+  const { data: manufacturerCounts = [] } = useManufacturerCounts();
+  const { data: categoryCounts = [] } = useCategoryCounts();
+
+  // Build category data from real counts
+  const categories = CATEGORY_ORDER.map((kindId) => {
+    const meta = CATEGORY_META[kindId];
+    const found = categoryCounts.find((c) => c.kind_id === kindId);
+    return {
+      id: kindId,
+      name: meta.name,
+      icon: meta.icon,
+      count: found?.count ?? 0,
+    };
+  });
+
+  // Top 8 brands by vehicle count
+  const popularBrands = [...manufacturerCounts]
+    .sort((a, b) => b.vehicle_count - a.vehicle_count)
+    .slice(0, 8);
 
   return (
     <div className="min-h-screen">
@@ -48,7 +62,7 @@ export default function HomePage() {
 
           {/* Kategorie */}
           <div className="flex flex-wrap justify-center gap-3 mt-8">
-            {VEHICLE_CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <Link
                 key={cat.id}
                 to={`/hledat?kind_id=${cat.id}`}
@@ -57,7 +71,9 @@ export default function HomePage() {
                 <cat.icon className="w-6 h-6 text-surface-400 group-hover:text-primary-400 transition-colors" />
                 <div className="text-left">
                   <p className="text-sm font-medium text-surface-100">{cat.name}</p>
-                  <p className="text-xs text-surface-500">{cat.count} nabídek</p>
+                  <p className="text-xs text-surface-500">
+                    {formatCount(cat.count)} nabídek
+                  </p>
                 </div>
               </Link>
             ))}
@@ -93,7 +109,7 @@ export default function HomePage() {
       <section className="max-w-7xl mx-auto px-4 py-12">
         <h2 className="text-2xl font-bold text-surface-100 mb-6">Populární značky</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {POPULAR_BRANDS.map((brand) => (
+          {popularBrands.map((brand) => (
             <Link
               key={brand.name}
               to={`/hledat?brand=${encodeURIComponent(brand.name)}`}
@@ -109,7 +125,7 @@ export default function HomePage() {
                 <p className="text-sm font-medium text-surface-100 group-hover:text-primary-400 transition-colors truncate">
                   {brand.name}
                 </p>
-                <p className="text-xs text-surface-500">{brand.count}</p>
+                <p className="text-xs text-surface-500">{formatCount(brand.vehicle_count)}</p>
               </div>
             </Link>
           ))}
