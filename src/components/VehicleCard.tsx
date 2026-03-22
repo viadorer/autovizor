@@ -33,15 +33,14 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
   const garageButton = (
     <button
       onClick={(e) => { e.preventDefault(); toggleFavorite(vehicle.id); }}
-      className={`absolute top-2 right-2 flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
+      className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
         inGarage
           ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30'
-          : 'bg-black/50 backdrop-blur-sm text-white hover:bg-black/70'
+          : 'bg-black/40 text-white hover:bg-black/60'
       }`}
       title={inGarage ? 'Odebrat z garáže' : 'Do garáže'}
     >
-      <Warehouse className="w-3.5 h-3.5" />
-      <span className="hidden sm:inline">{inGarage ? 'V garáži' : 'Do garáže'}</span>
+      <Warehouse className={`w-4 h-4 ${inGarage ? 'fill-white' : ''}`} />
     </button>
   );
 
