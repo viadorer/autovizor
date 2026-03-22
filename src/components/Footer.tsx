@@ -41,7 +41,7 @@ export default function Footer() {
                 { label: 'Prodat auto', to: '/prodat' },
                 { label: 'Poradna', to: '/poradna' },
                 { label: 'Porovnání vozidel', to: '/porovnani' },
-                { label: 'Oblíbené', to: '/oblibene' },
+                { label: 'Moje garáž', to: '/garaz' },
               ].map((item) => (
                 <li key={item.label}>
                   <Link to={item.to} className="text-sm text-surface-400 hover:text-surface-100 transition-colors">

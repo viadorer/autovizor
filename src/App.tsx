@@ -27,6 +27,7 @@ export default function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/hledat" element={<SearchPage />} />
               <Route path="/vozidlo/:id" element={<VehicleDetailPage />} />
+              <Route path="/garaz" element={<FavoritesPage />} />
               <Route path="/oblibene" element={<FavoritesPage />} />
               <Route path="/prodat" element={<SellPage />} />
               <Route path="/poradna" element={<AdvisoryPage />} />

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart, MapPin, Fuel, Settings, Calendar, Gauge, Zap, Camera, BadgeCheck, Sparkles } from 'lucide-react';
+import { Warehouse, MapPin, Fuel, Settings, Calendar, Gauge, Zap, Camera, BadgeCheck, Sparkles } from 'lucide-react';
 import type { Vehicle } from '../types';
 import { formatPrice, formatKm, formatPower, formatRegistration } from '../lib/codebooks';
 import { useFavoritesStore } from '../stores/favoritesStore';
@@ -25,10 +25,25 @@ function isNew(vehicle: Vehicle): boolean {
 
 export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardProps) {
   const { toggleFavorite, isFavorite } = useFavoritesStore();
-  const fav = isFavorite(vehicle.id);
+  const inGarage = isFavorite(vehicle.id);
   const rating = vehicle.price_rating ? RATING_LABELS[vehicle.price_rating] : null;
   const isNewVehicle = isNew(vehicle);
   const isCertified = !!vehicle.certified_id;
+
+  const garageButton = (
+    <button
+      onClick={(e) => { e.preventDefault(); toggleFavorite(vehicle.id); }}
+      className={`absolute top-2 right-2 flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
+        inGarage
+          ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/30'
+          : 'bg-black/50 backdrop-blur-sm text-white hover:bg-black/70'
+      }`}
+      title={inGarage ? 'Odebrat z garáže' : 'Do garáže'}
+    >
+      <Warehouse className="w-3.5 h-3.5" />
+      <span className="hidden sm:inline">{inGarage ? 'V garáži' : 'Do garáže'}</span>
+    </button>
+  );
 
   if (layout === 'grid') {
     return (
@@ -84,12 +99,7 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
               {vehicle.image_count}
             </span>
           )}
-          <button
-            onClick={(e) => { e.preventDefault(); toggleFavorite(vehicle.id); }}
-            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
-          >
-            <Heart className={`w-4 h-4 ${fav ? 'fill-primary-500 text-primary-500' : 'text-white'}`} />
-          </button>
+          {garageButton}
         </div>
 
         {/* Info */}
@@ -187,12 +197,7 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
             {vehicle.image_count}
           </span>
         )}
-        <button
-          onClick={(e) => { e.preventDefault(); toggleFavorite(vehicle.id); }}
-          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors"
-        >
-          <Heart className={`w-4 h-4 ${fav ? 'fill-primary-500 text-primary-500' : 'text-white'}`} />
-        </button>
+        {garageButton}
       </div>
 
       {/* Obsah */}

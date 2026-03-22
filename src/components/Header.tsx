@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Search, Heart, ArrowLeftRight, User, Menu, X, Sun, Moon, Car } from 'lucide-react';
+import { Search, Warehouse, ArrowLeftRight, User, Menu, X, Sun, Moon, Car } from 'lucide-react';
 import { AutovizorLogo } from './AutovizorLogo';
 import { useState } from 'react';
 import { useFavoritesStore } from '../stores/favoritesStore';
@@ -8,7 +8,7 @@ import { useThemeStore } from '../stores/themeStore';
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-  const favoriteCount = useFavoritesStore((s) => s.favoriteIds.length);
+  const garageCount = useFavoritesStore((s) => s.favoriteIds.length);
   const { mode, toggleMode } = useThemeStore();
 
   const navItems = [
@@ -62,13 +62,14 @@ export default function Header() {
             </button>
 
             <Link
-              to="/oblibene"
+              to="/garaz"
               className="relative flex items-center justify-center w-10 h-10 rounded-lg text-surface-300 hover:text-surface-100 hover:bg-surface-800 transition-colors"
+              title="Moje garáž"
             >
-              <Heart className="w-5 h-5" />
-              {favoriteCount > 0 && (
+              <Warehouse className="w-5 h-5" />
+              {garageCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary-600 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                  {favoriteCount}
+                  {garageCount}
                 </span>
               )}
             </Link>
