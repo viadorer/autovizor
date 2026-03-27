@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  ArrowLeft, Heart, Share2, Phone, Mail, MapPin,
+  ArrowLeft, Warehouse, Share2, Phone, Mail, MapPin,
   Calendar, Gauge, Zap, Fuel, Settings, Palette,
   Shield, Star, ChevronLeft, ChevronRight, Camera,
   Check, Info, Car, Globe, BookOpen, DoorOpen, Users,
@@ -37,10 +37,8 @@ export default function VehicleDetailPage() {
   const [phoneVisible, setPhoneVisible] = useState(false);
   const { toggleFavorite, isFavorite } = useFavoritesStore();
 
-  // Scroll to top on mount
   useState(() => { window.scrollTo(0, 0); });
 
-  // Add mock equipment if missing
   const vehicle = rawVehicle ? {
     ...rawVehicle,
     equipment: rawVehicle.equipment?.length ? rawVehicle.equipment : EQUIPMENT.slice(0, 15 + (Number(id) % 20)),
@@ -101,7 +99,6 @@ export default function VehicleDetailPage() {
     { label: 'VIN', value: vehicle.vin, icon: Key },
   ].filter((s) => s.value);
 
-  // Group equipment by category
   const equipmentByCategory = (vehicle.equipment ?? []).reduce<Record<string, typeof EQUIPMENT>>((acc, eq) => {
     const cat = eq.category ?? 'Ostatní';
     if (!acc[cat]) acc[cat] = [];
@@ -117,52 +114,50 @@ export default function VehicleDetailPage() {
         className="inline-flex items-center gap-2 text-sm text-surface-400 hover:text-surface-100 transition-colors mb-4"
       >
         <ArrowLeft className="w-4 h-4" />
-        Zpět na výsledky hledání
+        Zpět na výsledky
       </Link>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Levá strana - galerie + info */}
+        {/* Levá strana */}
         <div className="flex-1 min-w-0">
           {/* Galerie */}
-          <div className="relative bg-surface-900 rounded-xl overflow-hidden border border-surface-800">
+          <div className="relative bg-surface-850 rounded-2xl overflow-hidden">
             <div className="relative aspect-[16/10]">
               <img
                 src={images[currentImage]?.url}
                 alt={`${vehicle.title} - obrázek ${currentImage + 1}`}
                 className="w-full h-full object-cover"
               />
-              {/* Navigace */}
               {images.length > 1 && (
                 <>
                   <button
                     onClick={() => setCurrentImage((p) => (p > 0 ? p - 1 : images.length - 1))}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 0 transition-colors"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setCurrentImage((p) => (p < images.length - 1 ? p + 1 : 0))}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 0 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/40 hover:bg-black/60 rounded-full flex items-center justify-center text-white transition-colors"
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
                 </>
               )}
-              <span className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 bg-black/60 text-surface-100 text-sm rounded-lg">
+              <span className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 bg-black/50 backdrop-blur-sm text-white text-sm rounded-full">
                 <Camera className="w-4 h-4" />
                 {currentImage + 1}/{images.length}
               </span>
             </div>
 
-            {/* Thumbnaily */}
             {images.length > 1 && (
               <div className="flex gap-1.5 p-3 overflow-x-auto">
                 {images.map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrentImage(i)}
-                    className={`shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-colors ${
-                      i === currentImage ? 'border-primary-500' : 'border-transparent opacity-60 hover:opacity-100'
+                    className={`shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-all ${
+                      i === currentImage ? 'border-primary-500 opacity-100' : 'border-transparent opacity-50 hover:opacity-80'
                     }`}
                   >
                     <img src={img.url} alt="" className="w-full h-full object-cover" />
@@ -172,19 +167,19 @@ export default function VehicleDetailPage() {
             )}
           </div>
 
-          {/* Technické údaje */}
-          <div className="mt-6 bg-surface-900 rounded-xl border border-surface-800 p-6">
-            <h2 className="text-lg font-bold text-surface-100 mb-4">Technické údaje</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
-              {specs.map((spec, i) => (
+          {/* Technické údaje — tonal grid */}
+          <div className="mt-8">
+            <h2 className="text-lg font-bold text-surface-50 mb-4" style={{ fontFamily: 'var(--font-display)' }}>
+              Technické údaje
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {specs.map((spec) => (
                 <div
                   key={spec.label}
-                  className={`flex items-center justify-between py-3 px-4 ${
-                    i % 2 === 0 ? 'bg-surface-900' : 'bg-surface-800/30'
-                  } ${i < specs.length - (specs.length % 2 === 0 ? 2 : 1) ? 'border-b border-surface-800' : ''}`}
+                  className="flex items-center justify-between py-3 px-4 bg-surface-900 rounded-lg"
                 >
-                  <span className="flex items-center gap-2 text-sm text-surface-400">
-                    <spec.icon className="w-4 h-4" />
+                  <span className="flex items-center gap-2.5 text-sm text-surface-400">
+                    <spec.icon className="w-4 h-4 text-surface-500" />
                     {spec.label}
                   </span>
                   <span className="text-sm font-medium text-surface-100">{spec.value}</span>
@@ -195,9 +190,9 @@ export default function VehicleDetailPage() {
 
           {/* VIN dekódování */}
           {vehicle.vin && (
-            <div className="mt-6 bg-surface-900 rounded-xl border border-surface-800 p-6">
+            <div className="mt-8">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-surface-100 flex items-center gap-2">
+                <h2 className="text-lg font-bold text-surface-50 flex items-center gap-2" style={{ fontFamily: 'var(--font-display)' }}>
                   <Key className="w-5 h-5 text-primary-500" />
                   VIN: <span className="font-mono tracking-wider">{vehicle.vin}</span>
                 </h2>
@@ -210,7 +205,7 @@ export default function VehicleDetailPage() {
                       setVinLoading(false);
                     }}
                     disabled={vinLoading}
-                    className="px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:bg-surface-700 rounded-lg text-sm font-medium text-white transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-gradient-to-br from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 disabled:from-surface-600 disabled:to-surface-700 rounded-lg text-sm font-medium text-white transition-all flex items-center gap-2"
                   >
                     {vinLoading ? (
                       <><Loader2 className="w-4 h-4 animate-spin" /> Dekóduji...</>
@@ -223,7 +218,7 @@ export default function VehicleDetailPage() {
 
               {vinResult && vinResult.valid && (
                 <>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {[
                       { label: 'Výrobce', value: vinResult.manufacturer },
                       { label: 'Model', value: vinResult.model },
@@ -244,20 +239,19 @@ export default function VehicleDetailPage() {
                       { label: 'Spotřeba', value: vinResult.fuel_consumption },
                       { label: 'Země výroby', value: vinResult.country },
                     ].filter((i) => i.value).map((item) => (
-                      <div key={item.label} className="p-3 bg-surface-800/50 rounded-lg">
+                      <div key={item.label} className="p-3 bg-surface-900 rounded-lg">
                         <p className="text-xs text-surface-500">{item.label}</p>
                         <p className="text-sm font-medium text-surface-100 mt-0.5">{item.value}</p>
                       </div>
                     ))}
                   </div>
 
-                  {/* Výbava z VIN (vindecoder.eu) */}
                   {vinResult.equipment && vinResult.equipment.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-surface-800">
+                    <div className="mt-6">
                       <h3 className="text-sm font-semibold text-surface-100 mb-3">
                         Výbava dle VIN ({vinResult.equipment.length} položek)
                       </h3>
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {Object.entries(
                           vinResult.equipment.reduce<Record<string, typeof vinResult.equipment>>((acc, eq) => {
                             const cat = eq.category || 'Ostatní';
@@ -267,8 +261,8 @@ export default function VehicleDetailPage() {
                           }, {})
                         ).map(([category, items]) => (
                           <div key={category}>
-                            <h4 className="text-xs font-semibold text-surface-400 mb-1.5 uppercase tracking-wider">{category}</h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                            <h4 className="text-xs font-semibold text-surface-400 mb-2 uppercase tracking-wider">{category}</h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                               {items!.map((eq, i) => (
                                 <span key={i} className="flex items-center gap-2 text-sm text-surface-300">
                                   <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
@@ -299,8 +293,10 @@ export default function VehicleDetailPage() {
 
           {/* Výbava */}
           {Object.keys(equipmentByCategory).length > 0 && (
-            <div className="mt-6 bg-surface-900 rounded-xl border border-surface-800 p-6">
-              <h2 className="text-lg font-bold text-surface-100 mb-4">Výbava</h2>
+            <div className="mt-8">
+              <h2 className="text-lg font-bold text-surface-50 mb-4" style={{ fontFamily: 'var(--font-display)' }}>
+                Výbava
+              </h2>
               <div className="space-y-5">
                 {Object.entries(equipmentByCategory).map(([category, items]) => (
                   <div key={category}>
@@ -323,8 +319,10 @@ export default function VehicleDetailPage() {
 
           {/* Popis */}
           {vehicle.description && (
-            <div className="mt-6 bg-surface-900 rounded-xl border border-surface-800 p-6">
-              <h2 className="text-lg font-bold text-surface-100 mb-3">Popis</h2>
+            <div className="mt-8">
+              <h2 className="text-lg font-bold text-surface-50 mb-3" style={{ fontFamily: 'var(--font-display)' }}>
+                Popis
+              </h2>
               <p className="text-sm text-surface-300 leading-relaxed whitespace-pre-wrap">
                 {vehicle.description}
               </p>
@@ -332,18 +330,20 @@ export default function VehicleDetailPage() {
           )}
         </div>
 
-        {/* Pravá strana - cena a prodejce */}
+        {/* Pravá strana — sticky sidebar */}
         <div className="w-full lg:w-80 shrink-0">
           <div className="lg:sticky lg:top-20 space-y-4">
             {/* Cena box */}
-            <div className="bg-surface-900 rounded-xl border border-surface-800 p-6">
-              <h1 className="text-xl font-bold text-surface-100">{vehicle.title}</h1>
+            <div className="bg-surface-950 rounded-2xl shadow-sm p-6">
+              <h1 className="text-xl font-bold text-surface-50" style={{ fontFamily: 'var(--font-display)' }}>
+                {vehicle.title}
+              </h1>
               {vehicle.model_variant && (
                 <p className="text-sm text-surface-400 mt-1">{vehicle.model_variant}</p>
               )}
 
               <div className="flex items-center gap-3 mt-4">
-                <span className="text-3xl font-extrabold text-surface-100">
+                <span className="text-3xl font-extrabold text-surface-50">
                   {formatPrice(vehicle.price)}
                 </span>
               </div>
@@ -357,7 +357,7 @@ export default function VehicleDetailPage() {
                         className={`w-6 h-2 rounded-sm ${
                           i <= (vehicle.price_rating === 'very_good' ? 5 : vehicle.price_rating === 'good' ? 4 : vehicle.price_rating === 'fair' ? 3 : 2)
                             ? rating.className
-                            : 'bg-surface-700'
+                            : 'bg-surface-800'
                         }`}
                       />
                     ))}
@@ -371,59 +371,44 @@ export default function VehicleDetailPage() {
               )}
 
               {/* Klíčové parametry */}
-              <div className="grid grid-cols-2 gap-3 mt-5">
-                <div className="p-3 bg-surface-800 rounded-lg">
-                  <Gauge className="w-5 h-5 text-surface-400 mb-1" />
-                  <p className="text-xs text-surface-500">Kilometry</p>
-                  <p className="text-sm font-semibold text-surface-100">{formatKm(vehicle.tachometer)}</p>
-                </div>
-                <div className="p-3 bg-surface-800 rounded-lg">
-                  <Zap className="w-5 h-5 text-surface-400 mb-1" />
-                  <p className="text-xs text-surface-500">Výkon</p>
-                  <p className="text-sm font-semibold text-surface-100">
-                    {vehicle.engine_power ? formatPower(vehicle.engine_power) : '–'}
-                  </p>
-                </div>
-                <div className="p-3 bg-surface-800 rounded-lg">
-                  <Fuel className="w-5 h-5 text-surface-400 mb-1" />
-                  <p className="text-xs text-surface-500">Palivo</p>
-                  <p className="text-sm font-semibold text-surface-100">{vehicle.fuel_name}</p>
-                </div>
-                <div className="p-3 bg-surface-800 rounded-lg">
-                  <Settings className="w-5 h-5 text-surface-400 mb-1" />
-                  <p className="text-xs text-surface-500">Převodovka</p>
-                  <p className="text-sm font-semibold text-surface-100">{vehicle.gearbox_name}</p>
-                </div>
+              <div className="grid grid-cols-2 gap-2 mt-5">
+                {[
+                  { icon: Gauge, label: 'Kilometry', value: formatKm(vehicle.tachometer) },
+                  { icon: Zap, label: 'Výkon', value: vehicle.engine_power ? formatPower(vehicle.engine_power) : '–' },
+                  { icon: Fuel, label: 'Palivo', value: vehicle.fuel_name },
+                  { icon: Settings, label: 'Převodovka', value: vehicle.gearbox_name },
+                ].map((p) => (
+                  <div key={p.label} className="p-3 bg-surface-900 rounded-xl">
+                    <p.icon className="w-4 h-4 text-surface-500 mb-1" />
+                    <p className="text-[10px] text-surface-500 uppercase tracking-wide">{p.label}</p>
+                    <p className="text-sm font-semibold text-surface-100 mt-0.5">{p.value}</p>
+                  </div>
+                ))}
               </div>
 
               {/* Akce */}
               <div className="flex gap-2 mt-5">
                 <button
                   onClick={() => toggleFavorite(vehicle.id)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     fav
-                      ? 'bg-primary-600/20 text-primary-400 border border-primary-600'
-                      : 'bg-surface-800 text-surface-300 border border-surface-700 hover:border-surface-500'
+                      ? 'bg-primary-500/15 text-primary-500'
+                      : 'bg-surface-900 text-surface-300 hover:text-surface-100'
                   }`}
                 >
-                  <Heart className={`w-4 h-4 ${fav ? 'fill-primary-400' : ''}`} />
-                  {fav ? 'Uloženo' : 'Uložit'}
+                  <Warehouse className={`w-4 h-4 ${fav ? 'fill-primary-500' : ''}`} />
+                  {fav ? 'V garáži' : 'Do garáže'}
                 </button>
                 <button
                   onClick={async () => {
                     const url = window.location.href;
                     if (navigator.share) {
-                      try {
-                        await navigator.share({ title: vehicle.title, url });
-                      } catch {
-                        // user cancelled
-                      }
+                      try { await navigator.share({ title: vehicle.title, url }); } catch { /* cancelled */ }
                     } else {
                       await navigator.clipboard.writeText(url);
-                      alert('Odkaz zkopírován do schránky');
                     }
                   }}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-800 border border-surface-700 rounded-lg text-sm text-surface-300 hover:text-surface-100 transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-900 rounded-lg text-sm text-surface-300 hover:text-surface-100 transition-colors"
                 >
                   <Share2 className="w-4 h-4" />
                   Sdílet
@@ -432,9 +417,9 @@ export default function VehicleDetailPage() {
             </div>
 
             {/* Prodejce */}
-            <div className="bg-surface-900 rounded-xl border border-surface-800 p-6">
+            <div className="bg-surface-950 rounded-2xl shadow-sm p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-surface-800 rounded-full flex items-center justify-center text-surface-400">
+                <div className="w-12 h-12 bg-surface-850 rounded-full flex items-center justify-center text-surface-400">
                   {vehicle.seller_type === 'dealer' ? <Shield className="w-6 h-6" /> : <Users className="w-6 h-6" />}
                 </div>
                 <div>
@@ -453,7 +438,7 @@ export default function VehicleDetailPage() {
               </div>
 
               {vehicle.region_name && (
-                <p className="flex items-center gap-2 text-sm text-surface-400 mb-4">
+                <p className="flex items-center gap-2 text-sm text-surface-400 mb-5">
                   <MapPin className="w-4 h-4" />
                   {vehicle.region_name}
                 </p>
@@ -466,7 +451,7 @@ export default function VehicleDetailPage() {
                       window.location.href = `mailto:${vehicle.seller_email}`;
                     }
                   }}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-primary-600 hover:bg-primary-700 rounded-lg text-sm font-semibold text-white transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-br from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 rounded-xl text-sm font-semibold text-white transition-all shadow-sm hover:shadow-md"
                 >
                   <Mail className="w-4 h-4" />
                   Napsat e-mail
@@ -474,7 +459,7 @@ export default function VehicleDetailPage() {
                 {phoneVisible && vehicle.seller_phone ? (
                   <a
                     href={`tel:${vehicle.seller_phone}`}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-surface-800 border border-surface-700 rounded-lg text-sm font-medium text-surface-100 hover:bg-surface-700 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-surface-900 rounded-xl text-sm font-medium text-surface-100 hover:bg-surface-800 transition-colors"
                   >
                     <Phone className="w-4 h-4" />
                     {vehicle.seller_phone}
@@ -482,7 +467,7 @@ export default function VehicleDetailPage() {
                 ) : (
                   <button
                     onClick={() => setPhoneVisible(true)}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-surface-800 border border-surface-700 rounded-lg text-sm font-medium text-surface-100 hover:bg-surface-700 transition-colors"
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-surface-900 rounded-xl text-sm font-medium text-surface-100 hover:bg-surface-800 transition-colors"
                   >
                     <Phone className="w-4 h-4" />
                     Zobrazit telefon

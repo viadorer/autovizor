@@ -3,7 +3,7 @@ import { AutovizorLogo } from './AutovizorLogo';
 
 export default function Footer() {
   return (
-    <footer className="bg-surface-950 border-t border-surface-800 mt-auto">
+    <footer className="bg-surface-900 mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo a popis */}
@@ -73,7 +73,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-surface-800 mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-8 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-surface-500">
             &copy; {new Date().getFullYear()} Autovizor.cz – Všechna práva vyhrazena.
           </p>

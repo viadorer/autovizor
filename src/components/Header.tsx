@@ -19,7 +19,7 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-surface-950/95 backdrop-blur-md border-b border-surface-800">
+    <header className="sticky top-0 z-50 bg-surface-950/95 backdrop-blur-md shadow-sm">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -95,7 +95,7 @@ export default function Header() {
 
       {/* Mobilní menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-surface-800 bg-surface-950">
+        <div className="md:hidden bg-surface-950">
           <nav className="px-4 py-3 space-y-1">
             {navItems.map((item) => (
               <Link

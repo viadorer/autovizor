@@ -53,7 +53,7 @@ export default function ManufacturerSelect({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-left outline-none focus:ring-2 focus:ring-primary-600 cursor-pointer"
+        className="w-full flex items-center gap-2 bg-surface-850 rounded-lg px-3 py-2 text-sm text-left outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
       >
         {selected ? (
           <>
@@ -78,8 +78,8 @@ export default function ManufacturerSelect({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full min-w-[220px] bg-surface-800 border border-surface-700 rounded-lg shadow-xl max-h-72 overflow-hidden">
-          <div className="p-2 border-b border-surface-700">
+        <div className="absolute z-50 mt-1 w-full min-w-[220px] bg-surface-950 rounded-xl shadow-lg max-h-72 overflow-hidden">
+          <div className="p-2">
             <input
               ref={inputRef}
               type="text"

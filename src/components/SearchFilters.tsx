@@ -34,7 +34,7 @@ function Select({
       <select
         value={(value as string) ?? ''}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
-        className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+        className="w-full bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
       >
         <option value="">{placeholder ?? 'Libovolné'}</option>
         {options.map((o) => (
@@ -104,7 +104,7 @@ export default function SearchFilters() {
           value={filters.model_id ?? ''}
           onChange={(e) => { setFilter('model_id', e.target.value ? Number(e.target.value) : undefined); search(); }}
           disabled={!selectedMfr}
-          className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer disabled:opacity-50"
+          className="w-full bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer disabled:opacity-50"
         >
           <option value="">Libovolný model</option>
           {currentModels.map((m) => (
@@ -120,7 +120,7 @@ export default function SearchFilters() {
           <select
             value={filters.price_from ?? ''}
             onChange={(e) => { setFilter('price_from', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
           >
             <option value="">od</option>
             {[0, 50000, 100000, 200000, 300000, 500000, 750000, 1000000].map((p) => (
@@ -130,7 +130,7 @@ export default function SearchFilters() {
           <select
             value={filters.price_to ?? ''}
             onChange={(e) => { setFilter('price_to', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
           >
             <option value="">do</option>
             {[100000, 200000, 300000, 500000, 750000, 1000000, 1500000, 2000000, 3000000].map((p) => (
@@ -147,7 +147,7 @@ export default function SearchFilters() {
           <select
             value={filters.year_from ?? ''}
             onChange={(e) => { setFilter('year_from', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
           >
             <option value="">od</option>
             {YEAR_OPTIONS.map((y) => (
@@ -157,7 +157,7 @@ export default function SearchFilters() {
           <select
             value={filters.year_to ?? ''}
             onChange={(e) => { setFilter('year_to', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
           >
             <option value="">do</option>
             {YEAR_OPTIONS.map((y) => (
@@ -174,7 +174,7 @@ export default function SearchFilters() {
           <select
             value={filters.km_from ?? ''}
             onChange={(e) => { setFilter('km_from', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
           >
             <option value="">od</option>
             {[0, 10000, 25000, 50000, 75000, 100000].map((k) => (
@@ -184,7 +184,7 @@ export default function SearchFilters() {
           <select
             value={filters.km_to ?? ''}
             onChange={(e) => { setFilter('km_to', e.target.value ? Number(e.target.value) : undefined); search(); }}
-            className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+            className="bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
           >
             <option value="">do</option>
             {[10000, 30000, 50000, 75000, 100000, 150000, 200000, 300000].map((k) => (
@@ -247,7 +247,7 @@ export default function SearchFilters() {
       </button>
 
       {showMore && (
-        <div className="space-y-4 pt-2 border-t border-surface-800">
+        <div className="space-y-4 pt-4">
           {/* Karoserie - jen pro osobní a užitkové */}
           {(filters.kind_id === 1 || filters.kind_id === 4 || !filters.kind_id) && (
             <Select label="Karoserie" value={filters.body_type_id} onChange={(v) => { setFilter('body_type_id', v); search(); }} options={BODY_TYPES} />
@@ -313,7 +313,7 @@ export default function SearchFilters() {
               <select
                 value={filters.volume_from ?? ''}
                 onChange={(e) => { setFilter('volume_from', e.target.value ? Number(e.target.value) : undefined); search(); }}
-                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                className="bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
               >
                 <option value="">od</option>
                 {(filters.kind_id === 3
@@ -326,7 +326,7 @@ export default function SearchFilters() {
               <select
                 value={filters.volume_to ?? ''}
                 onChange={(e) => { setFilter('volume_to', e.target.value ? Number(e.target.value) : undefined); search(); }}
-                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                className="bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
               >
                 <option value="">do</option>
                 {(filters.kind_id === 3
@@ -348,7 +348,7 @@ export default function SearchFilters() {
               <select
                 value={filters.power_from ?? ''}
                 onChange={(e) => { setFilter('power_from', e.target.value ? Number(e.target.value) : undefined); search(); }}
-                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                className="bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
               >
                 <option value="">od</option>
                 {(filters.kind_id === 3
@@ -361,7 +361,7 @@ export default function SearchFilters() {
               <select
                 value={filters.power_to ?? ''}
                 onChange={(e) => { setFilter('power_to', e.target.value ? Number(e.target.value) : undefined); search(); }}
-                className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+                className="bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
               >
                 <option value="">do</option>
                 {(filters.kind_id === 3
@@ -381,7 +381,7 @@ export default function SearchFilters() {
             <select
               value={filters.region_id ?? ''}
               onChange={(e) => { setFilter('region_id', e.target.value ? Number(e.target.value) : undefined); search(); }}
-              className="w-full bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+              className="w-full bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
             >
               <option value="">Celá ČR</option>
               {Object.entries(regionGroups).map(([group, regions]) => (

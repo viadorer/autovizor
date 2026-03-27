@@ -89,7 +89,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
   }
 
   return (
-    <div className="bg-surface-900/80 backdrop-blur-sm rounded-2xl p-6 border border-surface-800">
+    <div className="bg-surface-950 shadow-sm rounded-2xl p-6">
       <h2 className="text-xl font-bold text-surface-100 mb-5">
         Miliony aut. Jedno hledání.
       </h2>
@@ -133,7 +133,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <select
           value={filters.model_id ?? ''}
           onChange={(e) => setFilter('model_id', e.target.value ? Number(e.target.value) : undefined)}
-          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+          className="bg-surface-850 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
           disabled={!selectedMfr}
         >
           <option value="">Model</option>
@@ -146,7 +146,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <select
           value={filters.year_from ?? ''}
           onChange={(e) => setFilter('year_from', e.target.value ? Number(e.target.value) : undefined)}
-          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+          className="bg-surface-850 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
         >
           <option value="">Rok od</option>
           {YEAR_OPTIONS.map((y) => (
@@ -158,7 +158,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <select
           value={filters.km_to ?? ''}
           onChange={(e) => setFilter('km_to', e.target.value ? Number(e.target.value) : undefined)}
-          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+          className="bg-surface-850 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
         >
           <option value="">Km do</option>
           {[10000, 30000, 50000, 75000, 100000, 150000, 200000].map((km) => (
@@ -170,7 +170,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <select
           value={filters.price_to ?? ''}
           onChange={(e) => setFilter('price_to', e.target.value ? Number(e.target.value) : undefined)}
-          className="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-600 appearance-none cursor-pointer"
+          className="bg-surface-850 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
         >
           <option value="">Cena do</option>
           {[100000, 200000, 300000, 500000, 750000, 1000000, 1500000, 2000000].map((p) => (
