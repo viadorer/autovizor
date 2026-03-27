@@ -76,7 +76,7 @@ export default function Header() {
 
             <Link
               to="/prihlaseni"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-colors"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 text-white text-sm font-medium transition-all"
             >
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">Přihlásit se</span>

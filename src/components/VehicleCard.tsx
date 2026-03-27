@@ -48,7 +48,7 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
     return (
       <Link
         to={`/vozidlo/${vehicle.id}`}
-        className="group bg-surface-900 rounded-xl overflow-hidden border border-surface-800 hover:border-surface-600 transition-all hover:shadow-lg hover:shadow-black/20 flex flex-col"
+        className="group bg-surface-950 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col"
       >
         {/* Obrázek */}
         <div className="relative aspect-[4/3] bg-surface-800 overflow-hidden">
@@ -116,22 +116,22 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
           {/* Spec chips */}
           <div className="flex flex-wrap gap-1.5 mt-3">
             {vehicle.made_year && (
-              <span className="px-2 py-0.5 border border-surface-700 rounded text-[10px] text-surface-300 uppercase tracking-wide">
-                <span className="text-surface-500">Rok</span> {vehicle.made_year}
+              <span className="px-2 py-0.5 bg-surface-850 rounded text-[10px] text-surface-300 uppercase tracking-wide">
+                <span className="text-surface-400">Rok</span> {vehicle.made_year}
               </span>
             )}
             {vehicle.tachometer != null && (
-              <span className="px-2 py-0.5 border border-surface-700 rounded text-[10px] text-surface-300 uppercase tracking-wide">
-                <span className="text-surface-500">Km</span> {formatKm(vehicle.tachometer)}
+              <span className="px-2 py-0.5 bg-surface-850 rounded text-[10px] text-surface-300 uppercase tracking-wide">
+                <span className="text-surface-400">Km</span> {formatKm(vehicle.tachometer)}
               </span>
             )}
             {vehicle.engine_power && (
-              <span className="px-2 py-0.5 border border-surface-700 rounded text-[10px] text-surface-300 uppercase tracking-wide">
-                <span className="text-surface-500">Výkon</span> {formatPower(vehicle.engine_power)}
+              <span className="px-2 py-0.5 bg-surface-850 rounded text-[10px] text-surface-300 uppercase tracking-wide">
+                {formatPower(vehicle.engine_power)}
               </span>
             )}
             {vehicle.fuel_name && (
-              <span className="px-2 py-0.5 border border-surface-700 rounded text-[10px] text-surface-300 uppercase tracking-wide">
+              <span className="px-2 py-0.5 bg-surface-850 rounded text-[10px] text-surface-300 uppercase tracking-wide">
                 {vehicle.fuel_name}
               </span>
             )}
@@ -146,7 +146,7 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
   return (
     <Link
       to={`/vozidlo/${vehicle.id}`}
-      className="group flex flex-col sm:flex-row bg-surface-900 rounded-xl overflow-hidden border border-surface-800 hover:border-surface-600 transition-all hover:shadow-lg hover:shadow-black/20"
+      className="group flex flex-col sm:flex-row bg-surface-950 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
     >
       {/* Obrázek */}
       <div className="relative w-full sm:w-72 lg:w-80 shrink-0 aspect-[4/3] sm:aspect-auto sm:h-auto bg-surface-800 overflow-hidden">
@@ -261,7 +261,7 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
         </div>
 
         {/* Prodejce */}
-        <div className="mt-auto pt-4 flex items-center justify-between border-t border-surface-800">
+        <div className="mt-auto pt-4 flex items-center justify-between border-t border-surface-800/50">
           <div className="flex items-center gap-2">
             <span className="text-sm text-surface-300">{vehicle.seller_name}</span>
             {vehicle.seller_rating && (

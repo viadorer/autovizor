@@ -80,7 +80,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         <button
           onClick={() => handleAiSearch(aiQuery)}
           disabled={aiLoading}
-          className="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-50"
+          className="px-4 py-2.5 bg-gradient-to-br from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 rounded-lg text-sm font-medium text-white transition-colors disabled:opacity-50"
         >
           {aiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Hledat'}
         </button>
@@ -181,7 +181,7 @@ export default function SearchBar({ variant = 'hero' }: SearchBarProps) {
         {/* Vyhledat */}
         <button
           onClick={handleSearch}
-          className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2.5 text-sm font-bold text-white transition-colors flex items-center justify-center gap-2"
+          className="bg-gradient-to-br from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 rounded-lg px-4 py-2.5 text-sm font-bold text-white transition-colors flex items-center justify-center gap-2"
         >
           <Search className="w-4 h-4" />
           Hledat

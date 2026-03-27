@@ -43,11 +43,12 @@ export default function HomePage() {
       {/* Hero — čistý, minimalistický */}
       <section className="max-w-7xl mx-auto px-4 pt-10 pb-6">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-surface-100 leading-tight">
-            Najděte své vysněné vozidlo
+          <h1 className="text-4xl md:text-5xl font-extrabold text-surface-50 leading-tight tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
+            Najdi své{' '}
+            <span className="text-primary-500">vysněné auto</span>
           </h1>
-          <p className="mt-2 text-surface-400 max-w-xl mx-auto">
-            Tisíce ověřených nabídek na jednom místě
+          <p className="mt-3 text-surface-400 max-w-xl mx-auto text-lg">
+            Najděte to pravé – na největším českém vyhledávači vozidel.
           </p>
         </div>
 
