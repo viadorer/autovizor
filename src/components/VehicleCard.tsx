@@ -104,39 +104,49 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
         {/* Info */}
         <div className="p-4 flex flex-col flex-1">
           <h3 className="text-sm font-semibold text-surface-100 truncate">{vehicle.title}</h3>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-lg font-bold text-surface-100">{formatPrice(vehicle.price)}</span>
-            {rating && (
-              <span className={`px-2 py-0.5 text-[10px] font-medium text-white rounded ${rating.className}`}>
-                {rating.label}
-              </span>
-            )}
-          </div>
 
-          {/* Spec chips */}
-          <div className="flex flex-wrap gap-1.5 mt-3">
+          {/* Spec row with icons */}
+          <div className="flex items-center gap-3 mt-2.5 text-[11px] text-surface-400">
             {vehicle.made_year && (
-              <span className="px-2 py-0.5 bg-surface-850 rounded text-[10px] text-surface-300 uppercase tracking-wide">
-                <span className="text-surface-400">Rok</span> {vehicle.made_year}
+              <span className="flex items-center gap-1">
+                <Calendar className="w-3 h-3 text-surface-500" />
+                {vehicle.made_year}
               </span>
             )}
             {vehicle.tachometer != null && (
-              <span className="px-2 py-0.5 bg-surface-850 rounded text-[10px] text-surface-300 uppercase tracking-wide">
-                <span className="text-surface-400">Km</span> {formatKm(vehicle.tachometer)}
+              <span className="flex items-center gap-1">
+                <Gauge className="w-3 h-3 text-surface-500" />
+                {formatKm(vehicle.tachometer)}
               </span>
             )}
             {vehicle.engine_power && (
-              <span className="px-2 py-0.5 bg-surface-850 rounded text-[10px] text-surface-300 uppercase tracking-wide">
+              <span className="flex items-center gap-1">
+                <Zap className="w-3 h-3 text-surface-500" />
                 {formatPower(vehicle.engine_power)}
               </span>
             )}
             {vehicle.fuel_name && (
-              <span className="px-2 py-0.5 bg-surface-850 rounded text-[10px] text-surface-300 uppercase tracking-wide">
+              <span className="flex items-center gap-1">
+                <Fuel className="w-3 h-3 text-surface-500" />
                 {vehicle.fuel_name}
               </span>
             )}
           </div>
 
+          {/* Price + CTA */}
+          <div className="flex items-center justify-between mt-auto pt-3">
+            <div>
+              <span className="text-lg font-bold text-surface-50">{formatPrice(vehicle.price)}</span>
+              {rating && (
+                <span className={`ml-2 px-1.5 py-0.5 text-[9px] font-semibold text-white rounded ${rating.className}`}>
+                  {rating.label}
+                </span>
+              )}
+            </div>
+            <span className="px-3 py-1.5 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg text-xs font-semibold text-white group-hover:shadow-md transition-all">
+              Detail →
+            </span>
+          </div>
         </div>
       </Link>
     );

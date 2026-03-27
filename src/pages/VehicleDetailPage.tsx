@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import { decodeVin, type VinDecodeResult } from '../lib/vin-decoder';
 import { EQUIPMENT } from '../lib/codebooks';
-import { useVehicle } from '../hooks/useVehicles';
+import { useVehicle, useTopVehicles } from '../hooks/useVehicles';
+import VehicleCard from '../components/VehicleCard';
 import {
   formatPrice, formatKm, formatPower, formatVolume,
   formatRegistration, getCodebookName,
@@ -167,7 +168,32 @@ export default function VehicleDetailPage() {
             )}
           </div>
 
-          {/* Technické údaje — tonal grid */}
+          {/* Engineering Profile — hero specs */}
+          <div className="mt-8">
+            <h2 className="text-xl font-extrabold text-surface-50 mb-5 uppercase tracking-wider" style={{ fontFamily: 'var(--font-display)' }}>
+              Engineering Profile
+            </h2>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+              {[
+                { icon: Zap, label: 'Výkon', value: vehicle.engine_power ? formatPower(vehicle.engine_power) : '–' },
+                { icon: Settings, label: 'Převodovka', value: vehicle.gearbox_name || '–' },
+                { icon: Fuel, label: 'Motor', value: vehicle.engine_volume ? formatVolume(vehicle.engine_volume) : vehicle.fuel_name || '–' },
+                { icon: Calendar, label: 'Ročník', value: vehicle.made_year ? String(vehicle.made_year) : '–' },
+                { icon: Gauge, label: 'Najeté', value: formatKm(vehicle.tachometer) },
+                { icon: Palette, label: 'Barva', value: vehicle.color_name || '–' },
+              ].map((s) => (
+                <div key={s.label} className="flex flex-col items-center text-center p-3 bg-surface-950 rounded-xl">
+                  <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center mb-2">
+                    <s.icon className="w-5 h-5 text-primary-500" />
+                  </div>
+                  <p className="text-[10px] text-surface-400 uppercase tracking-wider">{s.label}</p>
+                  <p className="text-sm font-bold text-surface-50 mt-0.5">{s.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Technické údaje — full grid */}
           <div className="mt-8">
             <h2 className="text-lg font-bold text-surface-50 mb-4" style={{ fontFamily: 'var(--font-display)' }}>
               Technické údaje
@@ -478,6 +504,29 @@ export default function VehicleDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Similar Excellence */}
+      <SimilarVehicles currentId={vehicle.id} />
     </div>
+  );
+}
+
+function SimilarVehicles({ currentId }: { currentId: number }) {
+  const { data: vehicles = [] } = useTopVehicles(7);
+  const similar = vehicles.filter((v) => v.id !== currentId).slice(0, 4);
+
+  if (similar.length === 0) return null;
+
+  return (
+    <section className="mt-12 mb-8">
+      <h2 className="text-xl font-extrabold text-surface-50 mb-6 uppercase tracking-wider" style={{ fontFamily: 'var(--font-display)' }}>
+        Similar Excellence
+      </h2>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {similar.map((v) => (
+          <VehicleCard key={v.id} vehicle={v} layout="grid" />
+        ))}
+      </div>
+    </section>
   );
 }
