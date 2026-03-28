@@ -39,48 +39,52 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* === CINEMATIC HERO === */}
-      <section className="relative overflow-hidden bg-surface-50 min-h-[520px] md:min-h-[580px] flex items-end">
-        {/* Background image with overlay */}
+      <section className="relative overflow-hidden bg-surface-50 min-h-[560px] md:min-h-[620px] flex items-end">
+        {/* Background image with cinematic overlay */}
         {heroImage && (
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center scale-105 animate-[pulse_20s_ease-in-out_infinite]"
             style={{ backgroundImage: `url(${heroImage})` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-surface-950/95 via-surface-950/60 to-surface-950/30" />
-          </div>
+          />
         )}
-        {!heroImage && (
-          <div className="absolute inset-0 bg-gradient-to-br from-surface-100 via-surface-200 to-primary-900/20" />
-        )}
+        {/* Dark cinematic gradient — always visible */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
+        {/* Orange accent glow */}
+        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gradient-to-tr from-primary-600/20 to-transparent" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 pb-10 pt-32 w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 pb-12 pt-36 w-full">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold text-primary-400 uppercase tracking-[0.2em] mb-3">
+            <p className="text-[10px] font-bold text-primary-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
+              <span className="w-8 h-px bg-primary-400" />
               Autovizor.cz
             </p>
             <h1
-              className="text-4xl md:text-6xl font-extrabold text-white leading-[1.1] tracking-tight"
+              className="text-5xl md:text-7xl font-extrabold text-white leading-[1.05] tracking-tight"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               Najdi své<br />
-              <span className="italic text-primary-400">vysněné auto.</span>
+              <span className="italic bg-gradient-to-r from-primary-400 to-primary-300 bg-clip-text text-transparent">
+                vysněné auto.
+              </span>
             </h1>
-            <p className="mt-4 text-lg text-white/70 max-w-md">
-              Tisíce ověřených nabídek. AI vyhledávání. Jeden cíl — vaše příští auto.
+            <p className="mt-5 text-base md:text-lg text-white/60 max-w-md leading-relaxed">
+              Tisíce ověřených nabídek. AI vyhledávání.
+              <br className="hidden md:block" />
+              Jeden cíl — vaše příští auto.
             </p>
           </div>
 
           {/* Category chips */}
-          <div className="flex flex-wrap gap-2 mt-8">
+          <div className="flex flex-wrap gap-2.5 mt-10">
             {categories.map((cat) => (
               <Link
                 key={cat.id}
                 to={`/hledat?kind_id=${cat.id}`}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-105 ${cat.color}`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all hover:scale-105 hover:shadow-lg ${cat.color}`}
               >
                 <cat.icon className="w-4 h-4" />
                 {cat.name}
-                <span className="opacity-60 text-xs">{formatCount(cat.count)}</span>
+                <span className="opacity-50 text-xs font-medium">{formatCount(cat.count)}</span>
               </Link>
             ))}
           </div>

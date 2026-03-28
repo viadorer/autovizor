@@ -61,9 +61,11 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
               <img
                 src={vehicle.main_image_url}
                 alt={vehicle.title}
-                className="relative w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                className="relative w-full h-full object-contain group-hover:scale-110 transition-transform duration-500 ease-out"
                 loading="lazy"
               />
+              {/* Cinematic bottom gradient */}
+              <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/30 to-transparent" />
             </>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-surface-600">
