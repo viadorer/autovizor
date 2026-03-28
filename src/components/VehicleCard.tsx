@@ -48,10 +48,10 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
     return (
       <Link
         to={`/vozidlo/${vehicle.id}`}
-        className="group bg-surface-950 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col"
+        className="group bg-surface-950 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
       >
         {/* Obrázek */}
-        <div className="relative aspect-[4/3] bg-surface-800 overflow-hidden">
+        <div className="relative aspect-[16/10] bg-surface-800 overflow-hidden">
           {vehicle.main_image_url ? (
             <>
               <div

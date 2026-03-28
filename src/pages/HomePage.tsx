@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom';
-import { Car, Truck, Bike, Caravan, TrendingUp, Shield, Zap, BadgeCheck, ArrowRight, Calculator } from 'lucide-react';
+import { Car, Truck, Bike, Caravan, TrendingUp, Shield, Zap, BadgeCheck, ArrowRight, Calculator, Sparkles } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import VehicleCard from '../components/VehicleCard';
 import { getManufacturerLogoUrl } from '../lib/manufacturers';
 import { useTopVehicles, useManufacturerCounts, useCategoryCounts } from '../hooks/useVehicles';
 
-const CATEGORY_META: Record<number, { name: string; icon: typeof Car }> = {
-  1: { name: 'Osobní', icon: Car },
-  3: { name: 'Motocykly', icon: Bike },
-  4: { name: 'Užitkové', icon: Truck },
-  9: { name: 'Obytné', icon: Caravan },
+const CATEGORY_META: Record<number, { name: string; icon: typeof Car; color: string }> = {
+  1: { name: 'Osobní', icon: Car, color: 'bg-primary-500 text-white' },
+  3: { name: 'Motocykly', icon: Bike, color: 'bg-surface-50 text-surface-950' },
+  4: { name: 'Užitkové', icon: Truck, color: 'bg-accent-600 text-white' },
+  9: { name: 'Obytné', icon: Caravan, color: 'bg-surface-300 text-surface-950' },
 };
 
 const CATEGORY_ORDER = [1, 3, 4, 9];
@@ -26,68 +26,84 @@ export default function HomePage() {
   const categories = CATEGORY_ORDER.map((kindId) => {
     const meta = CATEGORY_META[kindId];
     const found = categoryCounts.find((c) => c.kind_id === kindId);
-    return {
-      id: kindId,
-      name: meta.name,
-      icon: meta.icon,
-      count: found?.count ?? 0,
-    };
+    return { id: kindId, ...meta, count: found?.count ?? 0 };
   });
 
   const popularBrands = [...manufacturerCounts]
     .sort((a, b) => b.vehicle_count - a.vehicle_count)
     .slice(0, 8);
 
+  // Use first vehicle image as hero background
+  const heroImage = topDeals[0]?.main_image_url;
+
   return (
     <div className="min-h-screen">
-      {/* Hero */}
-      <section className="max-w-7xl mx-auto px-4 pt-12 pb-8">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-surface-50 leading-tight tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
-            Najdi své{' '}
-            <span className="text-primary-500">vysněné auto</span>
-          </h1>
-          <p className="mt-3 text-surface-400 max-w-xl mx-auto text-lg">
-            Najděte to pravé – na největším českém vyhledávači vozidel.
-          </p>
-        </div>
+      {/* === CINEMATIC HERO === */}
+      <section className="relative overflow-hidden bg-surface-50 min-h-[520px] md:min-h-[580px] flex items-end">
+        {/* Background image with overlay */}
+        {heroImage && (
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${heroImage})` }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-t from-surface-950/95 via-surface-950/60 to-surface-950/30" />
+          </div>
+        )}
+        {!heroImage && (
+          <div className="absolute inset-0 bg-gradient-to-br from-surface-100 via-surface-200 to-primary-900/20" />
+        )}
 
-        <div className="max-w-5xl mx-auto">
-          <SearchBar variant="hero" />
-        </div>
-
-        {/* Kategorie */}
-        <div className="flex flex-wrap justify-center gap-3 mt-10">
-          {categories.map((cat) => (
-            <Link
-              key={cat.id}
-              to={`/hledat?kind_id=${cat.id}`}
-              className="flex items-center gap-3 px-5 py-3 bg-surface-950 shadow-sm rounded-xl hover:shadow-md transition-all group"
+        <div className="relative z-10 max-w-7xl mx-auto px-4 pb-10 pt-32 w-full">
+          <div className="max-w-2xl">
+            <p className="text-xs font-bold text-primary-400 uppercase tracking-[0.2em] mb-3">
+              Autovizor.cz
+            </p>
+            <h1
+              className="text-4xl md:text-6xl font-extrabold text-white leading-[1.1] tracking-tight"
+              style={{ fontFamily: 'var(--font-display)' }}
             >
-              <cat.icon className="w-6 h-6 text-surface-400 group-hover:text-primary-500 transition-colors" />
-              <div className="text-left">
-                <p className="text-sm font-medium text-surface-100">{cat.name}</p>
-                <p className="text-xs text-surface-500">
-                  {formatCount(cat.count)} nabídek
-                </p>
-              </div>
-            </Link>
-          ))}
+              Najdi své<br />
+              <span className="italic text-primary-400">vysněné auto.</span>
+            </h1>
+            <p className="mt-4 text-lg text-white/70 max-w-md">
+              Tisíce ověřených nabídek. AI vyhledávání. Jeden cíl — vaše příští auto.
+            </p>
+          </div>
+
+          {/* Category chips */}
+          <div className="flex flex-wrap gap-2 mt-8">
+            {categories.map((cat) => (
+              <Link
+                key={cat.id}
+                to={`/hledat?kind_id=${cat.id}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all hover:scale-105 ${cat.color}`}
+              >
+                <cat.icon className="w-4 h-4" />
+                {cat.name}
+                <span className="opacity-60 text-xs">{formatCount(cat.count)}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Nejnovější nabídky */}
-      <section className="max-w-7xl mx-auto px-4 py-16">
-        <div className="flex items-center justify-between mb-8">
+      {/* === SEARCH BAR — floating over hero === */}
+      <section className="max-w-5xl mx-auto px-4 -mt-6 relative z-20">
+        <SearchBar variant="hero" />
+      </section>
+
+      {/* === LATEST INVENTORY === */}
+      <section className="max-w-7xl mx-auto px-4 pt-20 pb-16">
+        <div className="flex items-end justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-surface-50" style={{ fontFamily: 'var(--font-display)' }}>
+            <p className="text-xs font-bold text-primary-500 uppercase tracking-[0.15em] mb-1">Čerstvě přidané</p>
+            <h2 className="text-3xl font-extrabold text-surface-50 tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
               Nejnovější nabídky
             </h2>
-            <p className="text-sm text-surface-400 mt-1">Čerstvě přidané inzeráty</p>
           </div>
           <Link
             to="/hledat"
-            className="hidden sm:flex items-center gap-1 text-sm text-primary-500 hover:text-primary-400 font-medium transition-colors"
+            className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-surface-950 shadow-sm hover:shadow-md rounded-full text-sm font-medium text-surface-100 transition-all"
           >
             Zobrazit vše
             <ArrowRight className="w-4 h-4" />
@@ -100,44 +116,49 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Prodej + Ocenění — dva bannery */}
+      {/* === PRODEJ + OCENĚNÍ BANNERY === */}
       <section className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-          {/* Prodej své auto */}
+          {/* Prodej své auto — tmavý cinematic */}
           <Link
             to="/prodat"
-            className="md:col-span-3 relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-100 to-surface-200 p-8 md:p-10 flex flex-col justify-end min-h-[260px] group"
+            className="md:col-span-3 relative overflow-hidden rounded-2xl bg-gradient-to-br from-surface-50 via-surface-100 to-surface-200 p-8 md:p-10 flex flex-col justify-end min-h-[280px] group"
           >
-            <div className="absolute top-6 right-6 w-24 h-24 bg-primary-500/10 rounded-full blur-2xl" />
-            <Car className="w-12 h-12 text-primary-500/30 absolute top-6 right-8" />
+            <div className="absolute -top-10 -right-10 w-48 h-48 bg-primary-500/8 rounded-full blur-3xl" />
+            <div className="absolute top-8 right-8 opacity-10">
+              <Car className="w-32 h-32 text-primary-500" />
+            </div>
             <div className="relative z-10">
-              <p className="text-xs font-semibold text-primary-500 uppercase tracking-wider mb-2">Prodáváte?</p>
-              <h3 className="text-2xl md:text-3xl font-bold text-surface-950 mb-2" style={{ fontFamily: 'var(--font-display)' }}>
-                Prodejte rychleji za lepší cenu
-              </h3>
-              <p className="text-surface-400 max-w-md mb-6">
-                Vložte inzerát zdarma a oslovte tisíce kupujících po celé ČR. Průměrný čas prodeje: 14 dní.
+              <p className="text-xs font-bold text-primary-500 uppercase tracking-[0.15em] mb-2">
+                <Sparkles className="w-3 h-3 inline mr-1" />
+                Prodáváte?
               </p>
-              <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg text-white font-medium group-hover:shadow-lg group-hover:shadow-primary-600/30 transition-all">
+              <h3 className="text-2xl md:text-3xl font-extrabold text-surface-950 mb-3" style={{ fontFamily: 'var(--font-display)' }}>
+                Prodejte rychleji<br />za lepší cenu
+              </h3>
+              <p className="text-surface-400 max-w-sm mb-6 text-sm">
+                Inzerát zdarma. Tisíce kupujících. Průměrný prodej za 14 dní.
+              </p>
+              <span className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl text-white font-semibold group-hover:shadow-xl group-hover:shadow-primary-500/25 group-hover:scale-[1.02] transition-all">
                 Inzerovat zdarma
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </span>
             </div>
           </Link>
 
-          {/* Ocenění vozu */}
+          {/* AI Ocenění */}
           <Link
             to="/prodat"
-            className="md:col-span-2 rounded-2xl bg-gradient-to-br from-accent-600 to-accent-800 p-8 flex flex-col text-white group"
+            className="md:col-span-2 rounded-2xl bg-gradient-to-br from-accent-600 to-accent-800 p-8 flex flex-col text-white group hover:shadow-xl hover:shadow-accent-600/20 transition-all"
           >
             <Calculator className="w-10 h-10 text-white/80 mb-4" />
-            <h3 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+            <h3 className="text-xl font-extrabold mb-2" style={{ fontFamily: 'var(--font-display)' }}>
               Kolik stojí vaše auto?
             </h3>
-            <p className="text-sm text-white/70 mb-6 flex-1">
-              AI ocenění na základě aktuálních tržních dat. Výsledek za 30 sekund.
+            <p className="text-sm text-white/60 mb-6 flex-1">
+              AI ocenění z aktuálních tržních dat. Výsledek za 30 sekund.
             </p>
-            <span className="inline-flex items-center gap-2 text-sm font-medium text-white/90 group-hover:text-white transition-colors">
+            <span className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/15 backdrop-blur-sm rounded-xl text-sm font-semibold text-white group-hover:bg-white/25 transition-all">
               Zjistit tržní cenu
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </span>
@@ -145,7 +166,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Certifikováno banner */}
+      {/* === CERTIFIKOVÁNO === */}
       <section className="max-w-7xl mx-auto px-4 py-8">
         <div className="rounded-2xl bg-surface-850 p-8 md:p-10 flex flex-col md:flex-row items-start md:items-center gap-6">
           <div className="w-14 h-14 rounded-2xl bg-accent-100 flex items-center justify-center shrink-0">
@@ -156,21 +177,22 @@ export default function HomePage() {
               Autovizor Certifikováno
             </h3>
             <p className="text-sm text-surface-400">
-              Každé certifikované vozidlo prochází kontrolou technického stavu, historie a právní čistoty. Kupujte s jistotou.
+              Kontrola technického stavu, historie a právní čistoty. Kupujte s jistotou.
             </p>
           </div>
           <Link
             to="/poradna"
-            className="shrink-0 px-5 py-2.5 bg-surface-950 shadow-sm hover:shadow-md rounded-lg text-sm font-medium text-surface-100 transition-all"
+            className="shrink-0 px-5 py-2.5 bg-surface-950 shadow-sm hover:shadow-md rounded-xl text-sm font-medium text-surface-100 transition-all"
           >
             Zjistit více
           </Link>
         </div>
       </section>
 
-      {/* Populární značky */}
+      {/* === POPULÁRNÍ ZNAČKY === */}
       <section className="max-w-7xl mx-auto px-4 py-16">
-        <h2 className="text-2xl font-bold text-surface-50 mb-8" style={{ fontFamily: 'var(--font-display)' }}>
+        <p className="text-xs font-bold text-primary-500 uppercase tracking-[0.15em] mb-1">Značky</p>
+        <h2 className="text-3xl font-extrabold text-surface-50 mb-8 tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
           Populární značky
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -178,7 +200,7 @@ export default function HomePage() {
             <Link
               key={brand.name}
               to={`/hledat?brand=${encodeURIComponent(brand.name)}`}
-              className="flex items-center gap-3 p-4 bg-surface-950 rounded-xl shadow-sm hover:shadow-md transition-all group"
+              className="flex items-center gap-3 p-4 bg-surface-950 rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] transition-all group"
             >
               <img
                 src={getManufacturerLogoUrl(brand.name)}
@@ -187,7 +209,7 @@ export default function HomePage() {
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-surface-100 group-hover:text-primary-500 transition-colors truncate">
+                <p className="text-sm font-semibold text-surface-100 group-hover:text-primary-500 transition-colors truncate">
                   {brand.name}
                 </p>
                 <p className="text-xs text-surface-500">{formatCount(brand.vehicle_count)}</p>
@@ -197,25 +219,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* USP sekce — bez borderů, s icon circles */}
+      {/* === PROČ AUTOVIZOR === */}
       <section className="max-w-7xl mx-auto px-4 py-16">
-        <h2 className="text-2xl font-bold text-surface-50 mb-8 text-center" style={{ fontFamily: 'var(--font-display)' }}>
+        <h2 className="text-3xl font-extrabold text-surface-50 mb-10 text-center tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
           Proč Autovizor?
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { icon: TrendingUp, title: 'Hodnocení ceny', desc: 'U každého vozidla vidíte, zda je cena výhodná, férová, nebo vysoká. Nakupujte chytře.' },
-            { icon: Shield, title: 'Ověření prodejci', desc: 'Spolupracujeme pouze s ověřenými prodejci. Hodnocení a recenze od skutečných zákazníků.' },
-            { icon: Zap, title: 'Okamžitá upozornění', desc: 'Uložte si hledání a dostávejte upozornění, když se objeví nový inzerát.' },
+            { icon: TrendingUp, title: 'Hodnocení ceny', desc: 'U každého vozidla vidíte, zda je cena výhodná, férová, nebo vysoká.' },
+            { icon: Shield, title: 'Ověření prodejci', desc: 'Hodnocení a recenze od skutečných zákazníků. Kupujte bezpečně.' },
+            { icon: Zap, title: 'AI vyhledávání', desc: 'Popište auto co hledáte a my najdeme ty nejlepší nabídky.' },
           ].map((usp) => (
-            <div key={usp.title} className="text-center">
-              <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center mx-auto mb-4">
-                <usp.icon className="w-7 h-7 text-primary-500" />
+            <div key={usp.title} className="text-center group">
+              <div className="w-16 h-16 rounded-2xl bg-primary-50 flex items-center justify-center mx-auto mb-5 group-hover:bg-primary-100 transition-colors">
+                <usp.icon className="w-8 h-8 text-primary-500" />
               </div>
-              <h3 className="text-lg font-semibold text-surface-100 mb-2">{usp.title}</h3>
-              <p className="text-sm text-surface-400 max-w-xs mx-auto">
-                {usp.desc}
-              </p>
+              <h3 className="text-lg font-bold text-surface-100 mb-2">{usp.title}</h3>
+              <p className="text-sm text-surface-400 max-w-xs mx-auto">{usp.desc}</p>
             </div>
           ))}
         </div>
