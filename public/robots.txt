@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /prihlaseni
+Disallow: /garaz
+Disallow: /oblibene
+
+Sitemap: https://autovizor.cz/sitemap.xml

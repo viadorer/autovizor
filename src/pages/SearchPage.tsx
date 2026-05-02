@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Grid3X3, List, Search, Star } from 'lucide-react';
 import SearchFilters from '../components/SearchFilters';
 import VehicleCard from '../components/VehicleCard';
@@ -7,13 +8,26 @@ import { useSearchStore } from '../stores/searchStore';
 import { SORT_OPTIONS } from '../lib/codebooks';
 
 export default function SearchPage() {
-  const { results, totalCount, isLoading, page, perPage, filters, setPage, setSortBy, search } = useSearchStore();
+  const { results, totalCount, isLoading, page, perPage, filters, setPage, setSortBy, search, hydrateFromUrl, toUrlSearchParams } = useSearchStore();
   const [layout, setLayout] = useState<'list' | 'grid'>('grid');
+  const [urlParams, setUrlParams] = useSearchParams();
+  const initialized = useRef(false);
   const totalPages = Math.ceil(totalCount / perPage);
 
+  // Hydratace z URL při prvním renderu (sdílitelné odkazy s filtry)
   useEffect(() => {
+    if (initialized.current) return;
+    hydrateFromUrl(urlParams);
+    initialized.current = true;
     search();
-  }, []);
+  }, [urlParams, hydrateFromUrl, search]);
+
+  // Synchronizace store → URL (bez navigace)
+  useEffect(() => {
+    if (!initialized.current) return;
+    const params = toUrlSearchParams();
+    setUrlParams(params, { replace: true });
+  }, [filters, page, toUrlSearchParams, setUrlParams]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">

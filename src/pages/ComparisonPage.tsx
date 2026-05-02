@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import type { Vehicle } from '../types';
 import { searchVehicles } from '../lib/api';
+import { buildVehicleHref } from '../lib/slug';
 import {
   formatPrice, formatKm, formatPower, formatVolume, formatRegistration,
   getCodebookName, FUEL_TYPES, GEARBOX_TYPES, COLORS, CONDITIONS,
@@ -99,7 +100,7 @@ export default function ComparisonPage() {
                   </button>
                 </div>
                 <div className="p-4">
-                  <Link to={`/vozidlo/${v.id}`} className="text-sm font-semibold text-surface-100 hover:text-primary-400 transition-colors">
+                  <Link to={buildVehicleHref(v)} className="text-sm font-semibold text-surface-100 hover:text-primary-400 transition-colors">
                     {v.title}
                   </Link>
                   <p className="text-lg font-bold text-surface-100 mt-1">{formatPrice(v.price)}</p>

@@ -14,6 +14,7 @@ export interface CodebookWithCategory extends Codebook {
 
 export interface Manufacturer extends Codebook {
   seo_name?: string;
+  kind_ids?: number[]; // 1=Osobní, 3=Motocykl, 4=Užitkové, 5=Nákladní…
 }
 
 export interface Model extends Codebook {
@@ -23,6 +24,50 @@ export interface Model extends Codebook {
 
 export interface Region extends Codebook {
   region_group?: string;
+}
+
+export interface Dealer {
+  id: number;
+  sauto_id?: number;
+  name: string;
+  slug?: string;
+  type_id?: number;
+  phone?: string;
+  email?: string;
+  website?: string;
+  logo_url?: string;
+  address?: string;
+  city?: string;
+  zip_code?: string;
+  region_id?: number;
+  latitude?: number;
+  longitude?: number;
+  rating?: number;
+  review_count?: number;
+  certified_program_id?: number;
+  opening_hours?: Record<string, string>;
+  description?: string;
+  is_verified?: boolean;
+  is_active?: boolean;
+}
+
+export interface DealerReview {
+  id: number;
+  dealer_id: number;
+  user_id?: string;
+  rating: number;
+  title?: string;
+  body?: string;
+  pros?: string;
+  cons?: string;
+  is_verified_purchase?: boolean;
+  created_at: string;
+}
+
+export interface PriceHistoryPoint {
+  price: number;
+  change_pct?: number;
+  recorded_at: string;
 }
 
 // Hlavní entita vozidla
@@ -47,9 +92,8 @@ export interface Vehicle {
   price_leasing?: number;
   payment?: number;
   payment_count?: number;
-  vat_deductible?: boolean;
-  dph?: boolean; // cena s/bez DPH
-  deal_type?: string; // "sale" | "operating_lease" | "sale_or_lease"
+  vat_deductible?: boolean; // možnost odpočtu DPH (B2B)
+  price_includes_vat?: boolean; // cena včetně DPH (true) / bez DPH (false)
 
   // Technické údaje
   fuel_type_id?: number;
@@ -105,6 +149,8 @@ export interface Vehicle {
   truck_type_id?: number;
   bus_type_id?: number;
   trailer_type_id?: number;
+  quad_type_id?: number; // typ čtyřkolky (kind_id=11)
+  machine_type_id?: number; // typ pracovního stroje (kind_id=10)
   seatplace_id?: number; // kategorie sedadel autobusů
   certified_id?: number; // ověřené vozidlo (Škoda Plus, DWA...)
   type_info?: string; // doplňková info o modelu (max 30 znaků)
@@ -128,7 +174,7 @@ export interface Vehicle {
   vin?: string;
   owners_count?: number;
   crashed?: boolean;
-  first_owner?: number; // codebook: 1=Ano, 2=Ne
+  first_owner?: 1 | 2; // codebook: 1=Ano, 2=Ne
 
   // Operativní leasing
   operating_lease?: OperatingLeaseData;
@@ -141,11 +187,14 @@ export interface Vehicle {
   latitude?: number;
   longitude?: number;
 
-  // Prodejce
+  // SEO slug — používá se v URL /vozidlo/{slug}-{id}
+  slug?: string;
+
+  // Prodejce — denormalizované cache (autoritativní zdroj je tabulka dealers)
+  dealer_id?: number;
   seller_name?: string;
   seller_phone?: string;
   seller_email?: string;
-  seller_type?: string;
   seller_logo_url?: string;
   seller_rating?: number;
   seller_review_count?: number;
@@ -191,6 +240,7 @@ export interface Vehicle {
 
   // Výbava
   equipment?: CodebookWithCategory[];
+  equipment_ids?: number[]; // denormalizované pole pro rychlý GIN filter
 }
 
 export interface VehicleImage {
@@ -213,6 +263,7 @@ export interface OperatingLeaseData {
 // Vyhledávání
 export interface SearchFilters {
   manufacturer_id?: number;
+  manufacturer_ids?: number[]; // multi-select (mobile.de standard)
   model_id?: number;
   kind_id?: number;
   condition_id?: number;
@@ -258,6 +309,8 @@ export interface SearchFilters {
   truck_type_id?: number;
   bus_type_id?: number;
   trailer_type_id?: number;
+  quad_type_id?: number;
+  machine_type_id?: number;
   seatplace_id?: number;
   gearbox_level_id?: number;
   color_type_id?: number;
@@ -265,11 +318,29 @@ export interface SearchFilters {
 
   equipment_ids?: number[];
 
+  // Geo radius search (best practice u Mobile.de / AutoScout24)
+  user_lat?: number;
+  user_lng?: number;
+  radius_km?: number;
+
   sort_by?: string;
   sort_dir?: 'asc' | 'desc';
   page?: number;
   per_page?: number;
   query?: string;
+}
+
+// Faceted counts pro live UI counters
+export interface FilterFacets {
+  total: number;
+  manufacturer_id: Record<string, number>;
+  fuel_type_id: Record<string, number>;
+  gearbox_id: Record<string, number>;
+  body_type_id: Record<string, number>;
+  drive_id: Record<string, number>;
+  color_id: Record<string, number>;
+  condition_id: Record<string, number>;
+  region_id: Record<string, number>;
 }
 
 export interface SearchResult {

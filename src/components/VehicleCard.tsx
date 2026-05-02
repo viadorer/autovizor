@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Warehouse, MapPin, Fuel, Settings, Calendar, Gauge, Zap, Camera, BadgeCheck, Sparkles } from 'lucide-react';
+import { Warehouse, MapPin, Fuel, Settings, Calendar, Gauge, Zap, Camera, BadgeCheck, Sparkles, TrendingDown } from 'lucide-react';
 import type { Vehicle } from '../types';
 import { formatPrice, formatKm, formatPower, formatRegistration } from '../lib/codebooks';
 import { useFavoritesStore } from '../stores/favoritesStore';
+import { buildVehicleHref } from '../lib/slug';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -29,6 +30,9 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
   const rating = vehicle.price_rating ? RATING_LABELS[vehicle.price_rating] : null;
   const isNewVehicle = isNew(vehicle);
   const isCertified = !!vehicle.certified_id;
+  // Price drop badge (z get_price_drops RPC; pole je injectované do vehicle objectu)
+  const priceDropPct = (vehicle as unknown as { price_drop_pct?: number }).price_drop_pct;
+  const hasPriceDrop = typeof priceDropPct === 'number' && priceDropPct > 1;
 
   const garageButton = (
     <button
@@ -47,7 +51,7 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
   if (layout === 'grid') {
     return (
       <Link
-        to={`/vozidlo/${vehicle.id}`}
+        to={buildVehicleHref(vehicle)}
         className="group bg-surface-950 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
       >
         {/* Obrázek */}
@@ -90,6 +94,12 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
               <span className="flex items-center gap-1 px-2 py-0.5 bg-accent-600 text-white text-xs font-bold rounded">
                 <BadgeCheck className="w-3 h-3" />
                 Ověřeno
+              </span>
+            )}
+            {hasPriceDrop && (
+              <span className="flex items-center gap-1 px-2 py-0.5 bg-amber-600 text-white text-xs font-bold rounded">
+                <TrendingDown className="w-3 h-3" />
+                −{Math.round(priceDropPct!)} %
               </span>
             )}
           </div>
@@ -157,7 +167,7 @@ export default function VehicleCard({ vehicle, layout = 'list' }: VehicleCardPro
   // List layout
   return (
     <Link
-      to={`/vozidlo/${vehicle.id}`}
+      to={buildVehicleHref(vehicle)}
       className="group flex flex-col sm:flex-row bg-surface-950 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all"
     >
       {/* Obrázek */}

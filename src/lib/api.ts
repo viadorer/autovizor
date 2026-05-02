@@ -6,7 +6,7 @@
 import { supabase } from './supabase';
 import { getMockVehicles, getMockVehicle, searchMockVehicles } from './mock-data';
 import { MANUFACTURERS } from './manufacturers';
-import type { Vehicle, SearchResult, ManufacturerCount } from '../types';
+import type { Vehicle, SearchResult, ManufacturerCount, FilterFacets, PriceHistoryPoint } from '../types';
 import type { ManufacturerWithModels } from './manufacturers';
 
 // ============================================================
@@ -490,5 +490,154 @@ export async function getManufacturerCounts(): Promise<ManufacturerCount[]> {
       const mfr = MANUFACTURERS.find((m) => m.name === name);
       return { id: mfr?.id ?? i + 1, name, vehicle_count: popularCounts[i] };
     });
+  }
+}
+
+// ============================================================
+// getFilterFacets — live counts pro UI faceted search (migrace 009)
+// ============================================================
+export async function getFilterFacets(filters: Record<string, unknown>): Promise<FilterFacets | null> {
+  if (!isSupabaseConfigured()) return null;
+
+  try {
+    const { data, error } = await supabase.rpc('get_filter_facets', { p_filters: filters });
+    if (error) throw error;
+    return data as FilterFacets;
+  } catch (err) {
+    console.error('Supabase getFilterFacets error:', err);
+    return null;
+  }
+}
+
+// ============================================================
+// getSimilarVehicles — podobná vozidla pro detail page
+// ============================================================
+export async function getSimilarVehicles(vehicleId: number, limit = 6): Promise<Vehicle[]> {
+  if (!isSupabaseConfigured()) {
+    const vehicles = getMockVehicles(50);
+    return vehicles.filter((v) => v.id !== vehicleId).slice(0, limit);
+  }
+
+  try {
+    const { data, error } = await supabase.rpc('get_similar_vehicles', {
+      p_vehicle_id: vehicleId,
+      p_limit: limit,
+    });
+    if (error) throw error;
+    return (data ?? []).map((v: Record<string, unknown>) => normalizeVehicle(v));
+  } catch (err) {
+    console.error('Supabase getSimilarVehicles error:', err);
+    return [];
+  }
+}
+
+// ============================================================
+// logVehicleView — track view (RPC z migrace 009)
+// ============================================================
+function getOrCreateSessionId(): string {
+  if (typeof window === 'undefined') return '';
+  let sid = localStorage.getItem('autovizor_session_id');
+  if (!sid) {
+    sid = crypto.randomUUID();
+    localStorage.setItem('autovizor_session_id', sid);
+  }
+  return sid;
+}
+
+export async function logVehicleView(vehicleId: number, userId?: string): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  try {
+    await supabase.rpc('log_vehicle_view', {
+      p_vehicle_id: vehicleId,
+      p_user_id: userId ?? null,
+      p_session_id: getOrCreateSessionId(),
+    });
+  } catch (err) {
+    console.warn('logVehicleView failed (non-critical):', err);
+  }
+}
+
+// ============================================================
+// getRecentlyViewed — pro homepage / "nedávno prohlížené"
+// ============================================================
+export async function getRecentlyViewed(limit = 8, userId?: string): Promise<Vehicle[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  try {
+    const { data, error } = await supabase.rpc('get_recently_viewed', {
+      p_user_id: userId ?? null,
+      p_session_id: getOrCreateSessionId(),
+      p_limit: limit,
+    });
+    if (error) throw error;
+    return (data ?? []).map((v: Record<string, unknown>) => normalizeVehicle(v));
+  } catch (err) {
+    console.error('Supabase getRecentlyViewed error:', err);
+    return [];
+  }
+}
+
+// ============================================================
+// getPriceHistory — pro graf historie ceny na detail page
+// ============================================================
+export async function getPriceHistory(vehicleId: number): Promise<PriceHistoryPoint[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  try {
+    const { data, error } = await supabase
+      .from('vehicle_price_history')
+      .select('price, change_pct, recorded_at')
+      .eq('vehicle_id', vehicleId)
+      .order('recorded_at', { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as PriceHistoryPoint[];
+  } catch (err) {
+    console.error('Supabase getPriceHistory error:', err);
+    return [];
+  }
+}
+
+// ============================================================
+// getPriceDrops — pro homepage sekci "Klesly ceny"
+// ============================================================
+export async function getPriceDrops(limit = 12): Promise<Vehicle[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  try {
+    const { data: drops, error: dropsError } = await supabase.rpc('get_price_drops', {
+      p_limit: limit,
+      p_days: 30,
+    });
+    if (dropsError) throw dropsError;
+    if (!drops || drops.length === 0) return [];
+
+    const ids = drops.map((d: Record<string, unknown>) => d.vehicle_id as number);
+    const { data: vehicles, error } = await supabase
+      .from('vehicles')
+      .select('*')
+      .in('id', ids)
+      .eq('is_active', true);
+    if (error) throw error;
+
+    // Zachovat pořadí dle drop_pct + zkopírovat metadata
+    type DropMeta = { vehicle_id: number; drop_pct: number; previous_price: number };
+    type EnrichedVehicle = Vehicle & { price_drop_pct?: number; previous_price?: number };
+    const meta = new Map<number, DropMeta>(
+      (drops as DropMeta[]).map((d) => [d.vehicle_id, d])
+    );
+    return (vehicles ?? [])
+      .map((v) => {
+        const veh = normalizeVehicle(v as Record<string, unknown>) as EnrichedVehicle;
+        const m = meta.get(veh.id);
+        if (m) {
+          veh.price_drop_pct = m.drop_pct;
+          veh.previous_price = m.previous_price;
+        }
+        return veh;
+      })
+      .sort((a, b) => (b.price_drop_pct ?? 0) - (a.price_drop_pct ?? 0));
+  } catch (err) {
+    console.error('Supabase getPriceDrops error:', err);
+    return [];
   }
 }

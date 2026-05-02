@@ -219,7 +219,7 @@ function generateVehicle(id: number): Vehicle {
     seller_name: seller.name,
     seller_phone: generateCzechPhone(),
     seller_email: generateSellerEmail(seller.name),
-    seller_type: seller.type,
+    seller_type_id: seller.type === 'dealer' ? 2 : 1, // 1=Soukromý, 2=Autobazar
     seller_rating: seller.rating,
     seller_review_count: seller.reviews,
     images: Array.from({ length: rand(3, 8) }, (_, i) => ({

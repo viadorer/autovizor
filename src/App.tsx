@@ -26,7 +26,8 @@ export default function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/hledat" element={<SearchPage />} />
-              <Route path="/vozidlo/:id" element={<VehicleDetailPage />} />
+              {/* /vozidlo/{slug}-{id} — SEO friendly URL, fallback /vozidlo/{id} */}
+              <Route path="/vozidlo/:slugOrId" element={<VehicleDetailPage />} />
               <Route path="/garaz" element={<FavoritesPage />} />
               <Route path="/oblibene" element={<FavoritesPage />} />
               <Route path="/prodat" element={<SellPage />} />

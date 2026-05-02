@@ -21,12 +21,15 @@ function Select({
   onChange,
   options,
   placeholder,
+  facets,
 }: {
   label: string;
   value: unknown;
   onChange: (val: unknown) => void;
   options: { id: number; name: string }[];
   placeholder?: string;
+  /** Live počty per option (např. {1: 1234, 2: 567}) — z get_filter_facets RPC */
+  facets?: Record<string, number>;
 }) {
   return (
     <div>
@@ -37,21 +40,28 @@ function Select({
         className="w-full bg-surface-850 rounded-lg px-3 py-2 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500 appearance-none cursor-pointer"
       >
         <option value="">{placeholder ?? 'Libovolné'}</option>
-        {options.map((o) => (
-          <option key={o.id} value={o.id}>{o.name}</option>
-        ))}
+        {options.map((o) => {
+          const count = facets?.[String(o.id)];
+          const isEmpty = facets && (count == null || count === 0);
+          return (
+            <option key={o.id} value={o.id} disabled={isEmpty}>
+              {o.name}{count != null ? ` (${count.toLocaleString('cs-CZ')})` : ''}
+            </option>
+          );
+        })}
       </select>
     </div>
   );
 }
 
 export default function SearchFilters() {
-  const { filters, setFilter, resetFilters, search } = useSearchStore();
+  const { filters, setFilter, resetFilters, search, facets, totalCount } = useSearchStore();
   const [showMore, setShowMore] = useState(false);
   const [showEquipment, setShowEquipment] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const { data: manufacturers = [] } = useManufacturers(filters.kind_id as number | undefined);
+  const f = (key: keyof NonNullable<typeof facets>) => facets?.[key] as Record<string, number> | undefined;
   const selectedMfr = filters.manufacturer_id;
   const currentModels = selectedMfr
     ? manufacturers.find((m) => m.id === selectedMfr)?.models ?? []
@@ -80,6 +90,7 @@ export default function SearchFilters() {
         value={filters.condition_id}
         onChange={(v) => { setFilter('condition_id', v); search(); }}
         options={CONDITIONS}
+        facets={f('condition_id')}
       />
 
       {/* Značka */}
@@ -200,6 +211,7 @@ export default function SearchFilters() {
         value={filters.fuel_type_id}
         onChange={(v) => { setFilter('fuel_type_id', v); search(); }}
         options={FUEL_TYPES}
+        facets={f('fuel_type_id')}
       />
 
       {/* Převodovka - skrýt pro motorky a přívěsy */}
@@ -210,6 +222,7 @@ export default function SearchFilters() {
             value={filters.gearbox_id}
             onChange={(v) => { setFilter('gearbox_id', v); search(); }}
             options={GEARBOX_TYPES}
+            facets={f('gearbox_id')}
           />
           <Select
             label="Počet stupňů"
@@ -250,15 +263,15 @@ export default function SearchFilters() {
         <div className="space-y-4 pt-4">
           {/* Karoserie - jen pro osobní a užitkové */}
           {(filters.kind_id === 1 || filters.kind_id === 4 || !filters.kind_id) && (
-            <Select label="Karoserie" value={filters.body_type_id} onChange={(v) => { setFilter('body_type_id', v); search(); }} options={BODY_TYPES} />
+            <Select label="Karoserie" value={filters.body_type_id} onChange={(v) => { setFilter('body_type_id', v); search(); }} options={BODY_TYPES} facets={f('body_type_id')} />
           )}
 
           {/* Pohon - relevantní pro auta, motorky, užitkové */}
           {filters.kind_id !== 7 && (
-            <Select label="Pohon" value={filters.drive_id} onChange={(v) => { setFilter('drive_id', v); search(); }} options={DRIVE_TYPES} />
+            <Select label="Pohon" value={filters.drive_id} onChange={(v) => { setFilter('drive_id', v); search(); }} options={DRIVE_TYPES} facets={f('drive_id')} />
           )}
 
-          <Select label="Barva" value={filters.color_id} onChange={(v) => { setFilter('color_id', v); search(); }} options={COLORS} />
+          <Select label="Barva" value={filters.color_id} onChange={(v) => { setFilter('color_id', v); search(); }} options={COLORS} facets={f('color_id')} />
           <Select label="Odstín laku" value={filters.color_tone_id} onChange={(v) => { setFilter('color_tone_id', v); search(); }} options={COLOR_TONES} />
           <Select label="Typ laku" value={filters.color_type_id} onChange={(v) => { setFilter('color_type_id', v); search(); }} options={COLOR_TYPES} />
 
@@ -466,14 +479,24 @@ export default function SearchFilters() {
         </div>
       )}
 
-      {/* Reset */}
-      <button
-        onClick={() => { resetFilters(); search(); }}
-        className="flex items-center gap-2 w-full py-2.5 text-sm text-surface-400 hover:text-surface-100 border border-surface-700 rounded-lg justify-center transition-colors"
-      >
-        <RotateCcw className="w-4 h-4" />
-        Resetovat filtry
-      </button>
+      {/* Live results indicator + Reset */}
+      <div className="space-y-2 pt-2">
+        {totalCount > 0 && (
+          <div className="px-3 py-2 bg-primary-500/10 border border-primary-500/20 rounded-lg text-center">
+            <p className="text-xs text-surface-400">Aktuální výsledek</p>
+            <p className="text-lg font-bold text-primary-400">
+              {totalCount.toLocaleString('cs-CZ')} <span className="text-xs font-normal text-surface-400">vozů</span>
+            </p>
+          </div>
+        )}
+        <button
+          onClick={() => { resetFilters(); search(); }}
+          className="flex items-center gap-2 w-full py-2.5 text-sm text-surface-400 hover:text-surface-100 border border-surface-700 rounded-lg justify-center transition-colors"
+        >
+          <RotateCcw className="w-4 h-4" />
+          Resetovat filtry
+        </button>
+      </div>
     </div>
   );
 

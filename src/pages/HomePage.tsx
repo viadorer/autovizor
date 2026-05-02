@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Car, Truck, Bike, Caravan, TrendingUp, Shield, Zap, BadgeCheck, ArrowRight, Calculator, Sparkles } from 'lucide-react';
+import { Car, Truck, Bike, Caravan, TrendingUp, Shield, Zap, BadgeCheck, ArrowRight, Calculator, Sparkles, Clock, TrendingDown } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import VehicleCard from '../components/VehicleCard';
 import { getManufacturerLogoUrl } from '../lib/manufacturers';
-import { useTopVehicles, useManufacturerCounts, useCategoryCounts } from '../hooks/useVehicles';
+import { useTopVehicles, useManufacturerCounts, useCategoryCounts, useRecentlyViewed, usePriceDrops } from '../hooks/useVehicles';
 
 const CATEGORY_META: Record<number, { name: string; icon: typeof Car; color: string }> = {
   1: { name: 'Osobní', icon: Car, color: 'bg-primary-500 text-white' },
@@ -22,6 +22,8 @@ export default function HomePage() {
   const { data: topDeals = [] } = useTopVehicles(6);
   const { data: manufacturerCounts = [] } = useManufacturerCounts();
   const { data: categoryCounts = [] } = useCategoryCounts();
+  const { data: recentlyViewed = [] } = useRecentlyViewed(6);
+  const { data: priceDrops = [] } = usePriceDrops(6);
 
   const categories = CATEGORY_ORDER.map((kindId) => {
     const meta = CATEGORY_META[kindId];
@@ -96,6 +98,28 @@ export default function HomePage() {
         <SearchBar variant="hero" />
       </section>
 
+      {/* === RECENTLY VIEWED — viditelné jen pokud jsou data === */}
+      {recentlyViewed.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 pt-20 pb-4">
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <p className="text-xs font-bold text-primary-500 uppercase tracking-[0.15em] mb-1 flex items-center gap-1.5">
+                <Clock className="w-3 h-3" />
+                Nedávno prohlížené
+              </p>
+              <h2 className="text-2xl font-extrabold text-surface-50 tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
+                Pokračujte tam, kde jste skončili
+              </h2>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {recentlyViewed.map((vehicle) => (
+              <VehicleCard key={vehicle.id} vehicle={vehicle} layout="grid" />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* === LATEST INVENTORY === */}
       <section className="max-w-7xl mx-auto px-4 pt-20 pb-16">
         <div className="flex items-end justify-between mb-8">
@@ -119,6 +143,35 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* === PRICE DROPS === */}
+      {priceDrops.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 py-12">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="text-xs font-bold text-amber-500 uppercase tracking-[0.15em] mb-1 flex items-center gap-1.5">
+                <TrendingDown className="w-3 h-3" />
+                Klesly ceny
+              </p>
+              <h2 className="text-3xl font-extrabold text-surface-50 tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
+                Vozy se sníženou cenou
+              </h2>
+            </div>
+            <Link
+              to="/hledat?sort_by=price_asc"
+              className="hidden sm:flex items-center gap-1.5 px-4 py-2 bg-surface-950 shadow-sm hover:shadow-md rounded-full text-sm font-medium text-surface-100 transition-all"
+            >
+              Více slev
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {priceDrops.map((vehicle) => (
+              <VehicleCard key={vehicle.id} vehicle={vehicle} layout="grid" />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* === PRODEJ + OCENĚNÍ BANNERY === */}
       <section className="max-w-7xl mx-auto px-4 py-8">

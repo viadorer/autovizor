@@ -17,9 +17,39 @@
     <meta name="twitter:description" content="Najděte své vysněné auto mezi tisíci nabídkami." />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://autovizor.cz" />
+    <link rel="alternate" type="application/rss+xml" title="Autovizor.cz" href="https://autovizor.cz/sitemap.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
+    <!-- JSON-LD Organization + WebSite Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://autovizor.cz#org",
+          "name": "Autovizor.cz",
+          "url": "https://autovizor.cz",
+          "logo": "https://autovizor.cz/favicon.svg",
+          "sameAs": []
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://autovizor.cz#website",
+          "url": "https://autovizor.cz",
+          "name": "Autovizor.cz",
+          "publisher": { "@id": "https://autovizor.cz#org" },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://autovizor.cz/hledat?query={search_term_string}",
+            "query-input": "required name=search_term_string"
+          },
+          "inLanguage": "cs-CZ"
+        }
+      ]
+    }
+    </script>
   </head>
   <body class="bg-surface-950 text-surface-50 antialiased">
     <div id="root"></div>

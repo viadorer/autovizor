@@ -1,16 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, Warehouse, Share2, Phone, Mail, MapPin,
   Calendar, Gauge, Zap, Fuel, Settings, Palette,
   Shield, Star, ChevronLeft, ChevronRight, Camera,
   Check, Info, Car, Globe, BookOpen, DoorOpen, Users,
-  Wind, Leaf, Key, Search, Loader2,
+  Wind, Leaf, Key, Search, Loader2, FileSearch, TrendingDown,
+  ExternalLink,
 } from 'lucide-react';
 import { decodeVin, type VinDecodeResult } from '../lib/vin-decoder';
-import { EQUIPMENT } from '../lib/codebooks';
-import { useVehicle, useTopVehicles } from '../hooks/useVehicles';
+import { useVehicle, useSimilarVehicles, usePriceHistory } from '../hooks/useVehicles';
+import { parseSlugOrId, buildVehicleHref } from '../lib/slug';
+import { logVehicleView } from '../lib/api';
 import VehicleCard from '../components/VehicleCard';
+import VehicleSeoHead from '../components/VehicleSeoHead';
 import {
   formatPrice, formatKm, formatPower, formatVolume,
   formatRegistration, getCodebookName,
@@ -30,20 +33,33 @@ const RATING_LABELS: Record<string, { label: string; className: string }> = {
 };
 
 export default function VehicleDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const { data: rawVehicle, isLoading } = useVehicle(id ? Number(id) : undefined);
+  const { slugOrId } = useParams<{ slugOrId: string }>();
+  const id = parseSlugOrId(slugOrId);
+  const { data: rawVehicle, isLoading } = useVehicle(id);
+  const { data: priceHistory = [] } = usePriceHistory(id);
   const [currentImage, setCurrentImage] = useState(0);
   const [vinResult, setVinResult] = useState<VinDecodeResult | null>(null);
   const [vinLoading, setVinLoading] = useState(false);
   const [phoneVisible, setPhoneVisible] = useState(false);
   const { toggleFavorite, isFavorite } = useFavoritesStore();
 
-  useState(() => { window.scrollTo(0, 0); });
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (id) logVehicleView(id);
+  }, [id]);
 
-  const vehicle = rawVehicle ? {
-    ...rawVehicle,
-    equipment: rawVehicle.equipment?.length ? rawVehicle.equipment : EQUIPMENT.slice(0, 15 + (Number(id) % 20)),
-  } : null;
+  const vehicle = rawVehicle ?? null;
+
+  // Canonical redirect: pokud je URL `/vozidlo/123` ale máme slug → 301-like replace
+  // (jen v prohlížeči, ne v history → SEO crawler s SSR by tohle dělal jinak)
+  useEffect(() => {
+    if (!vehicle) return;
+    const expected = buildVehicleHref(vehicle);
+    const current = `/vozidlo/${slugOrId}`;
+    if (vehicle.slug && current !== expected) {
+      window.history.replaceState(null, '', expected);
+    }
+  }, [vehicle, slugOrId]);
 
   if (isLoading) {
     return (
@@ -100,15 +116,18 @@ export default function VehicleDetailPage() {
     { label: 'VIN', value: vehicle.vin, icon: Key },
   ].filter((s) => s.value);
 
-  const equipmentByCategory = (vehicle.equipment ?? []).reduce<Record<string, typeof EQUIPMENT>>((acc, eq) => {
+  const equipmentByCategory = (vehicle.equipment ?? []).reduce<Record<string, typeof vehicle.equipment>>((acc, eq) => {
     const cat = eq.category ?? 'Ostatní';
     if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(eq);
+    acc[cat]!.push(eq);
     return acc;
   }, {});
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
+      {/* SEO: title, meta, canonical, OG, JSON-LD Vehicle schema */}
+      <VehicleSeoHead vehicle={vehicle} />
+
       {/* Breadcrumb */}
       <Link
         to="/hledat"
@@ -330,7 +349,7 @@ export default function VehicleDetailPage() {
                       {category}
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                      {items.map((eq) => (
+                      {items?.map((eq) => (
                         <span key={eq.id} className="flex items-center gap-2 text-sm text-surface-300">
                           <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                           {eq.name}
@@ -354,6 +373,42 @@ export default function VehicleDetailPage() {
               </p>
             </div>
           )}
+
+          {/* === Cebia historie vozidla === */}
+          {(vehicle.cebia_smart_code_url || vehicle.cebia_coupon) && (
+            <div className="mt-8 bg-surface-950 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <FileSearch className="w-5 h-5 text-emerald-500" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-surface-50" style={{ fontFamily: 'var(--font-display)' }}>
+                    Cebia — ověřená historie vozidla
+                  </h2>
+                  <p className="text-xs text-surface-400">Stočená km, havárie, exekuce, leasing, registr ztracených dokladů.</p>
+                </div>
+              </div>
+              {vehicle.cebia_coupon && (
+                <p className="text-sm text-surface-300 mb-3">
+                  Kupón: <span className="font-mono font-semibold text-emerald-400">{vehicle.cebia_coupon}</span>
+                </p>
+              )}
+              {vehicle.cebia_smart_code_url && (
+                <a
+                  href={vehicle.cebia_smart_code_url}
+                  target="_blank"
+                  rel="nofollow noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-sm font-semibold text-white transition-colors"
+                >
+                  Zobrazit kompletní report
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* === Cenová historie === */}
+          <PriceHistorySection priceHistory={priceHistory} currentPrice={vehicle.price} />
         </div>
 
         {/* Pravá strana — sticky sidebar */}
@@ -446,7 +501,7 @@ export default function VehicleDetailPage() {
             <div className="bg-surface-950 rounded-2xl shadow-sm p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-surface-850 rounded-full flex items-center justify-center text-surface-400">
-                  {vehicle.seller_type === 'dealer' ? <Shield className="w-6 h-6" /> : <Users className="w-6 h-6" />}
+                  {vehicle.seller_type_id && vehicle.seller_type_id !== 1 ? <Shield className="w-6 h-6" /> : <Users className="w-6 h-6" />}
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-surface-100">{vehicle.seller_name}</h3>
@@ -511,16 +566,104 @@ export default function VehicleDetailPage() {
   );
 }
 
+function PriceHistorySection({
+  priceHistory,
+  currentPrice,
+}: {
+  priceHistory: { price: number; recorded_at: string; change_pct?: number }[];
+  currentPrice: number;
+}) {
+  if (priceHistory.length < 2) return null;
+
+  const sorted = [...priceHistory].sort(
+    (a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime()
+  );
+  const initial = sorted[0].price;
+  const lowest = Math.min(...sorted.map((p) => p.price));
+  const highest = Math.max(...sorted.map((p) => p.price));
+  const totalDropPct = initial > 0 ? ((initial - currentPrice) / initial) * 100 : 0;
+
+  return (
+    <div className="mt-8 bg-surface-950 rounded-2xl p-6 shadow-sm">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+          <TrendingDown className="w-5 h-5 text-amber-500" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-surface-50" style={{ fontFamily: 'var(--font-display)' }}>
+            Historie ceny
+          </h2>
+          <p className="text-xs text-surface-400">
+            Inzerát eviduje {priceHistory.length} cenových bodů.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        <div>
+          <p className="text-xs text-surface-500">Aktuální</p>
+          <p className="text-lg font-bold text-surface-50 mt-0.5">
+            {currentPrice.toLocaleString('cs-CZ')} Kč
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-surface-500">Nejnižší</p>
+          <p className="text-lg font-bold text-emerald-400 mt-0.5">
+            {lowest.toLocaleString('cs-CZ')} Kč
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-surface-500">Nejvyšší</p>
+          <p className="text-lg font-bold text-surface-300 mt-0.5">
+            {highest.toLocaleString('cs-CZ')} Kč
+          </p>
+        </div>
+      </div>
+
+      {totalDropPct > 1 && (
+        <div className="mb-4 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+          <p className="text-sm text-emerald-400">
+            Cena klesla celkem o <strong>{totalDropPct.toFixed(1)} %</strong> od prvního zaznamenání.
+          </p>
+        </div>
+      )}
+
+      {/* Mini graf cen — jednoduchý SVG bez závislostí */}
+      <PriceSparkline points={sorted} />
+    </div>
+  );
+}
+
+function PriceSparkline({ points }: { points: { price: number; recorded_at: string }[] }) {
+  if (points.length < 2) return null;
+  const w = 600, h = 80, pad = 4;
+  const min = Math.min(...points.map((p) => p.price));
+  const max = Math.max(...points.map((p) => p.price));
+  const range = Math.max(max - min, 1);
+  const xs = points.map((_, i) => pad + (i * (w - 2 * pad)) / (points.length - 1));
+  const ys = points.map((p) => h - pad - ((p.price - min) / range) * (h - 2 * pad));
+  const path = points.map((_, i) => `${i === 0 ? 'M' : 'L'}${xs[i]},${ys[i]}`).join(' ');
+  const area = `${path} L${xs[xs.length - 1]},${h} L${xs[0]},${h} Z`;
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-20" preserveAspectRatio="none">
+      <path d={area} fill="rgba(245, 158, 11, 0.15)" />
+      <path d={path} fill="none" stroke="rgb(245, 158, 11)" strokeWidth="2" />
+      {points.map((_, i) => (
+        <circle key={i} cx={xs[i]} cy={ys[i]} r="3" fill="rgb(245, 158, 11)" />
+      ))}
+    </svg>
+  );
+}
+
 function SimilarVehicles({ currentId }: { currentId: number }) {
-  const { data: vehicles = [] } = useTopVehicles(7);
-  const similar = vehicles.filter((v) => v.id !== currentId).slice(0, 4);
+  const { data: similar = [] } = useSimilarVehicles(currentId, 4);
 
   if (similar.length === 0) return null;
 
   return (
     <section className="mt-12 mb-8">
       <h2 className="text-xl font-extrabold text-surface-50 mb-6 uppercase tracking-wider" style={{ fontFamily: 'var(--font-display)' }}>
-        Similar Excellence
+        Podobná vozidla
       </h2>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {similar.map((v) => (
