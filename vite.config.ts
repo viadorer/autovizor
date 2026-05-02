@@ -15,6 +15,25 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    // Code-splitting kvůli velkým static datům (manufacturers, codebooks)
+    // i node_modules — zlepší TTI a cache hit-rate při deploy
+    chunkSizeWarningLimit: 600,
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [
+            { name: 'vendor-react', test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom)[\\/]/ },
+            { name: 'vendor-supabase', test: /[\\/]node_modules[\\/]@supabase[\\/]/ },
+            { name: 'vendor-query', test: /[\\/]node_modules[\\/]@tanstack[\\/]/ },
+            { name: 'vendor-icons', test: /[\\/]node_modules[\\/]lucide-react[\\/]/ },
+            { name: 'data-manufacturers', test: /[\\/]src[\\/]lib[\\/]manufacturers\.ts$/ },
+            { name: 'data-codebooks', test: /[\\/]src[\\/]lib[\\/]codebooks\.ts$/ },
+          ],
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

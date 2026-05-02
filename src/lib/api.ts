@@ -232,6 +232,7 @@ export async function getTopVehicles(limit = 6): Promise<Vehicle[]> {
 
   try {
     // Try promoted/top vehicles first
+    // eslint-disable-next-line prefer-const
     let { data, error } = await supabase
       .from('vehicles')
       .select('*')
