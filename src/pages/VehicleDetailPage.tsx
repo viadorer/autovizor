@@ -15,6 +15,8 @@ import { logVehicleView } from '../lib/api';
 import VehicleCard from '../components/VehicleCard';
 import VehicleSeoHead from '../components/VehicleSeoHead';
 import InquiryModal from '../components/InquiryModal';
+import TCOCalculator from '../components/TCOCalculator';
+import FinancingCalculator from '../components/FinancingCalculator';
 import type { InquiryType } from '../types';
 import {
   formatPrice, formatKm, formatPower, formatVolume,
@@ -412,6 +414,16 @@ export default function VehicleDetailPage() {
 
           {/* === Cenová historie === */}
           <PriceHistorySection priceHistory={priceHistory} currentPrice={vehicle.price} />
+
+          {/* === Financování === */}
+          <div className="mt-8">
+            <FinancingCalculator vehicle={vehicle} />
+          </div>
+
+          {/* === TCO kalkulačka === */}
+          <div className="mt-4">
+            <TCOCalculator vehicle={vehicle} />
+          </div>
         </div>
 
         {/* Pravá strana — sticky sidebar */}

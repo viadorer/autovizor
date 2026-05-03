@@ -20,6 +20,9 @@ import DashboardOverview from './pages/DashboardOverview';
 import DashboardListings from './pages/DashboardListings';
 import DashboardInquiries from './pages/DashboardInquiries';
 import SellWizardLayout from './pages/SellWizardLayout';
+import AdminLayout from './pages/AdminLayout';
+import AdminOverview from './pages/AdminOverview';
+import AdminListings from './pages/AdminListings';
 import { useThemeStore } from './stores/themeStore';
 import { useAuthStore } from './stores/authStore';
 
@@ -82,6 +85,18 @@ export default function App() {
                 <Route path="inzeraty" element={<DashboardListings />} />
                 <Route path="dotazy" element={<DashboardInquiries />} />
                 <Route path="profil" element={<ProfilePage />} />
+              </Route>
+              {/* Admin moderace — jen pro role=admin */}
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute requireRole="admin">
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<AdminOverview />} />
+                <Route path="listings" element={<AdminListings />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

@@ -996,6 +996,115 @@ export async function deleteVehiclePhoto(userId: string, draftKey: string, fileN
   }
 }
 
+// ============================================================
+// ADMIN MODERATION
+// ============================================================
+
+export async function getPendingListings(filter?: {
+  status?: 'pending_review' | 'rejected' | 'expired' | 'all';
+  search?: string;
+  limit?: number;
+}): Promise<Vehicle[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    let query = supabase
+      .from('vehicles')
+      .select('*')
+      .order('updated_at', { ascending: false });
+
+    if (filter?.status === 'all') {
+      // bez filteru — admin vidí vše
+    } else if (filter?.status) {
+      query = query.eq('published_status', filter.status);
+    } else {
+      query = query.eq('published_status', 'pending_review');
+    }
+
+    if (filter?.search) {
+      query = query.ilike('title', `%${filter.search}%`);
+    }
+
+    if (filter?.limit) query = query.limit(filter.limit);
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data ?? []).map((v) => normalizeVehicle(v as Record<string, unknown>));
+  } catch (err) {
+    console.error('getPendingListings error:', err);
+    return [];
+  }
+}
+
+export async function approveListing(vehicleId: number): Promise<boolean> {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase
+      .from('vehicles')
+      .update({
+        published_status: 'published',
+        is_active: true,
+        published_at: new Date().toISOString(),
+      })
+      .eq('id', vehicleId);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('approveListing error:', err);
+    return false;
+  }
+}
+
+export async function rejectListing(vehicleId: number, reason?: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const updates: Record<string, unknown> = {
+      published_status: 'rejected',
+      is_active: false,
+    };
+    if (reason) updates.deactivation_reason = reason;
+
+    const { error } = await supabase.from('vehicles').update(updates).eq('id', vehicleId);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('rejectListing error:', err);
+    return false;
+  }
+}
+
+export async function getAdminStats(): Promise<{
+  pending_review: number;
+  published: number;
+  rejected: number;
+  total_users: number;
+  total_dealers: number;
+  total_inquiries: number;
+} | null> {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const [pendingR, publishedR, rejectedR, usersR, dealersR, inquiriesR] = await Promise.all([
+      supabase.from('vehicles').select('id', { count: 'exact', head: true }).eq('published_status', 'pending_review'),
+      supabase.from('vehicles').select('id', { count: 'exact', head: true }).eq('is_active', true).eq('published_status', 'published'),
+      supabase.from('vehicles').select('id', { count: 'exact', head: true }).eq('published_status', 'rejected'),
+      supabase.from('users').select('id', { count: 'exact', head: true }),
+      supabase.from('dealers').select('id', { count: 'exact', head: true }),
+      supabase.from('vehicle_inquiries').select('id', { count: 'exact', head: true }),
+    ]);
+
+    return {
+      pending_review: pendingR.count ?? 0,
+      published: publishedR.count ?? 0,
+      rejected: rejectedR.count ?? 0,
+      total_users: usersR.count ?? 0,
+      total_dealers: dealersR.count ?? 0,
+      total_inquiries: inquiriesR.count ?? 0,
+    };
+  } catch (err) {
+    console.error('getAdminStats error:', err);
+    return null;
+  }
+}
+
 export async function updateInquiryStatus(
   inquiryId: number,
   status: 'new' | 'contacted' | 'closed' | 'spam',
