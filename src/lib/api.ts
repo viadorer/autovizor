@@ -956,12 +956,62 @@ export async function loadDraft(): Promise<{ id: number; data: Record<string, un
   }
 }
 
+// ============================================================
+// Photo upload — Cloudflare Worker → R2
+//
+// Worker URL: VITE_PHOTO_UPLOADER_URL env var
+// Pokud env chybí, fallback na Supabase Storage (legacy z migrace 018).
+// ============================================================
+
+function getPhotoUploaderUrl(): string | null {
+  const url = import.meta.env.VITE_PHOTO_UPLOADER_URL;
+  return typeof url === 'string' && url.length > 0 ? url.replace(/\/$/, '') : null;
+}
+
 export async function uploadVehiclePhoto(
   userId: string,
   draftKey: string,
   file: File,
   index: number,
 ): Promise<string | null> {
+  const workerUrl = getPhotoUploaderUrl();
+
+  // Preferred path: Cloudflare Worker → R2
+  if (workerUrl) {
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      const token = session?.access_token;
+      if (!token) {
+        console.error('uploadVehiclePhoto: no auth token');
+        return null;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('draft_key', draftKey);
+      formData.append('index', String(index));
+
+      const res = await fetch(`${workerUrl}/upload`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error(`Worker upload failed (${res.status}):`, errText);
+        return null;
+      }
+
+      const data = await res.json() as { url: string; key: string };
+      return data.url;
+    } catch (err) {
+      console.error('uploadVehiclePhoto (Worker) error:', err);
+      return null;
+    }
+  }
+
+  // Fallback: Supabase Storage (legacy)
   if (!isSupabaseConfigured()) return null;
   try {
     const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
@@ -969,29 +1019,58 @@ export async function uploadVehiclePhoto(
 
     const { error } = await supabase.storage
       .from('vehicle-photos')
-      .upload(path, file, {
-        upsert: true,
-        contentType: file.type,
-      });
+      .upload(path, file, { upsert: true, contentType: file.type });
     if (error) throw error;
 
     const { data } = supabase.storage.from('vehicle-photos').getPublicUrl(path);
     return data.publicUrl;
   } catch (err) {
-    console.error('uploadVehiclePhoto error:', err);
+    console.error('uploadVehiclePhoto (Supabase fallback) error:', err);
     return null;
   }
 }
 
-export async function deleteVehiclePhoto(userId: string, draftKey: string, fileName: string): Promise<boolean> {
+export async function deleteVehiclePhoto(_userId: string, _draftKey: string, urlOrKey: string): Promise<boolean> {
+  const workerUrl = getPhotoUploaderUrl();
+
+  // Preferred path: Cloudflare Worker
+  if (workerUrl) {
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      const token = session?.access_token;
+      if (!token) return false;
+
+      // Pokud dostaneme plnou URL, vyextrahujeme key (vše po doméně)
+      const r2Public = import.meta.env.VITE_R2_PUBLIC_URL as string | undefined;
+      let key = urlOrKey;
+      if (urlOrKey.startsWith('http') && r2Public) {
+        key = urlOrKey.replace(r2Public.replace(/\/$/, '') + '/', '');
+      }
+
+      const res = await fetch(`${workerUrl}/delete`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ key }),
+      });
+      return res.ok;
+    } catch (err) {
+      console.error('deleteVehiclePhoto (Worker) error:', err);
+      return false;
+    }
+  }
+
+  // Fallback: Supabase Storage
   if (!isSupabaseConfigured()) return false;
   try {
-    const path = `${userId}/${draftKey}/${fileName}`;
+    const path = `${_userId}/${_draftKey}/${urlOrKey}`;
     const { error } = await supabase.storage.from('vehicle-photos').remove([path]);
     if (error) throw error;
     return true;
   } catch (err) {
-    console.error('deleteVehiclePhoto error:', err);
+    console.error('deleteVehiclePhoto (Supabase fallback) error:', err);
     return false;
   }
 }

@@ -3,6 +3,7 @@ import { Upload, X, Image as ImageIcon, Loader2, AlertCircle, Move } from 'lucid
 import { useSellWizardStore } from '../../stores/sellWizardStore';
 import { useAuthStore } from '../../stores/authStore';
 import { uploadVehiclePhoto } from '../../lib/api';
+import { resizeImage } from '../../lib/image-resize';
 
 const MAX_FILES = 12;
 const MAX_FILE_SIZE_MB = 10;
@@ -47,7 +48,10 @@ export default function SellStep4() {
         continue;
       }
 
-      const url = await uploadVehiclePhoto(appUser.id, draftKey, file, nextIndex);
+      // Client-side resize na max 1920px + JPEG komprese (úspora bandwidth + R2 storage)
+      const resized = await resizeImage(file);
+
+      const url = await uploadVehiclePhoto(appUser.id, draftKey, resized, nextIndex);
       if (url) {
         newUrls.push(url);
         nextIndex++;

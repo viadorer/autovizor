@@ -1,0 +1,49 @@
+# Cloudflare Worker config — autovizor-photo-uploader
+#
+# Deploy:
+#   cd cloudflare/photo-uploader
+#   npm install
+#   npx wrangler login              # první deploy
+#   npx wrangler secret put SUPABASE_JWT_SECRET   # zadáš JWT secret z Supabase
+#   npx wrangler deploy
+#
+# Po deploy získáš URL např. https://autovizor-photo-uploader.<account>.workers.dev
+# Tu nasaď do frontend env: VITE_PHOTO_UPLOADER_URL
+
+name = "autovizor-photo-uploader"
+main = "src/index.ts"
+compatibility_date = "2026-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# === R2 binding ===
+# VEHICLE_PHOTOS je název v env, "autovizor" je název R2 bucketu
+# (uprav pokud máš jiný R2_BUCKET_NAME v .env)
+[[r2_buckets]]
+binding = "VEHICLE_PHOTOS"
+bucket_name = "autovizor"
+
+# === Public env vars ===
+[vars]
+# Najdi v Supabase Dashboard → Settings → API → Project URL
+SUPABASE_PROJECT_URL = "https://YOUR-PROJECT.supabase.co"
+
+# Tvá public R2 URL — bez trailing slash
+# Najdi v Cloudflare Dashboard → R2 → bucket → Settings → Public access
+R2_PUBLIC_URL = "https://pub-73649d5be63240648a58ace4d4c57318.r2.dev"
+
+# Domény, ze kterých Worker přijímá uploady
+ALLOWED_ORIGINS = "https://autovizor.cz,https://autovizor.vercel.app,http://localhost:3000,http://localhost:5173"
+
+# === Secrets (NUTNO nastavit ručně, nikdy do gitu) ===
+# npx wrangler secret put SUPABASE_JWT_SECRET
+# (najdi v Supabase Dashboard → Settings → API → JWT Settings → JWT Secret)
+
+# === Custom domain (volitelné) ===
+# Pokud chceš Worker pod vlastní subdoménou:
+# [[routes]]
+# pattern = "uploader.autovizor.cz/*"
+# zone_name = "autovizor.cz"
+
+# === Observability ===
+[observability]
+enabled = true
