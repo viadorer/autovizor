@@ -772,3 +772,115 @@ export async function getSellerDashboard(userId: string): Promise<SellerDashboar
     return null;
   }
 }
+
+// ============================================================
+// SELLER LISTINGS — vehicles vlastněné uživatelem / jeho dealerem
+// ============================================================
+
+export async function getMyListings(userId: string, dealerId?: number): Promise<Vehicle[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    let query = supabase
+      .from('vehicles')
+      .select('*')
+      .order('updated_at', { ascending: false });
+
+    if (dealerId) {
+      // Dealer admin vidí všechny vozy svého dealera
+      query = query.eq('dealer_id', dealerId);
+    } else {
+      // Private seller vidí jen vozy, které sám vytvořil
+      query = query.eq('user_id', userId);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data ?? []).map((v) => normalizeVehicle(v as Record<string, unknown>));
+  } catch (err) {
+    console.error('getMyListings error:', err);
+    return [];
+  }
+}
+
+export async function updateVehicleStatus(
+  vehicleId: number,
+  status: 'draft' | 'pending_review' | 'published' | 'rejected' | 'expired' | 'sold',
+  isActive?: boolean,
+): Promise<boolean> {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const updates: Record<string, unknown> = { published_status: status };
+    if (isActive !== undefined) updates.is_active = isActive;
+    if (status === 'sold' || status === 'expired') updates.is_active = false;
+    if (status === 'published') updates.is_active = true;
+
+    const { error } = await supabase.from('vehicles').update(updates).eq('id', vehicleId);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('updateVehicleStatus error:', err);
+    return false;
+  }
+}
+
+export async function deleteVehicle(vehicleId: number): Promise<boolean> {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const { error } = await supabase.from('vehicles').delete().eq('id', vehicleId);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('deleteVehicle error:', err);
+    return false;
+  }
+}
+
+// ============================================================
+// SELLER INQUIRIES — dotazy na mé inzeráty (s join na vehicle)
+// ============================================================
+
+export interface InquiryWithVehicle extends VehicleInquiry {
+  vehicle?: Pick<Vehicle, 'id' | 'title' | 'price' | 'main_image_url' | 'slug'>;
+}
+
+export async function getSellerInquiries(filter?: {
+  status?: 'new' | 'contacted' | 'closed' | 'spam';
+  limit?: number;
+}): Promise<InquiryWithVehicle[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    let query = supabase
+      .from('vehicle_inquiries')
+      .select('*, vehicle:vehicles(id, title, price, main_image_url, slug)')
+      .order('created_at', { ascending: false });
+
+    if (filter?.status) query = query.eq('status', filter.status);
+    if (filter?.limit) query = query.limit(filter.limit);
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data ?? []) as InquiryWithVehicle[];
+  } catch (err) {
+    console.error('getSellerInquiries error:', err);
+    return [];
+  }
+}
+
+export async function updateInquiryStatus(
+  inquiryId: number,
+  status: 'new' | 'contacted' | 'closed' | 'spam',
+): Promise<boolean> {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const updates: Record<string, unknown> = { status };
+    if (status === 'contacted') updates.contacted_at = new Date().toISOString();
+    if (status === 'spam') updates.is_spam = true;
+
+    const { error } = await supabase.from('vehicle_inquiries').update(updates).eq('id', inquiryId);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('updateInquiryStatus error:', err);
+    return false;
+  }
+}

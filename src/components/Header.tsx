@@ -129,6 +129,16 @@ export default function Header() {
                       </span>
                     </div>
                     <div className="py-1">
+                      {(appUser.role === 'private_seller' || appUser.role === 'dealer_admin' || appUser.role === 'admin') && (
+                        <Link
+                          to="/dashboard"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-surface-200 hover:bg-surface-850 hover:text-surface-100"
+                        >
+                          <Settings className="w-4 h-4" />
+                          Dashboard
+                        </Link>
+                      )}
                       <Link
                         to="/profil"
                         onClick={() => setUserMenuOpen(false)}

@@ -15,6 +15,9 @@ import {
   getDealerBySlug,
   getDealerListings,
   getDealerReviews,
+  getSellerDashboard,
+  getMyListings,
+  getSellerInquiries,
 } from '../lib/api';
 
 export function useTopVehicles(limit = 6) {
@@ -148,5 +151,32 @@ export function useDealerReviews(dealerId: number | undefined, limit = 20) {
     queryFn: () => getDealerReviews(dealerId!, limit),
     enabled: !!dealerId,
     staleTime: 5 * 60 * 1000,
+  });
+}
+
+// === Seller dashboard ===
+export function useSellerDashboard(userId: string | undefined) {
+  return useQuery({
+    queryKey: ['sellerDashboard', userId],
+    queryFn: () => getSellerDashboard(userId!),
+    enabled: !!userId,
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useMyListings(userId: string | undefined, dealerId?: number) {
+  return useQuery({
+    queryKey: ['myListings', userId, dealerId],
+    queryFn: () => getMyListings(userId!, dealerId),
+    enabled: !!userId,
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useSellerInquiries(filter?: { status?: 'new' | 'contacted' | 'closed' | 'spam'; limit?: number }) {
+  return useQuery({
+    queryKey: ['sellerInquiries', filter?.status, filter?.limit],
+    queryFn: () => getSellerInquiries(filter),
+    staleTime: 15 * 1000,
   });
 }

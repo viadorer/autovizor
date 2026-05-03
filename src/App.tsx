@@ -15,6 +15,10 @@ import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import DealerPage from './pages/DealerPage';
 import ProfilePage from './pages/ProfilePage';
+import DashboardLayout from './pages/DashboardLayout';
+import DashboardOverview from './pages/DashboardOverview';
+import DashboardListings from './pages/DashboardListings';
+import DashboardInquiries from './pages/DashboardInquiries';
 import { useThemeStore } from './stores/themeStore';
 import { useAuthStore } from './stores/authStore';
 
@@ -54,6 +58,20 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              {/* Seller dashboard — jen pro prodejce */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute requireRole={['private_seller', 'dealer_admin', 'admin']}>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<DashboardOverview />} />
+                <Route path="inzeraty" element={<DashboardListings />} />
+                <Route path="dotazy" element={<DashboardInquiries />} />
+                <Route path="profil" element={<ProfilePage />} />
+              </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </ErrorBoundary>
