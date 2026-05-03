@@ -14,6 +14,8 @@ import { parseSlugOrId, buildVehicleHref } from '../lib/slug';
 import { logVehicleView } from '../lib/api';
 import VehicleCard from '../components/VehicleCard';
 import VehicleSeoHead from '../components/VehicleSeoHead';
+import InquiryModal from '../components/InquiryModal';
+import type { InquiryType } from '../types';
 import {
   formatPrice, formatKm, formatPower, formatVolume,
   formatRegistration, getCodebookName,
@@ -41,6 +43,7 @@ export default function VehicleDetailPage() {
   const [vinResult, setVinResult] = useState<VinDecodeResult | null>(null);
   const [vinLoading, setVinLoading] = useState(false);
   const [phoneVisible, setPhoneVisible] = useState(false);
+  const [inquiryOpen, setInquiryOpen] = useState<InquiryType | null>(null);
   const { toggleFavorite, isFavorite } = useFavoritesStore();
 
   useEffect(() => {
@@ -503,8 +506,17 @@ export default function VehicleDetailPage() {
                 <div className="w-12 h-12 bg-surface-850 rounded-full flex items-center justify-center text-surface-400">
                   {vehicle.seller_type_id && vehicle.seller_type_id !== 1 ? <Shield className="w-6 h-6" /> : <Users className="w-6 h-6" />}
                 </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-surface-100">{vehicle.seller_name}</h3>
+                <div className="min-w-0 flex-1">
+                  {vehicle.dealer_id ? (
+                    <Link
+                      to={`/prodejce/${vehicle.dealer_id}`}
+                      className="text-sm font-semibold text-surface-100 hover:text-primary-400 transition-colors truncate block"
+                    >
+                      {vehicle.seller_name}
+                    </Link>
+                  ) : (
+                    <h3 className="text-sm font-semibold text-surface-100 truncate">{vehicle.seller_name}</h3>
+                  )}
                   {vehicle.seller_rating && (
                     <div className="flex items-center gap-1 mt-0.5">
                       <div className="flex text-amber-400">
@@ -526,17 +538,34 @@ export default function VehicleDetailPage() {
               )}
 
               <div className="space-y-2">
+                {/* Primary CTA — otevírá inquiry modal */}
                 <button
-                  onClick={() => {
-                    if (vehicle.seller_email) {
-                      window.location.href = `mailto:${vehicle.seller_email}`;
-                    }
-                  }}
+                  onClick={() => setInquiryOpen('message')}
                   className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-br from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 rounded-xl text-sm font-semibold text-white transition-all shadow-sm hover:shadow-md"
                 >
                   <Mail className="w-4 h-4" />
-                  Napsat e-mail
+                  Mám zájem
                 </button>
+
+                {/* Sekundární akce */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setInquiryOpen('test_drive')}
+                    className="flex items-center justify-center gap-1.5 py-2.5 bg-surface-900 hover:bg-surface-800 rounded-lg text-xs font-medium text-surface-200 transition-colors"
+                  >
+                    <Car className="w-3.5 h-3.5" />
+                    Zkušební jízda
+                  </button>
+                  <button
+                    onClick={() => setInquiryOpen('offer')}
+                    className="flex items-center justify-center gap-1.5 py-2.5 bg-surface-900 hover:bg-surface-800 rounded-lg text-xs font-medium text-surface-200 transition-colors"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                    Nabídnout cenu
+                  </button>
+                </div>
+
+                {/* Telefon — direct call */}
                 {phoneVisible && vehicle.seller_phone ? (
                   <a
                     href={`tel:${vehicle.seller_phone}`}
@@ -554,6 +583,17 @@ export default function VehicleDetailPage() {
                     Zobrazit telefon
                   </button>
                 )}
+
+                {/* Dealer profile link */}
+                {vehicle.dealer_id && (
+                  <Link
+                    to={`/prodejce/${vehicle.dealer_id}`}
+                    className="w-full flex items-center justify-center gap-2 py-2 text-xs text-primary-400 hover:text-primary-300 transition-colors"
+                  >
+                    <Shield className="w-3 h-3" />
+                    Zobrazit profil prodejce
+                  </Link>
+                )}
               </div>
             </div>
           </div>
@@ -562,6 +602,15 @@ export default function VehicleDetailPage() {
 
       {/* Similar Excellence */}
       <SimilarVehicles currentId={vehicle.id} />
+
+      {/* Inquiry modal */}
+      {inquiryOpen && (
+        <InquiryModal
+          vehicle={vehicle}
+          initialType={inquiryOpen}
+          onClose={() => setInquiryOpen(null)}
+        />
+      )}
     </div>
   );
 }

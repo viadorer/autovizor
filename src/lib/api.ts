@@ -6,7 +6,7 @@
 import { supabase } from './supabase';
 import { getMockVehicles, getMockVehicle, searchMockVehicles } from './mock-data';
 import { MANUFACTURERS } from './manufacturers';
-import type { Vehicle, SearchResult, ManufacturerCount, FilterFacets, PriceHistoryPoint, VehicleInquiry, SellerDashboard } from '../types';
+import type { Vehicle, SearchResult, ManufacturerCount, FilterFacets, PriceHistoryPoint, VehicleInquiry, SellerDashboard, Dealer, DealerReview } from '../types';
 import type { ManufacturerWithModels } from './manufacturers';
 
 // ============================================================
@@ -697,6 +697,66 @@ export async function getMyInquiries(): Promise<VehicleInquiry[]> {
     return (data ?? []) as VehicleInquiry[];
   } catch (err) {
     console.error('getMyInquiries error:', err);
+    return [];
+  }
+}
+
+// ============================================================
+// DEALERS — profil prodejce, listings, reviews
+// ============================================================
+
+export async function getDealerBySlug(slugOrId: string): Promise<Dealer | null> {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    // Akceptuj jak slug ("auto-jarov-12") tak číselné ID ("12")
+    const isNumeric = /^\d+$/.test(slugOrId);
+    let query = supabase.from('dealers').select('*').eq('is_active', true);
+    if (isNumeric) {
+      query = query.eq('id', Number(slugOrId));
+    } else {
+      query = query.eq('slug', slugOrId);
+    }
+    const { data, error } = await query.maybeSingle();
+    if (error) throw error;
+    return (data as Dealer) ?? null;
+  } catch (err) {
+    console.error('getDealerBySlug error:', err);
+    return null;
+  }
+}
+
+export async function getDealerListings(dealerId: number, limit = 24): Promise<Vehicle[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const { data, error } = await supabase
+      .from('vehicles')
+      .select('*')
+      .eq('dealer_id', dealerId)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []).map((v) => normalizeVehicle(v as Record<string, unknown>));
+  } catch (err) {
+    console.error('getDealerListings error:', err);
+    return [];
+  }
+}
+
+export async function getDealerReviews(dealerId: number, limit = 20): Promise<DealerReview[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const { data, error } = await supabase
+      .from('dealer_reviews')
+      .select('*')
+      .eq('dealer_id', dealerId)
+      .eq('is_published', true)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []) as DealerReview[];
+  } catch (err) {
+    console.error('getDealerReviews error:', err);
     return [];
   }
 }

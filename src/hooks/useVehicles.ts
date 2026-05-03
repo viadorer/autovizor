@@ -12,6 +12,9 @@ import {
   getRecentlyViewed,
   getPriceHistory,
   getPriceDrops,
+  getDealerBySlug,
+  getDealerListings,
+  getDealerReviews,
 } from '../lib/api';
 
 export function useTopVehicles(limit = 6) {
@@ -116,6 +119,34 @@ export function usePriceDrops(limit = 12) {
   return useQuery({
     queryKey: ['priceDrops', limit],
     queryFn: () => getPriceDrops(limit),
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+// === Dealer profile page ===
+export function useDealerBySlug(slug: string | undefined) {
+  return useQuery({
+    queryKey: ['dealer', slug],
+    queryFn: () => getDealerBySlug(slug!),
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useDealerListings(dealerId: number | undefined, limit = 24) {
+  return useQuery({
+    queryKey: ['dealerListings', dealerId, limit],
+    queryFn: () => getDealerListings(dealerId!, limit),
+    enabled: !!dealerId,
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useDealerReviews(dealerId: number | undefined, limit = 20) {
+  return useQuery({
+    queryKey: ['dealerReviews', dealerId, limit],
+    queryFn: () => getDealerReviews(dealerId!, limit),
+    enabled: !!dealerId,
     staleTime: 5 * 60 * 1000,
   });
 }

@@ -11,6 +11,7 @@ import AdvisoryPage from './pages/AdvisoryPage';
 import ComparisonPage from './pages/ComparisonPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
+import DealerPage from './pages/DealerPage';
 import { useThemeStore } from './stores/themeStore';
 
 export default function App() {
@@ -28,6 +29,8 @@ export default function App() {
               <Route path="/hledat" element={<SearchPage />} />
               {/* /vozidlo/{slug}-{id} — SEO friendly URL, fallback /vozidlo/{id} */}
               <Route path="/vozidlo/:slugOrId" element={<VehicleDetailPage />} />
+              {/* Dealer profile page */}
+              <Route path="/prodejce/:slug" element={<DealerPage />} />
               <Route path="/garaz" element={<FavoritesPage />} />
               <Route path="/oblibene" element={<FavoritesPage />} />
               <Route path="/prodat" element={<SellPage />} />
