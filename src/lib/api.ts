@@ -877,31 +877,71 @@ export interface DraftSaveInput {
   publish: boolean; // true = pending_review/published, false = draft
 }
 
-export async function saveDraft(input: DraftSaveInput): Promise<{ id: number } | null> {
-  if (!isSupabaseConfigured()) return null;
+export interface SaveDraftResult {
+  id?: number;
+  error?: string;
+}
+
+export async function saveDraft(input: DraftSaveInput): Promise<SaveDraftResult> {
+  if (!isSupabaseConfigured()) return { error: 'Supabase není nakonfigurované' };
   try {
     const { user_id, vehicle_id, data, publish } = input;
 
     // Title fallback z manufacturer + model + year
     const title = (data.title as string) || `Vozidlo ${data.made_year ?? ''}`.trim();
 
+    // Whitelist polí, která vehicles tabulka opravdu má — ostatní (např.
+    // image_urls, equipment_ids) se ignorují nebo zpracují separátně níže.
+    const allowedColumns = new Set([
+      'kind_id', 'manufacturer_id', 'model_id', 'body_type_id', 'condition_id',
+      'title', 'model_variant', 'series',
+      'price', 'price_note', 'price_leasing', 'payment', 'payment_count',
+      'vat_deductible', 'price_includes_vat', 'deal_type_id',
+      'fuel_type_id', 'gearbox_id', 'gearbox_level_id', 'drive_id',
+      'engine_volume', 'engine_power', 'engine_power_ps',
+      'tachometer', 'tachometer_unit_id',
+      'gas_mileage', 'weight', 'load_capacity', 'motohodiny',
+      'battery_capacity', 'electric_mileage', 'vehicle_range',
+      'manufacture_date', 'first_registration', 'made_year', 'made_month',
+      'run_date', 'disused_date', 'stk_date', 'guarantee_date', 'delivery_date',
+      'color_id', 'color_tone_id', 'color_type_id',
+      'door_count_id', 'capacity_id', 'airbag_count_id', 'aircondition_id',
+      'euro_id', 'servicebook_id', 'country_id', 'availability_id',
+      'bed_count_id', 'upholstery_id', 'owner_count_id',
+      'seller_type_id', 'motorcycle_type_id', 'truck_type_id', 'bus_type_id',
+      'trailer_type_id', 'quad_type_id', 'machine_type_id',
+      'seatplace_id', 'certified_id', 'type_info',
+      'tunning', 'handicapped', 'environmental_tax',
+      'cebia_coupon', 'cebia_smart_code_url',
+      'sign_note',
+      'vin', 'owners_count', 'crashed', 'first_owner',
+      'region_id', 'address', 'city', 'zip_code', 'latitude', 'longitude',
+      'description', 'note',
+    ]);
+
     const payload: Record<string, unknown> = {
-      ...data,
       user_id,
       title,
       source: 'self',
       published_status: publish ? 'pending_review' : 'draft',
-      is_active: false, // dokud není published, není v searchu
-      draft_data: publish ? null : data, // při draftu uložíme i raw state pro rehydrate
+      is_active: false,
+      draft_data: publish ? null : data,
     };
+    for (const [key, value] of Object.entries(data)) {
+      if (allowedColumns.has(key) && value !== undefined && value !== '') {
+        payload[key] = value;
+      }
+    }
+
+    // Numeric defaults pro NOT NULL sloupce
+    if (payload.price === undefined) payload.price = 0;
+    if (payload.tachometer === undefined) payload.tachometer = 0;
 
     // Equipment_ids[] sync — array → vehicle_equipment M:N
     const equipmentIds = data.equipment_ids as number[] | undefined;
-    delete payload.equipment_ids;
 
     // Photos pole → JSONB
     const imageUrls = (data.image_urls as string[] | undefined) ?? [];
-    delete payload.image_urls;
     if (imageUrls.length > 0) {
       payload.images = JSON.stringify(imageUrls.map((url, order) => ({ url, order })));
       payload.main_image_url = imageUrls[0];
@@ -913,29 +953,37 @@ export async function saveDraft(input: DraftSaveInput): Promise<{ id: number } |
 
     if (id) {
       const { error } = await supabase.from('vehicles').update(payload).eq('id', id);
-      if (error) throw error;
+      if (error) {
+        console.error('saveDraft UPDATE error:', error);
+        return { error: error.message };
+      }
     } else {
       const { data: created, error } = await supabase
         .from('vehicles')
         .insert(payload)
         .select('id')
         .single();
-      if (error) throw error;
+      if (error) {
+        console.error('saveDraft INSERT error:', error);
+        return { error: error.message };
+      }
       id = created.id as number;
     }
 
     // Equipment sync
     if (id && equipmentIds && equipmentIds.length > 0) {
-      // Delete & re-insert (jednoduché, robustní pro draft → final flow)
       await supabase.from('vehicle_equipment').delete().eq('vehicle_id', id);
       const rows = equipmentIds.map((equipment_id) => ({ vehicle_id: id!, equipment_id }));
-      await supabase.from('vehicle_equipment').insert(rows);
+      const { error: eqError } = await supabase.from('vehicle_equipment').insert(rows);
+      if (eqError) {
+        console.warn('saveDraft equipment insert error (non-fatal):', eqError);
+      }
     }
 
-    return id ? { id } : null;
+    return id ? { id } : { error: 'Nelze získat ID' };
   } catch (err) {
-    console.error('saveDraft error:', err);
-    return null;
+    console.error('saveDraft fatal error:', err);
+    return { error: err instanceof Error ? err.message : String(err) };
   }
 }
 

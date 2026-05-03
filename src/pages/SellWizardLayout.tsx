@@ -55,8 +55,9 @@ export default function SellWizardLayout() {
         data: data as Record<string, unknown>,
         publish: false,
       });
-      if (result?.id && !vehicleId) setVehicleId(result.id);
-      if (result) markSaved();
+      if (result.id && !vehicleId) setVehicleId(result.id);
+      if (result.id) markSaved();
+      if (result.error) console.warn('Auto-save failed:', result.error);
       setSaving(false);
     }, 1500);
 
@@ -79,8 +80,10 @@ export default function SellWizardLayout() {
 
     setSubmitting(false);
 
-    if (!result) {
-      setSubmitError('Odeslání selhalo. Zkontrolujte, zda jste vyplnili všechna povinná pole.');
+    if (!result.id) {
+      // Zobraz konkrétní DB error pro debugging
+      const detail = result.error ? ` (${result.error})` : '';
+      setSubmitError(`Odeslání selhalo${detail}. Zkontrolujte, zda jste vyplnili všechna povinná pole.`);
       return;
     }
 
