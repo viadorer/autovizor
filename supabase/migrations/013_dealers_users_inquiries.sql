@@ -60,37 +60,45 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_dealers_phone_uniq
 
 -- ============================================================
 -- A.3 Backfill: extrahuj unikátní dealery z vehicles
+--
+-- POZN k DISTINCT ON: dedupe_key musí být první v ORDER BY.
+-- POZN k ON CONFLICT: partial unique index nelze rovnou cílit
+--   ON CONFLICT bez WHERE klauzule → použijeme NOT EXISTS pre-check.
 -- ============================================================
 
-WITH unique_sellers AS (
-  -- Klíč: normalized email > normalized phone > seller_name (fallback)
-  SELECT DISTINCT ON (
+WITH dedupe_keys AS (
+  SELECT
+    seller_name,
+    seller_phone,
+    seller_email,
+    seller_logo_url,
+    seller_type_id,
+    seller_rating,
+    seller_review_count,
+    address, city, zip_code, region_id, latitude, longitude,
+    created_at,
     COALESCE(
       normalize_email(seller_email),
       'phone:' || normalize_phone(seller_phone),
       'name:' || lower(trim(seller_name))
-    )
-  )
+    ) AS dedupe_key
+  FROM vehicles
+  WHERE seller_name IS NOT NULL
+    AND length(trim(seller_name)) > 0
+),
+unique_sellers AS (
+  SELECT DISTINCT ON (dedupe_key)
+    dedupe_key,
     seller_name AS name,
     seller_phone AS phone,
     seller_email AS email,
     seller_logo_url AS logo_url,
-    COALESCE(seller_type_id, 2) AS type_id, -- default: Autobazar
+    COALESCE(seller_type_id, 2) AS type_id,
     address, city, zip_code, region_id, latitude, longitude,
-    AVG(seller_rating) OVER (
-      PARTITION BY COALESCE(normalize_email(seller_email),
-                            normalize_phone(seller_phone),
-                            lower(trim(seller_name)))
-    )::NUMERIC(3,2) AS rating,
-    MAX(seller_review_count) OVER (
-      PARTITION BY COALESCE(normalize_email(seller_email),
-                            normalize_phone(seller_phone),
-                            lower(trim(seller_name)))
-    ) AS review_count
-  FROM vehicles
-  WHERE seller_name IS NOT NULL
-    AND length(trim(seller_name)) > 0
-  ORDER BY 1, created_at DESC
+    seller_rating AS rating,
+    seller_review_count AS review_count
+  FROM dedupe_keys
+  ORDER BY dedupe_key, created_at DESC NULLS LAST
 )
 INSERT INTO dealers (
   name, phone, email, logo_url, type_id,
@@ -98,17 +106,24 @@ INSERT INTO dealers (
   rating, review_count, is_verified
 )
 SELECT
-  name, phone, email, logo_url, type_id,
-  address, city, zip_code, region_id, latitude, longitude,
-  rating, review_count, FALSE
-FROM unique_sellers
-ON CONFLICT (email_normalized) DO UPDATE
-SET name = COALESCE(EXCLUDED.name, dealers.name),
-    phone = COALESCE(EXCLUDED.phone, dealers.phone),
-    logo_url = COALESCE(EXCLUDED.logo_url, dealers.logo_url),
-    type_id = COALESCE(EXCLUDED.type_id, dealers.type_id),
-    rating = COALESCE(EXCLUDED.rating, dealers.rating),
-    review_count = COALESCE(EXCLUDED.review_count, dealers.review_count);
+  us.name, us.phone, us.email, us.logo_url, us.type_id,
+  us.address, us.city, us.zip_code, us.region_id, us.latitude, us.longitude,
+  us.rating, us.review_count, FALSE
+FROM unique_sellers us
+WHERE NOT EXISTS (
+  SELECT 1 FROM dealers d
+  WHERE
+    -- match podle emailu (priorita 1)
+    (us.email IS NOT NULL AND d.email_normalized = normalize_email(us.email))
+    -- match podle telefonu (priorita 2, jen když email chybí)
+    OR (us.email IS NULL AND us.phone IS NOT NULL
+        AND d.phone_normalized = normalize_phone(us.phone)
+        AND d.email_normalized IS NULL)
+    -- match podle name (priorita 3)
+    OR (us.email IS NULL AND us.phone IS NULL
+        AND lower(trim(d.name)) = lower(trim(us.name))
+        AND d.email_normalized IS NULL AND d.phone_normalized IS NULL)
+);
 
 -- ============================================================
 -- A.4 Set vehicles.dealer_id (match by email > phone > name)
@@ -189,9 +204,11 @@ BEGIN
       NEW.address, NEW.city, NEW.zip_code, NEW.region_id, NEW.latitude, NEW.longitude,
       NEW.seller_rating, COALESCE(NEW.seller_review_count, 0), FALSE
     )
-    ON CONFLICT (email_normalized) DO UPDATE
-      SET name = EXCLUDED.name
     RETURNING id INTO v_dealer_id;
+    -- POZN: race-condition (dva insertu se stejným email_normalized) je
+    -- ošetřena tím, že trigger nejprve hledá existujícího dealera (3
+    -- strategie výše). Pokud by selhal partial unique index, transakce
+    -- celého INSERT na vehicles se rollbackne — což je očekávané chování.
   END IF;
 
   NEW.dealer_id = v_dealer_id;
@@ -266,17 +283,32 @@ BEGIN
     NEW.dealer_id = u_record.dealer_id;
     NEW.posted_by = 'dealer';
   ELSIF u_record.role = 'private_seller' THEN
-    -- Auto-create dealer-row typu "private" pro uživatele
-    INSERT INTO dealers (name, email, phone, type_id, is_verified)
-    VALUES (
-      u_record.name,
-      u_record.email,
-      u_record.phone,
-      1, -- Soukromý prodejce
-      u_record.email IS NOT NULL -- ano = email-verified při registraci
-    )
-    ON CONFLICT (email_normalized) DO UPDATE SET name = EXCLUDED.name
-    RETURNING id INTO v_dealer_id;
+    -- Najdi existujícího dealera podle emailu/telefonu (private sellers
+    -- mohou mít více inzerátů → reuse stejného dealer_id)
+    IF u_record.email IS NOT NULL THEN
+      SELECT id INTO v_dealer_id FROM dealers
+      WHERE email_normalized = normalize_email(u_record.email)
+      LIMIT 1;
+    END IF;
+    IF v_dealer_id IS NULL AND u_record.phone IS NOT NULL THEN
+      SELECT id INTO v_dealer_id FROM dealers
+      WHERE phone_normalized = normalize_phone(u_record.phone)
+        AND email_normalized IS NULL
+      LIMIT 1;
+    END IF;
+
+    -- Pokud neexistuje, auto-vytvoř soukromého "dealera"
+    IF v_dealer_id IS NULL THEN
+      INSERT INTO dealers (name, email, phone, type_id, is_verified)
+      VALUES (
+        u_record.name,
+        u_record.email,
+        u_record.phone,
+        1, -- Soukromý prodejce
+        u_record.email IS NOT NULL
+      )
+      RETURNING id INTO v_dealer_id;
+    END IF;
 
     NEW.dealer_id = v_dealer_id;
     NEW.posted_by = 'private_seller';
