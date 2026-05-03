@@ -6,18 +6,18 @@
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Manrope', 'Inter', system-ui, sans-serif;
 
-  /* Primary: #F04D23 — warm red-orange (user palette) */
-  --color-primary-50: #fef3f0;
-  --color-primary-100: #fee4dd;
-  --color-primary-200: #fdc6b8;
-  --color-primary-300: #fb9e87;
-  --color-primary-400: #f67350;
-  --color-primary-500: #F04D23;
-  --color-primary-600: #D84420;
-  --color-primary-700: #B83A1A;
-  --color-primary-800: #952F16;
-  --color-primary-900: #7A2914;
-  --color-primary-950: #43120A;
+  /* Primary: #F97316 — vibrant orange (Tailwind orange-500) */
+  --color-primary-50: #FFF7ED;
+  --color-primary-100: #FFEDD5;
+  --color-primary-200: #FED7AA;
+  --color-primary-300: #FDBA74;
+  --color-primary-400: #FB923C;
+  --color-primary-500: #F97316;
+  --color-primary-600: #EA580C;
+  --color-primary-700: #C2410C;
+  --color-primary-800: #9A3412;
+  --color-primary-900: #7C2D12;
+  --color-primary-950: #431407;
 
   /* Accent/Tertiary: #008ECF */
   --color-accent-50: #eef8ff;
