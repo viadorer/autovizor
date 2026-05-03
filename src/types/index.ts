@@ -190,6 +190,12 @@ export interface Vehicle {
   // SEO slug — používá se v URL /vozidlo/{slug}-{id}
   slug?: string;
 
+  // Vlastnictví inzerátu (po migraci 013)
+  user_id?: string; // creator (private seller / dealer admin)
+  posted_by?: 'import' | 'private_seller' | 'dealer';
+  published_status?: 'draft' | 'pending_review' | 'published' | 'rejected' | 'expired' | 'sold';
+  expires_at?: string;
+
   // Prodejce — denormalizované cache (autoritativní zdroj je tabulka dealers)
   dealer_id?: number;
   seller_name?: string;
@@ -365,13 +371,58 @@ export interface SavedSearch {
 }
 
 // Uživatel
+export type UserRole = 'buyer' | 'private_seller' | 'dealer_admin' | 'admin';
+
 export interface User {
   id: string;
   email: string;
   name?: string;
   phone?: string;
   avatar_url?: string;
-  is_dealer?: boolean;
+  is_dealer?: boolean; // legacy, použij role
+  role?: UserRole;
+  email_verified_at?: string;
+  phone_verified_at?: string;
+  dealer_id?: number;
+}
+
+// Lead-gen / messaging
+export type InquiryType = 'message' | 'phone_call' | 'test_drive' | 'offer';
+export type InquiryStatus = 'new' | 'contacted' | 'closed' | 'spam';
+
+export interface VehicleInquiry {
+  id: number;
+  vehicle_id: number;
+  dealer_id?: number;
+  buyer_user_id?: string;
+  buyer_name?: string;
+  buyer_email?: string;
+  buyer_phone?: string;
+  buyer_message: string;
+  inquiry_type?: InquiryType;
+  offer_amount?: number;
+  status?: InquiryStatus;
+  contacted_at?: string;
+  is_spam?: boolean;
+  created_at: string;
+}
+
+export interface VehicleMessage {
+  id: number;
+  inquiry_id: number;
+  sender_user_id?: string;
+  sender_role: 'buyer' | 'seller';
+  body: string;
+  read_at?: string;
+  created_at: string;
+}
+
+export interface SellerDashboard {
+  role: UserRole;
+  dealer_id?: number;
+  active_listings: number;
+  new_inquiries: number;
+  total_views_30d: number;
 }
 
 // Statistiky

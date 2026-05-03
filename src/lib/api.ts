@@ -6,7 +6,7 @@
 import { supabase } from './supabase';
 import { getMockVehicles, getMockVehicle, searchMockVehicles } from './mock-data';
 import { MANUFACTURERS } from './manufacturers';
-import type { Vehicle, SearchResult, ManufacturerCount, FilterFacets, PriceHistoryPoint } from '../types';
+import type { Vehicle, SearchResult, ManufacturerCount, FilterFacets, PriceHistoryPoint, VehicleInquiry, SellerDashboard } from '../types';
 import type { ManufacturerWithModels } from './manufacturers';
 
 // ============================================================
@@ -643,5 +643,72 @@ export async function getPriceDrops(limit = 12): Promise<Vehicle[]> {
   } catch (err) {
     console.error('Supabase getPriceDrops error:', err);
     return [];
+  }
+}
+
+// ============================================================
+// INQUIRIES (lead-gen) — buyer↔seller komunikace
+// ============================================================
+
+export interface CreateInquiryInput {
+  vehicle_id: number;
+  buyer_name?: string;
+  buyer_email?: string;
+  buyer_phone?: string;
+  buyer_message: string;
+  inquiry_type?: 'message' | 'phone_call' | 'test_drive' | 'offer';
+  offer_amount?: number;
+}
+
+export async function createInquiry(input: CreateInquiryInput): Promise<{ id: number } | null> {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    const { data, error } = await supabase
+      .from('vehicle_inquiries')
+      .insert({
+        vehicle_id: input.vehicle_id,
+        buyer_user_id: userId ?? null,
+        buyer_name: input.buyer_name,
+        buyer_email: input.buyer_email,
+        buyer_phone: input.buyer_phone,
+        buyer_message: input.buyer_message,
+        inquiry_type: input.inquiry_type ?? 'message',
+        offer_amount: input.offer_amount,
+      })
+      .select('id')
+      .single();
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('createInquiry error:', err);
+    return null;
+  }
+}
+
+export async function getMyInquiries(): Promise<VehicleInquiry[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const { data, error } = await supabase
+      .from('vehicle_inquiries')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as VehicleInquiry[];
+  } catch (err) {
+    console.error('getMyInquiries error:', err);
+    return [];
+  }
+}
+
+export async function getSellerDashboard(userId: string): Promise<SellerDashboard | null> {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase.rpc('get_seller_dashboard', { p_user_id: userId });
+    if (error) throw error;
+    return (data as SellerDashboard) ?? null;
+  } catch (err) {
+    console.error('getSellerDashboard error:', err);
+    return null;
   }
 }
