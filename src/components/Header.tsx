@@ -1,15 +1,20 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Search, Warehouse, ArrowLeftRight, User, Menu, X, Sun, Moon, Car } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Search, Warehouse, ArrowLeftRight, User, Menu, X, Sun, Moon, Car, LogOut, Settings, ChevronDown, ShieldCheck } from 'lucide-react';
 import { AutovizorLogo } from './AutovizorLogo';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFavoritesStore } from '../stores/favoritesStore';
 import { useThemeStore } from '../stores/themeStore';
+import { useAuthStore } from '../stores/authStore';
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
   const garageCount = useFavoritesStore((s) => s.favoriteIds.length);
   const { mode, toggleMode } = useThemeStore();
+  const { appUser, signOut } = useAuthStore();
 
   const navItems = [
     { to: '/hledat', label: 'Hledat', icon: Search },
@@ -17,6 +22,28 @@ export default function Header() {
     { to: '/porovnani', label: 'Porovnat', icon: ArrowLeftRight },
     { to: '/poradna', label: 'Poradna', icon: Search },
   ];
+
+  // Click outside to close user menu
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [userMenuOpen]);
+
+  const handleLogout = async () => {
+    await signOut();
+    setUserMenuOpen(false);
+    navigate('/');
+  };
+
+  const userInitials = appUser?.name
+    ? appUser.name.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+    : appUser?.email?.[0].toUpperCase() ?? '?';
 
   return (
     <header className="sticky top-0 z-50 bg-surface-950/95 backdrop-blur-md shadow-sm">
@@ -74,13 +101,92 @@ export default function Header() {
               )}
             </Link>
 
-            <Link
-              to="/prihlaseni"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 text-white text-sm font-medium transition-all"
-            >
-              <User className="w-4 h-4" />
-              <span className="hidden sm:inline">Přihlásit se</span>
-            </Link>
+            {/* Auth state: přihlášený user nebo login button */}
+            {appUser ? (
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface-800 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white text-xs font-bold">
+                    {userInitials}
+                  </div>
+                  <ChevronDown className="w-3.5 h-3.5 text-surface-400 hidden sm:block" />
+                </button>
+
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-surface-900 rounded-xl shadow-2xl border border-surface-800 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-surface-800">
+                      <p className="text-sm font-semibold text-surface-100 truncate">
+                        {appUser.name ?? appUser.email}
+                      </p>
+                      <p className="text-xs text-surface-500 truncate">{appUser.email}</p>
+                      <span className="inline-block mt-1.5 text-[10px] px-1.5 py-0.5 bg-surface-800 text-surface-300 rounded uppercase tracking-wide">
+                        {appUser.role === 'private_seller' ? 'Soukromý prodejce'
+                          : appUser.role === 'dealer_admin' ? 'Dealer admin'
+                          : appUser.role === 'admin' ? 'Admin'
+                          : 'Kupující'}
+                      </span>
+                    </div>
+                    <div className="py-1">
+                      <Link
+                        to="/profil"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-surface-200 hover:bg-surface-850 hover:text-surface-100"
+                      >
+                        <Settings className="w-4 h-4" />
+                        Můj profil
+                      </Link>
+                      <Link
+                        to="/garaz"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-surface-200 hover:bg-surface-850 hover:text-surface-100"
+                      >
+                        <Warehouse className="w-4 h-4" />
+                        Moje garáž
+                      </Link>
+                      {(appUser.role === 'private_seller' || appUser.role === 'dealer_admin' || appUser.role === 'admin') && (
+                        <Link
+                          to="/prodat"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-surface-200 hover:bg-surface-850 hover:text-surface-100"
+                        >
+                          <Car className="w-4 h-4" />
+                          Inzerovat vůz
+                        </Link>
+                      )}
+                      {appUser.role === 'admin' && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-surface-200 hover:bg-surface-850 hover:text-surface-100"
+                        >
+                          <ShieldCheck className="w-4 h-4" />
+                          Administrace
+                        </Link>
+                      )}
+                    </div>
+                    <div className="border-t border-surface-800 py-1">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-surface-200 hover:bg-surface-850 hover:text-surface-100"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Odhlásit
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/prihlaseni"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 hover:from-primary-600 hover:to-primary-800 text-white text-sm font-medium transition-all"
+              >
+                <User className="w-4 h-4" />
+                <span className="hidden sm:inline">Přihlásit se</span>
+              </Link>
+            )}
 
             {/* Hamburger */}
             <button
@@ -108,6 +214,16 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
+            {appUser && (
+              <Link
+                to="/profil"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-surface-300 hover:text-surface-100 hover:bg-surface-800 transition-colors"
+              >
+                <Settings className="w-5 h-5" />
+                Můj profil
+              </Link>
+            )}
           </nav>
         </div>
       )}

@@ -1,7 +1,9 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import VehicleDetailPage from './pages/VehicleDetailPage';
@@ -12,11 +14,18 @@ import ComparisonPage from './pages/ComparisonPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import DealerPage from './pages/DealerPage';
+import ProfilePage from './pages/ProfilePage';
 import { useThemeStore } from './stores/themeStore';
+import { useAuthStore } from './stores/authStore';
 
 export default function App() {
   // Initialize theme on mount (triggers rehydration side-effect)
   useThemeStore();
+  const initAuth = useAuthStore((s) => s.init);
+
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
 
   return (
     <BrowserRouter>
@@ -37,6 +46,14 @@ export default function App() {
               <Route path="/poradna" element={<AdvisoryPage />} />
               <Route path="/porovnani" element={<ComparisonPage />} />
               <Route path="/prihlaseni" element={<LoginPage />} />
+              <Route
+                path="/profil"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </ErrorBoundary>

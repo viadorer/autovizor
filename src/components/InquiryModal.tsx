@@ -54,14 +54,14 @@ export default function InquiryModal({ vehicle, onClose, initialType = 'message'
     };
   }, [onClose]);
 
-  // Auto-update default message when type changes
-  useEffect(() => {
-    setMessage((current) => {
-      const prevDefaults = Object.values(DEFAULT_MESSAGES);
-      if (prevDefaults.includes(current) || current === '') return DEFAULT_MESSAGES[type];
-      return current;
-    });
-  }, [type]);
+  const handleTypeChange = (newType: InquiryType) => {
+    setType(newType);
+    // Auto-update default message jen pokud user nezačal psát vlastní
+    const prevDefaults = Object.values(DEFAULT_MESSAGES);
+    if (prevDefaults.includes(message) || message === '') {
+      setMessage(DEFAULT_MESSAGES[newType]);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,7 +155,7 @@ export default function InquiryModal({ vehicle, onClose, initialType = 'message'
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() => setType(opt.value)}
+                    onClick={() => handleTypeChange(opt.value)}
                     className={`flex items-start gap-2 p-3 rounded-xl text-left text-sm transition-colors ${
                       type === opt.value
                         ? 'bg-primary-500/15 border border-primary-500/40 text-primary-300'
