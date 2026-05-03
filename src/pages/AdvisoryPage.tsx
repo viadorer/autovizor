@@ -5,6 +5,7 @@ import {
   Car, ChevronDown, ChevronUp, Search, HelpCircle, CheckCircle,
   Wrench, FileText, Scale,
 } from 'lucide-react';
+import AIAdvisorChat from '../components/AIAdvisorChat';
 
 const GUIDES = [
   {
@@ -84,6 +85,11 @@ export default function AdvisoryPage() {
           Kompletní průvodce nákupem ojetého vozidla. Poradíme vám, na co si dát pozor,
           jak prověřit auto i prodejce a jak zvládnout administrativu.
         </p>
+      </div>
+
+      {/* AI poradce — konverzační upřesnění */}
+      <div className="mb-12">
+        <AIAdvisorChat />
       </div>
 
       {/* Quick stats */}

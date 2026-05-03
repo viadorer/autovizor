@@ -14,6 +14,7 @@ import {
 } from '../lib/codebooks';
 import ManufacturerSelect from './ManufacturerSelect';
 import { useManufacturers } from '../hooks/useVehicles';
+import MapRadiusSearch from './MapRadiusSearch';
 
 function Select({
   label,
@@ -387,6 +388,25 @@ export default function SearchFilters() {
             </div>
           </div>
           )}
+
+          {/* === Mapový radius search (mobile.de standard) === */}
+          <MapRadiusSearch
+            initialLat={filters.user_lat}
+            initialLng={filters.user_lng}
+            initialRadiusKm={filters.radius_km}
+            onChange={(p) => {
+              if (p) {
+                setFilter('user_lat', p.lat);
+                setFilter('user_lng', p.lng);
+                setFilter('radius_km', p.radiusKm);
+              } else {
+                setFilter('user_lat', undefined);
+                setFilter('user_lng', undefined);
+                setFilter('radius_km', undefined);
+              }
+              search();
+            }}
+          />
 
           {/* Standort / Region */}
           <div>

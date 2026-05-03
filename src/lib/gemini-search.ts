@@ -4,6 +4,7 @@
 
 import { MANUFACTURERS } from './manufacturers';
 import { FUEL_TYPES, GEARBOX_TYPES, BODY_TYPES, COLORS, DRIVE_TYPES, CONDITIONS } from './codebooks';
+import { checkRateLimit } from './rate-limit';
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
@@ -100,8 +101,19 @@ interface ParsedFilters {
   power_to?: number;
 }
 
+// Anonymous rate limit: 20 requests per hour per browser
+// (Backend by měl mít vlastní limit per IP přes Edge Function)
+const RATE_LIMIT_PER_HOUR = 20;
+const HOUR_MS = 60 * 60 * 1000;
+
 export async function aiParseQuery(query: string): Promise<ParsedFilters | null> {
   if (!GEMINI_API_KEY || !query.trim()) return null;
+
+  const rl = checkRateLimit('gemini-search', RATE_LIMIT_PER_HOUR, HOUR_MS);
+  if (!rl.ok) {
+    console.warn(`AI search rate-limited. Reset at ${new Date(rl.resetAt).toISOString()}`);
+    return null;
+  }
 
   try {
     const res = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
