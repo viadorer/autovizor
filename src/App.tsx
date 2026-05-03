@@ -19,6 +19,7 @@ import DashboardLayout from './pages/DashboardLayout';
 import DashboardOverview from './pages/DashboardOverview';
 import DashboardListings from './pages/DashboardListings';
 import DashboardInquiries from './pages/DashboardInquiries';
+import SellWizardLayout from './pages/SellWizardLayout';
 import { useThemeStore } from './stores/themeStore';
 import { useAuthStore } from './stores/authStore';
 
@@ -46,7 +47,17 @@ export default function App() {
               <Route path="/prodejce/:slug" element={<DealerPage />} />
               <Route path="/garaz" element={<FavoritesPage />} />
               <Route path="/oblibene" element={<FavoritesPage />} />
-              <Route path="/prodat" element={<SellPage />} />
+              {/* Sell wizard — vyžaduje auth, role buyer se autopromote při prvním inzerátu */}
+              <Route
+                path="/prodat"
+                element={
+                  <ProtectedRoute>
+                    <SellWizardLayout />
+                  </ProtectedRoute>
+                }
+              />
+              {/* Legacy single-form (zatím necháváme jako fallback) */}
+              <Route path="/prodat-classic" element={<SellPage />} />
               <Route path="/poradna" element={<AdvisoryPage />} />
               <Route path="/porovnani" element={<ComparisonPage />} />
               <Route path="/prihlaseni" element={<LoginPage />} />

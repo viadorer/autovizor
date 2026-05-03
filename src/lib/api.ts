@@ -866,6 +866,136 @@ export async function getSellerInquiries(filter?: {
   }
 }
 
+// ============================================================
+// SELL WIZARD — draft save, finalize, photo upload
+// ============================================================
+
+export interface DraftSaveInput {
+  user_id: string;
+  vehicle_id: number | null;
+  data: Record<string, unknown>;
+  publish: boolean; // true = pending_review/published, false = draft
+}
+
+export async function saveDraft(input: DraftSaveInput): Promise<{ id: number } | null> {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { user_id, vehicle_id, data, publish } = input;
+
+    // Title fallback z manufacturer + model + year
+    const title = (data.title as string) || `Vozidlo ${data.made_year ?? ''}`.trim();
+
+    const payload: Record<string, unknown> = {
+      ...data,
+      user_id,
+      title,
+      source: 'self',
+      published_status: publish ? 'pending_review' : 'draft',
+      is_active: false, // dokud není published, není v searchu
+      draft_data: publish ? null : data, // při draftu uložíme i raw state pro rehydrate
+    };
+
+    // Equipment_ids[] sync — array → vehicle_equipment M:N
+    const equipmentIds = data.equipment_ids as number[] | undefined;
+    delete payload.equipment_ids;
+
+    // Photos pole → JSONB
+    const imageUrls = (data.image_urls as string[] | undefined) ?? [];
+    delete payload.image_urls;
+    if (imageUrls.length > 0) {
+      payload.images = JSON.stringify(imageUrls.map((url, order) => ({ url, order })));
+      payload.main_image_url = imageUrls[0];
+      payload.main_thumbnail_url = imageUrls[0];
+      payload.image_count = imageUrls.length;
+    }
+
+    let id = vehicle_id;
+
+    if (id) {
+      const { error } = await supabase.from('vehicles').update(payload).eq('id', id);
+      if (error) throw error;
+    } else {
+      const { data: created, error } = await supabase
+        .from('vehicles')
+        .insert(payload)
+        .select('id')
+        .single();
+      if (error) throw error;
+      id = created.id as number;
+    }
+
+    // Equipment sync
+    if (id && equipmentIds && equipmentIds.length > 0) {
+      // Delete & re-insert (jednoduché, robustní pro draft → final flow)
+      await supabase.from('vehicle_equipment').delete().eq('vehicle_id', id);
+      const rows = equipmentIds.map((equipment_id) => ({ vehicle_id: id!, equipment_id }));
+      await supabase.from('vehicle_equipment').insert(rows);
+    }
+
+    return id ? { id } : null;
+  } catch (err) {
+    console.error('saveDraft error:', err);
+    return null;
+  }
+}
+
+export async function loadDraft(): Promise<{ id: number; data: Record<string, unknown> } | null> {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const { data, error } = await supabase.rpc('get_my_draft');
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return null;
+    return {
+      id: row.id as number,
+      data: (row.draft_data as Record<string, unknown>) ?? row,
+    };
+  } catch (err) {
+    console.error('loadDraft error:', err);
+    return null;
+  }
+}
+
+export async function uploadVehiclePhoto(
+  userId: string,
+  draftKey: string,
+  file: File,
+  index: number,
+): Promise<string | null> {
+  if (!isSupabaseConfigured()) return null;
+  try {
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+    const path = `${userId}/${draftKey}/${index}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from('vehicle-photos')
+      .upload(path, file, {
+        upsert: true,
+        contentType: file.type,
+      });
+    if (error) throw error;
+
+    const { data } = supabase.storage.from('vehicle-photos').getPublicUrl(path);
+    return data.publicUrl;
+  } catch (err) {
+    console.error('uploadVehiclePhoto error:', err);
+    return null;
+  }
+}
+
+export async function deleteVehiclePhoto(userId: string, draftKey: string, fileName: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) return false;
+  try {
+    const path = `${userId}/${draftKey}/${fileName}`;
+    const { error } = await supabase.storage.from('vehicle-photos').remove([path]);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('deleteVehiclePhoto error:', err);
+    return false;
+  }
+}
+
 export async function updateInquiryStatus(
   inquiryId: number,
   status: 'new' | 'contacted' | 'closed' | 'spam',
