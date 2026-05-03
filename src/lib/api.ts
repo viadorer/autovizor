@@ -525,7 +525,10 @@ export async function getSimilarVehicles(vehicleId: number, limit = 6): Promise<
       p_limit: limit,
     });
     if (error) throw error;
-    return (data ?? []).map((v: Record<string, unknown>) => normalizeVehicle(v));
+    // Migrace 012+: data je JSONB array. Před migrací 012 to byl SETOF vehicles.
+    // Zachováváme zpětnou kompatibilitu obojího formátu.
+    const arr = Array.isArray(data) ? data : (data ?? []);
+    return arr.map((v: Record<string, unknown>) => normalizeVehicle(v));
   } catch (err) {
     console.error('Supabase getSimilarVehicles error:', err);
     return [];
