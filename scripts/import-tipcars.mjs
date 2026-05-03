@@ -128,6 +128,46 @@ const MANUFACTURER_SEO_MAP = {
   'zeekr': 1524,
 };
 
+// ── Equipment cache: name (lowercase, unaccent) → id ────────
+let equipmentCache = null;
+
+function unaccent(s) {
+  return s
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/š/g, 's').replace(/ž/g, 'z').replace(/č/g, 'c')
+    .replace(/ř/g, 'r').replace(/ď/g, 'd').replace(/ť/g, 't')
+    .replace(/ň/g, 'n').replace(/ý/g, 'y').replace(/á/g, 'a')
+    .replace(/é/g, 'e').replace(/í/g, 'i').replace(/ó/g, 'o')
+    .replace(/ú/g, 'u').replace(/ů/g, 'u').replace(/ě/g, 'e');
+}
+
+async function loadEquipmentFromDB() {
+  if (equipmentCache) return;
+  const { data, error } = await supabase.from('equipment').select('id, name');
+  if (error) { console.error('Failed to load equipment:', error); equipmentCache = []; return; }
+  // Sort descending by name length — match nejdelší jména první
+  // (jinak by "Airbag řidiče" mohlo matchnout dřív než "Airbag spolujezdce")
+  equipmentCache = data
+    .map((e) => ({ id: e.id, key: unaccent(e.name) }))
+    .filter((e) => e.key.length >= 4)
+    .sort((a, b) => b.key.length - a.key.length);
+  console.log(`Loaded ${equipmentCache.length} equipment items from DB`);
+}
+
+/** Z parsovaných položek výbavy + popisu vrátí pole equipment_id. */
+function extractEquipmentIds(parsedItems, descriptionText) {
+  if (!equipmentCache?.length) return [];
+  const haystack = unaccent(
+    (parsedItems ?? []).map((e) => e.item).join(' • ') + ' ' + (descriptionText ?? '')
+  );
+  const found = new Set();
+  for (const eq of equipmentCache) {
+    if (haystack.includes(eq.key)) found.add(eq.id);
+  }
+  return Array.from(found);
+}
+
 // ── Models cache (loaded from DB) ───────────────────────────
 let modelsCache = null;
 
@@ -479,6 +519,31 @@ async function uploadImageToR2(imageUrl, vehicleId, index) {
   }
 }
 
+// ── Insert/update equipment relations ──────────────────────
+async function syncVehicleEquipment(vehicleId, equipmentIds) {
+  if (!vehicleId || !equipmentIds?.length) return 0;
+
+  // Stávající equipment vazby — porovnáme, vyhneme se duplicitnímu insertu
+  const { data: existing } = await supabase
+    .from('vehicle_equipment')
+    .select('equipment_id')
+    .eq('vehicle_id', vehicleId);
+
+  const existingIds = new Set((existing ?? []).map((r) => r.equipment_id));
+  const toInsert = equipmentIds.filter((id) => !existingIds.has(id));
+  if (toInsert.length === 0) return 0;
+
+  const rows = toInsert.map((equipment_id) => ({ vehicle_id: vehicleId, equipment_id }));
+  const { error } = await supabase.from('vehicle_equipment').insert(rows);
+  if (error) {
+    console.error(`  vehicle_equipment insert error: ${error.message}`);
+    return 0;
+  }
+  // Trigger sync_vehicle_equipment_array (migrace 008) automaticky updatne
+  // vehicles.equipment_ids[] po každém insertu/deletu.
+  return rows.length;
+}
+
 // ── Process and insert vehicle ──────────────────────────────
 async function processAndInsertVehicle(detailUrl, options) {
   const { uploadImages = true, dryRun = false } = options;
@@ -492,9 +557,12 @@ async function processAndInsertVehicle(detailUrl, options) {
 
   // Upload images to R2
   const imageUrls = vehicle._imageUrls || [];
-  const equipment = vehicle._equipment || [];
+  const equipmentParsed = vehicle._equipment || [];
   delete vehicle._imageUrls;
   delete vehicle._equipment;
+
+  // Mapování parsované výbavy → equipment_id (přes lokální cache)
+  const equipmentIds = extractEquipmentIds(equipmentParsed, vehicle.description);
 
   if (uploadImages && imageUrls.length > 0) {
     const r2Urls = [];
@@ -520,10 +588,11 @@ async function processAndInsertVehicle(detailUrl, options) {
   }
 
   if (dryRun) {
-    return { vehicle, equipment, imageCount: imageUrls.length };
+    return { vehicle, equipment: equipmentParsed, equipmentIds, imageCount: imageUrls.length };
   }
 
   // Check if already exists (by custom_id + source)
+  let vehicleId = null;
   if (vehicle.custom_id) {
     const { data: existing } = await supabase
       .from('vehicles')
@@ -538,22 +607,37 @@ async function processAndInsertVehicle(detailUrl, options) {
         .update(vehicle)
         .eq('id', existing[0].id);
       if (updateErr) console.error(`\n  Update error: ${updateErr.message}`);
-      return { vehicle, id: existing[0].id, imageCount: imageUrls.length };
+      vehicleId = existing[0].id;
     }
   }
 
-  // Insert new
-  const { data, error } = await supabase
-    .from('vehicles')
-    .insert(vehicle)
-    .select('id');
+  if (vehicleId === null) {
+    // Insert new
+    const { data, error } = await supabase
+      .from('vehicles')
+      .insert(vehicle)
+      .select('id');
 
-  if (error) {
-    console.error(`\n  Insert error: ${error.message}`);
-    return null;
+    if (error) {
+      console.error(`\n  Insert error: ${error.message}`);
+      return null;
+    }
+    vehicleId = data?.[0]?.id;
   }
 
-  return { vehicle, id: data?.[0]?.id, imageCount: imageUrls.length };
+  // Sync equipment vazby (až po insert/update vehicle, ať máme ID)
+  let equipmentInserted = 0;
+  if (vehicleId && equipmentIds.length > 0) {
+    equipmentInserted = await syncVehicleEquipment(vehicleId, equipmentIds);
+  }
+
+  return {
+    vehicle,
+    id: vehicleId,
+    imageCount: imageUrls.length,
+    equipmentParsed: equipmentParsed.length,
+    equipmentInserted,
+  };
 }
 
 // ── Fetch listing pages → detail URLs ───────────────────────
@@ -651,6 +735,7 @@ Examples:
   // Load DB data
   await loadModelsFromDB();
   await loadRegionsFromDB();
+  await loadEquipmentFromDB();
 
   // Get total pages
   if (endPage === 0) {
@@ -682,6 +767,7 @@ Examples:
   let skipped = 0;
   let errors = 0;
   let totalImages = 0;
+  let totalEquipmentLinks = 0;
 
   for (const listing of toProcess) {
     try {
@@ -700,7 +786,8 @@ Examples:
           console.log(`  VIN: ${result.vehicle.vin}`);
           console.log(`  Seller: ${result.vehicle.seller_name} (${result.vehicle.city})`);
           console.log(`  Images: ${result.imageCount || 0}`);
-          console.log(`  Equipment (${result.equipment?.length || 0}):`, (result.equipment || []).slice(0, 5).map(e => e.item).join(', '));
+          console.log(`  Equipment parsed (${result.equipment?.length || 0}):`, (result.equipment || []).slice(0, 5).map(e => e.item).join(', '));
+          console.log(`  Equipment matched IDs (${result.equipmentIds?.length || 0}):`, result.equipmentIds?.slice(0, 8).join(', '));
         }
 
         if (result.skipped) {
@@ -708,6 +795,7 @@ Examples:
         } else {
           inserted++;
           totalImages += result.imageCount || 0;
+          totalEquipmentLinks += result.equipmentInserted || 0;
         }
       } else {
         skipped++;
@@ -719,7 +807,7 @@ Examples:
 
     processed++;
     if (!dryRun) {
-      process.stdout.write(`\r  Processed: ${processed}/${toProcess.length} | Inserted: ${inserted} | Skipped: ${skipped} | Errors: ${errors} | Images: ${totalImages}`);
+      process.stdout.write(`\r  Processed: ${processed}/${toProcess.length} | Inserted: ${inserted} | Skipped: ${skipped} | Errors: ${errors} | Images: ${totalImages} | Equipment: ${totalEquipmentLinks}`);
     }
 
     // Rate limit — be respectful
@@ -732,6 +820,7 @@ Examples:
   console.log(`  Skipped: ${skipped}`);
   console.log(`  Errors: ${errors}`);
   console.log(`  Total images: ${totalImages}`);
+  console.log(`  Total equipment links: ${totalEquipmentLinks}`);
 }
 
 main().catch(err => {
