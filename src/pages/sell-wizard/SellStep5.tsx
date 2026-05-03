@@ -139,8 +139,22 @@ export default function SellStep5() {
       <Field label="Platnost STK (volitelné)">
         <input
           type="month"
-          value={data.stk_date?.slice(0, 7) ?? ''}
-          onChange={(e) => patch({ stk_date: e.target.value ? `${e.target.value}-01` : undefined })}
+          value={
+            data.stk_date && /^\d{4}-\d{2}-\d{2}$/.test(data.stk_date)
+              ? data.stk_date.slice(0, 7)
+              : ''
+          }
+          onChange={(e) => {
+            const v = e.target.value;
+            // <input type="month"> vrací strict "YYYY-MM" — ale validujme
+            if (v && /^\d{4}-\d{2}$/.test(v)) {
+              patch({ stk_date: `${v}-01` });
+            } else {
+              patch({ stk_date: undefined });
+            }
+          }}
+          min="2000-01"
+          max="2100-12"
           className="w-full bg-surface-900 rounded-lg px-3 py-2.5 text-sm text-surface-100 outline-none focus:ring-2 focus:ring-primary-500"
         />
       </Field>

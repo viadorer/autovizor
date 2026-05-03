@@ -919,6 +919,13 @@ export async function saveDraft(input: DraftSaveInput): Promise<SaveDraftResult>
       'description', 'note',
     ]);
 
+    // Date fields v DB — validujeme strict ISO YYYY-MM-DD
+    const dateColumns = new Set([
+      'manufacture_date', 'first_registration', 'run_date', 'disused_date',
+      'stk_date', 'guarantee_date', 'delivery_date',
+    ]);
+    const isoDateRe = /^\d{4}-\d{2}-\d{2}$/;
+
     const payload: Record<string, unknown> = {
       user_id,
       title,
@@ -928,9 +935,23 @@ export async function saveDraft(input: DraftSaveInput): Promise<SaveDraftResult>
       draft_data: publish ? null : data,
     };
     for (const [key, value] of Object.entries(data)) {
-      if (allowedColumns.has(key) && value !== undefined && value !== '') {
-        payload[key] = value;
+      if (!allowedColumns.has(key) || value === undefined || value === '') continue;
+
+      // Validace datumů — přeskočit malformed (např. "0-014-07-01" z legacy dat)
+      if (dateColumns.has(key)) {
+        if (typeof value !== 'string' || !isoDateRe.test(value)) {
+          console.warn(`saveDraft: skipping invalid date for ${key}:`, value);
+          continue;
+        }
+        // Sanity check: rok 1900-2100
+        const year = parseInt(value.slice(0, 4));
+        if (year < 1900 || year > 2100) {
+          console.warn(`saveDraft: skipping out-of-range date for ${key}:`, value);
+          continue;
+        }
       }
+
+      payload[key] = value;
     }
 
     // Numeric defaults pro NOT NULL sloupce
